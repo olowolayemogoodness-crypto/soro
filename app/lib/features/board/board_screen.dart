@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 import 'dart:ui' show PointerDeviceKind;
 
 import 'package:flutter/material.dart';
@@ -7,6 +8,9 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../l10n/soro_strings.dart';
 import '../../theme/soro_theme.dart';
 import 'board_strings.dart';
+import 'pen_line_view.dart';
+import 'solve_intent.dart';
+import 'tutor_pen_writer.dart';
 import 'tutor_script.dart';
 import 'voice_dock.dart';
 
@@ -31,7 +35,7 @@ class BoardInkStroke {
 
 /// Entry in the notebook's worked calculation log.
 class _NotebookEntry {
-  const _NotebookEntry({
+  _NotebookEntry({
     required this.author,
     required this.text,
     this.textYo,
@@ -43,6 +47,7 @@ class _NotebookEntry {
     this.inputMethod,
   });
 
+  final List<PenMarkKind> marks = <PenMarkKind>[];
   final ScriptAuthor author;
   final String text;
   final String? textYo;
@@ -117,6 +122,7 @@ class _BoardScreenState extends State<BoardScreen> {
   Color _inkColor = SoroTokens.studentBlue;
   bool _erasedInGesture = false;
   bool _graphOpen = true;
+  bool _solving = false;
   int? _inkPointerId;
   int? _activeStylusPointerId;
   DateTime? _lastStylusEventTime;
@@ -126,7 +132,12 @@ class _BoardScreenState extends State<BoardScreen> {
     super.initState();
     _script = widget.tutorScript ?? DemoQuadraticTutorScript();
     _subscription = _script.events.listen(_handleScriptEvent);
-    _script.start();
+    final Future<void> started = _script.start();
+    if (isSolveIntent(widget.activeQuestion)) {
+      started.then((_) {
+        if (mounted) _requestSolve();
+      });
+    }
     _resetIdleTimer();
   }
 
@@ -155,6 +166,17 @@ class _BoardScreenState extends State<BoardScreen> {
       }
       if (event.turnState != null) {
         _turnState = event.turnState!;
+      }
+      if (event.clearBlanks) {
+        _activeBlankRow = null;
+      }
+      if (event.penMark != null) {
+        for (int i = _entries.length - 1; i >= 0; i--) {
+          if (_entries[i].author == ScriptAuthor.tutor) {
+            _entries[i].marks.add(event.penMark!);
+            break;
+          }
+        }
       }
       if (event.rootsRevealed != null) {
         _rootsRevealed = event.rootsRevealed!;
@@ -190,8 +212,8 @@ class _BoardScreenState extends State<BoardScreen> {
           ),
         );
         if (!line.isAnalogy) {
-          _currentCaptionEn = line.text;
-          _currentCaptionYo = line.textYo;
+          _currentCaptionEn = line.caption ?? line.text;
+          _currentCaptionYo = line.captionYo ?? line.textYo;
         }
       }
       if (event.blankRow != null) {
@@ -256,6 +278,14 @@ class _BoardScreenState extends State<BoardScreen> {
       _isTyping = false;
       _resetIdleTimer();
     });
+    _resetIdleTimer();
+  }
+
+  /// Solve mode: the tutor writes the full worked solution with the pen.
+  void _requestSolve() {
+    if (_solving) return;
+    _solving = true;
+    _script.solveForStudent().whenComplete(() => _solving = false);
     _resetIdleTimer();
   }
 
@@ -865,7 +895,30 @@ class _BoardScreenState extends State<BoardScreen> {
               tooltip: 'Clear page',
               onPressed: _strokes.isEmpty ? null : _clearPage,
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: 12),
+            SizedBox(
+              height: 48,
+              child: OutlinedButton(
+                key: const Key('show-me-how-button'),
+                onPressed: _requestSolve,
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: SoroTokens.crimsonDeep,
+                  side: const BorderSide(color: SoroTokens.crimson, width: 1.6),
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(SoroTokens.rPill),
+                  ),
+                ),
+                child: Text(
+                  BoardStrings.tr(lang, 'showMeHowBtn'),
+                  style: SoroTokens.sans(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
             SizedBox(
               height: 48,
               child: ElevatedButton.icon(
@@ -904,83 +957,104 @@ class _BoardScreenState extends State<BoardScreen> {
     required double marginLineX,
     required double ruleSpacing,
   }) {
-    final int shown = isPhone ? 4 : 6;
-    final int start = _entries.length > shown ? _entries.length - shown : 0;
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints box) {
+        final double contentW =
+            box.maxWidth - marginLineX - (isPhone ? 20 : 36);
+        int budget =
+            (box.maxHeight / ruleSpacing).floor() -
+            3 -
+            (_activeBlankRow != null && !_unaidedCompleted ? 2 : 0);
+        int start = _entries.length;
+        while (start > 0) {
+          final _NotebookEntry e = _entries[start - 1];
+          final int rows = math.max(
+            1,
+            (e.text.length * 0.43 * ruleSpacing / math.max(contentW, 100))
+                .ceil(),
+          );
+          if (budget - rows < 0 && start < _entries.length) break;
+          budget -= rows;
+          start--;
+        }
 
-    return Listener(
-      key: const Key('board-ink-page'),
-      behavior: HitTestBehavior.translucent,
-      onPointerDown: (PointerDownEvent e) => _trackStylus(e, isUp: false),
-      onPointerMove: (PointerMoveEvent e) => _trackStylus(e, isUp: false),
-      onPointerUp: (PointerUpEvent e) => _trackStylus(e, isUp: true),
-      onPointerCancel: (PointerCancelEvent e) => _trackStylus(e, isUp: true),
-      child: CustomPaint(
-        key: const Key('ruled-notebook-page'),
-        painter: _RuledNotebookPaperPainter(
-          marginLineX: marginLineX,
-          ruleSpacing: ruleSpacing,
-        ),
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            Listener(
-              key: const Key('board-ink-input'),
-              behavior: HitTestBehavior.opaque,
-              onPointerDown: _onInkDown,
-              onPointerMove: _onInkMove,
-              onPointerUp: _endInk,
-              onPointerCancel: _endInk,
-              child: const SizedBox.expand(),
+        return Listener(
+          key: const Key('board-ink-page'),
+          behavior: HitTestBehavior.translucent,
+          onPointerDown: (PointerDownEvent e) => _trackStylus(e, isUp: false),
+          onPointerMove: (PointerMoveEvent e) => _trackStylus(e, isUp: false),
+          onPointerUp: (PointerUpEvent e) => _trackStylus(e, isUp: true),
+          onPointerCancel: (PointerCancelEvent e) =>
+              _trackStylus(e, isUp: true),
+          child: CustomPaint(
+            key: const Key('ruled-notebook-page'),
+            painter: _RuledNotebookPaperPainter(
+              marginLineX: marginLineX,
+              ruleSpacing: ruleSpacing,
             ),
-            Positioned(
-              left: marginLineX + (isPhone ? 10 : 16),
-              right: isPhone ? 10 : 20,
-              top: 0,
-              bottom: 0,
-              child: ClipRect(
-                child: OverflowBox(
-                  alignment: Alignment.topLeft,
-                  minHeight: 0,
-                  maxHeight: double.infinity,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      _buildNotebookTitleHeader(lang, isPhone, ruleSpacing),
-                      for (int i = start; i < _entries.length; i++)
-                        _buildNotebookEntryRow(
-                          _entries[i],
-                          lang,
-                          i,
-                          ruleSpacing,
-                        ),
-                      if (_activeBlankRow != null && !_unaidedCompleted)
-                        _buildActiveBlankRow(
-                          _activeBlankRow!,
-                          lang,
-                          isPhone,
-                          ruleSpacing,
-                        ),
-                    ],
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Listener(
+                  key: const Key('board-ink-input'),
+                  behavior: HitTestBehavior.opaque,
+                  onPointerDown: _onInkDown,
+                  onPointerMove: _onInkMove,
+                  onPointerUp: _endInk,
+                  onPointerCancel: _endInk,
+                  child: const SizedBox.expand(),
+                ),
+                Positioned(
+                  left: marginLineX + (isPhone ? 10 : 16),
+                  right: isPhone ? 10 : 20,
+                  top: 0,
+                  bottom: 0,
+                  child: ClipRect(
+                    child: OverflowBox(
+                      alignment: Alignment.topLeft,
+                      minHeight: 0,
+                      maxHeight: double.infinity,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          _buildNotebookTitleHeader(lang, isPhone, ruleSpacing),
+                          for (int i = start; i < _entries.length; i++)
+                            _buildNotebookEntryRow(
+                              _entries[i],
+                              lang,
+                              i,
+                              ruleSpacing,
+                            ),
+                          if (_activeBlankRow != null && !_unaidedCompleted)
+                            _buildActiveBlankRow(
+                              _activeBlankRow!,
+                              lang,
+                              isPhone,
+                              ruleSpacing,
+                            ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
-              ),
+                Positioned(
+                  right: isPhone ? 8 : 16,
+                  bottom: isPhone ? 8 : 16,
+                  child: _buildGraphPanel(lang, isPhone),
+                ),
+                IgnorePointer(
+                  child: CustomPaint(
+                    key: const Key('board-ink-layer'),
+                    painter: BoardInkPainter(strokes: _strokes),
+                    child: const SizedBox.expand(),
+                  ),
+                ),
+              ],
             ),
-            Positioned(
-              right: isPhone ? 8 : 16,
-              bottom: isPhone ? 8 : 16,
-              child: _buildGraphPanel(lang, isPhone),
-            ),
-            IgnorePointer(
-              child: CustomPaint(
-                key: const Key('board-ink-layer'),
-                painter: BoardInkPainter(strokes: _strokes),
-                child: const SizedBox.expand(),
-              ),
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
@@ -1120,8 +1194,8 @@ class _BoardScreenState extends State<BoardScreen> {
     );
   }
 
-  /// One line of the worked log, written straight onto the page: the tutor in
-  /// crimson, the student in royal blue.
+  /// One line of the worked log: the tutor's lines are written by the pen in
+  /// crimson, the student's answers stand in royal blue.
   Widget _buildNotebookEntryRow(
     _NotebookEntry entry,
     SoroLanguage lang,
@@ -1129,57 +1203,55 @@ class _BoardScreenState extends State<BoardScreen> {
     double ruleSpacing,
   ) {
     final bool isTutor = entry.author == ScriptAuthor.tutor;
-    final double size = isTutor ? 17 : 20;
-    final TextStyle style = entry.isAnalogy
-        ? SoroTokens.serif(
-            fontSize: size,
-            fontStyle: FontStyle.italic,
-            fontWeight: FontWeight.w500,
-            color: SoroTokens.crimsonDeep,
-          )
-        : isTutor
-        ? SoroTokens.sans(
-            fontSize: size,
-            fontWeight: FontWeight.w700,
-            color: SoroTokens.crimsonDeep,
-          )
-        : SoroTokens.serif(
-            fontSize: size,
-            fontWeight: FontWeight.w600,
-            color: SoroTokens.studentBlue,
-          );
 
-    return IgnorePointer(
-      key: entry.isAnalogy ? const Key('board-analogy-line') : null,
-      child: Column(
+    if (isTutor) {
+      return Column(
         key: Key('notebook-entry-$index'),
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          SoroLocalizedText(
-            entry.text,
-            language: SoroLanguage.en,
-            style: style.copyWith(height: ruleSpacing / size),
+          KeyedSubtree(
+            key: entry.isAnalogy ? const Key('board-analogy-line') : null,
+            child: PenLineView(
+              text: entry.text,
+              color: SoroTokens.crimson,
+              rule: ruleSpacing,
+              marks: List<PenMarkKind>.of(entry.marks),
+            ),
           ),
-          if (isTutor &&
-              lang == SoroLanguage.yo &&
+          if (lang == SoroLanguage.yo &&
               entry.textYo != null &&
               entry.textYo!.isNotEmpty)
-            SoroLocalizedText(
-              entry.textYo!,
-              language: SoroLanguage.yo,
-              style: SoroTokens.sans(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: SoroTokens.ink2,
-              ).copyWith(height: ruleSpacing / 14),
+            IgnorePointer(
+              child: SoroLocalizedText(
+                entry.textYo!,
+                language: SoroLanguage.yo,
+                style: SoroTokens.sans(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: SoroTokens.ink2,
+                ).copyWith(height: ruleSpacing / 14),
+              ),
             ),
         ],
+      );
+    }
+
+    return IgnorePointer(
+      child: SoroLocalizedText(
+        entry.text,
+        key: Key('notebook-entry-$index'),
+        language: SoroLanguage.en,
+        style: SoroTokens.serif(
+          fontSize: 20,
+          fontWeight: FontWeight.w600,
+          color: SoroTokens.studentBlue,
+        ).copyWith(height: ruleSpacing / 20),
       ),
     );
   }
 
-  /// The tutor's step template as a crimson line with the blanks as inline
-  /// boxes the student can type into (or write beside).
+  /// The tutor's step template written by the pen, with each blank drawn as a
+  /// hand-drawn box the student can type into (or write beside).
   Widget _buildActiveBlankRow(
     TutorBlankRowPayload row,
     SoroLanguage lang,
@@ -1187,81 +1259,47 @@ class _BoardScreenState extends State<BoardScreen> {
     double ruleSpacing,
   ) {
     final bool isFactorStep = row.stepId == QuadraticStepIds.factors;
-    final List<String> parts = row.templateText.split('▢');
-    final TextStyle lineStyle = SoroTokens.serif(
-      fontSize: isPhone ? 19 : 22,
-      fontWeight: FontWeight.w600,
-      color: SoroTokens.crimsonDeep,
-    );
-
-    final List<Widget> inline = <Widget>[];
-    for (int i = 0; i < parts.length; i++) {
-      if (parts[i].isNotEmpty) {
-        inline.add(IgnorePointer(child: Text(parts[i], style: lineStyle)));
-      }
-      if (i < parts.length - 1 && i < row.blanks.length) {
-        final BlankSpec blank = row.blanks[i];
-        inline.add(
-          SizedBox(
-            width: isPhone ? 54 : 64,
-            height: ruleSpacing - 4,
-            child: TextField(
-              key: Key('blank-input-${blank.id}'),
-              controller: _blankControllers[blank.id],
-              focusNode: _blankFocusNodes[blank.id],
-              onChanged: (_) => _notifyStudentTyping(),
-              onSubmitted: (_) => _handleSubmitCurrentBlanks(),
-              textAlign: TextAlign.center,
-              style: SoroTokens.serif(
-                fontSize: 19,
-                fontWeight: FontWeight.w600,
-                color: SoroTokens.studentBlue,
-              ),
-              decoration: InputDecoration(
-                isDense: true,
-                hintText: blank.label,
-                hintStyle: SoroTokens.sans(
-                  fontSize: 13,
-                  color: SoroTokens.studentBlue.withValues(alpha: 0.55),
-                ),
-                filled: true,
-                fillColor: SoroTokens.skyDeep.withValues(alpha: 0.7),
-                contentPadding: const EdgeInsets.symmetric(vertical: 4),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(6),
-                  borderSide: const BorderSide(
-                    color: SoroTokens.studentBlue,
-                    width: 1.4,
-                  ),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(6),
-                  borderSide: const BorderSide(
-                    color: SoroTokens.studentBlue,
-                    width: 2.2,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-      }
-    }
 
     return Container(
       key: Key('active-blank-row-${row.stepId}'),
-      padding: const EdgeInsets.only(top: 2),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Semantics(
+          KeyedSubtree(
             key: const Key('active-blank-template'),
-            label: row.templateText,
-            child: Wrap(
-              spacing: 6,
-              runSpacing: 2,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: inline,
+            child: PenLineView(
+              key: ValueKey<String>('blank-line-${row.stepId}'),
+              text: row.templateText,
+              color: SoroTokens.crimson,
+              rule: ruleSpacing,
+              blankBuilder: (int i, Rect rect) {
+                if (i >= row.blanks.length) return const SizedBox.shrink();
+                final BlankSpec blank = row.blanks[i];
+                return Semantics(
+                  label: blank.label,
+                  child: TextField(
+                    key: Key('blank-input-${blank.id}'),
+                    controller: _blankControllers[blank.id],
+                    focusNode: _blankFocusNodes[blank.id],
+                    onChanged: (_) => _notifyStudentTyping(),
+                    onSubmitted: (_) => _handleSubmitCurrentBlanks(),
+                    textAlign: TextAlign.center,
+                    cursorColor: SoroTokens.studentBlue,
+                    style: SoroTokens.serif(
+                      fontSize: 19,
+                      fontWeight: FontWeight.w600,
+                      color: SoroTokens.studentBlue,
+                    ),
+                    decoration: const InputDecoration(
+                      isDense: true,
+                      border: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                  ),
+                );
+              },
             ),
           ),
           if (isFactorStep)

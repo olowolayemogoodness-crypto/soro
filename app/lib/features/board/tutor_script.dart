@@ -2,36 +2,23 @@ import 'dart:async';
 
 import '../../l10n/soro_strings.dart';
 import 'board_strings.dart';
+import 'tutor_pen_writer.dart' show PenMarkKind;
 
 /// Author of a notebook line (`tutor` in crimson, `student` in royal blue #1B56D0).
-enum ScriptAuthor {
-  tutor,
-  student,
-}
+enum ScriptAuthor { tutor, student }
 
 /// Turn state displayed in the bottom Voice Dock.
-enum TutorTurnState {
-  soroSpeaking,
-  studentTurn,
-  listening,
-}
+enum TutorTurnState { soroSpeaking, studentTurn, listening }
 
 /// Shape: `{id, expected}` representing a fillable blank in a tutor structure row.
 class BlankSpec {
-  const BlankSpec({
-    required this.id,
-    required this.expected,
-    this.label = '▢',
-  });
+  const BlankSpec({required this.id, required this.expected, this.label = '▢'});
 
   final String id;
   final String expected;
   final String label;
 
-  Map<String, String> toJson() => {
-        'id': id,
-        'expected': expected,
-      };
+  Map<String, String> toJson() => {'id': id, 'expected': expected};
 }
 
 /// Shape: `{author: tutor, text}` emitted by [TutorScript].
@@ -44,8 +31,13 @@ class TutorLinePayload {
     this.isCorrection = false,
     this.isPraise = false,
     this.isUnaided = false,
+    this.caption,
+    this.captionYo,
   });
 
+  /// Dock caption for this line when it differs from the written text.
+  final String? caption;
+  final String? captionYo;
   final ScriptAuthor author;
   final String text;
   final String textYo;
@@ -55,11 +47,11 @@ class TutorLinePayload {
   final bool isUnaided;
 
   Map<String, Object> toJson() => {
-        'author': author.name,
-        'text': text,
-        'text_yo': textYo,
-        'is_analogy': isAnalogy,
-      };
+    'author': author.name,
+    'text': text,
+    'text_yo': textYo,
+    'is_analogy': isAnalogy,
+  };
 }
 
 /// Shape: student answer line rendered in royal blue `#1B56D0`.
@@ -79,29 +71,26 @@ class StudentAnswerPayload {
   final bool isCorrect;
 
   Map<String, Object> toJson() => {
-        'author': ScriptAuthor.student.name,
-        'step_id': stepId,
-        'text': text,
-        'values': values,
-        'input_method': inputMethod,
-        'is_correct': isCorrect,
-      };
+    'author': ScriptAuthor.student.name,
+    'step_id': stepId,
+    'text': text,
+    'values': values,
+    'input_method': inputMethod,
+    'is_correct': isCorrect,
+  };
 }
 
 /// Shape: `board_visibility` control message emitted by the tutor script.
 class BoardVisibilityPayload {
-  const BoardVisibilityPayload({
-    required this.visible,
-    required this.reason,
-  });
+  const BoardVisibilityPayload({required this.visible, required this.reason});
 
   final bool visible;
   final String reason;
 
   Map<String, Object> toJson() => {
-        'board_visibility': visible,
-        'reason': reason,
-      };
+    'board_visibility': visible,
+    'reason': reason,
+  };
 }
 
 /// A step structure written by Sọ̀rọ̀ with blanks (`▢`) that the student fills in.
@@ -132,8 +121,15 @@ class TutorScriptEvent {
     this.boardVisibility,
     this.turnState,
     this.rootsRevealed,
+    this.penMark,
+    this.clearBlanks = false,
   });
 
+  /// Hand-drawn mark to add to the most recently written tutor line.
+  final PenMarkKind? penMark;
+
+  /// Drops the open blank row (the tutor is writing the solution itself).
+  final bool clearBlanks;
   final TutorLinePayload? tutorLine;
   final TutorBlankRowPayload? blankRow;
   final StudentAnswerPayload? studentAnswer;
@@ -163,6 +159,10 @@ abstract class TutorScript {
     required Map<String, String> values,
     String inputMethod = 'Typed',
   });
+
+  /// Solve mode: the student explicitly asked, so write the full worked
+  /// solution, then return to guide mode with a similar unaided problem.
+  Future<void> solveForStudent() async {}
 
   void dispose();
 }
@@ -234,8 +234,7 @@ class DemoQuadraticTutorScript implements TutorScript {
     _emit(
       TutorScriptEvent(
         tutorLine: TutorLinePayload(
-          text:
-              'Analogy: ${BoardStrings.tr(SoroLanguage.en, 'analogyText')}.',
+          text: 'Analogy: ${BoardStrings.tr(SoroLanguage.en, 'analogyText')}.',
           textYo: BoardStrings.tr(SoroLanguage.yo, 'analogyText'),
           isAnalogy: true,
         ),
@@ -297,10 +296,8 @@ class DemoQuadraticTutorScript implements TutorScript {
         _emit(
           const TutorScriptEvent(
             tutorLine: TutorLinePayload(
-              text:
-                  'Look closely at the signs in x² − 5x + 6 = 0. What sign is in front of 5x?',
-              textYo:
-                  'Wo àmì iwájú 5x nínú x² − 5x + 6 = 0 dáadáa. Àmì wo ló wà níbẹ̀? [needs native check]',
+              text: 'Look closely at the signs in x² − 5x + 6 = 0. What sign is in front of 5x?',
+              textYo: 'Wo àmì iwájú 5x nínú x² − 5x + 6 = 0 dáadáa. Àmì wo ló wà níbẹ̀? [needs native check]',
               isCorrection: true,
             ),
             turnState: TutorTurnState.studentTurn,
@@ -342,14 +339,16 @@ class DemoQuadraticTutorScript implements TutorScript {
       final String n2 = _normalizeNum(raw2);
 
       // Check if student made a sign error (e.g. typed -2/-3 or explicit +2/+3 sign error flag)
-      final bool isSignError = values['sign_error'] == 'true' ||
+      final bool isSignError =
+          values['sign_error'] == 'true' ||
           raw1.startsWith('+') ||
           raw2.startsWith('+') ||
           (n1 == '-2' && n2 == '-3') ||
           (n1 == '-3' && n2 == '-2');
 
       final bool isCorrectPair =
-          !isSignError && ((n1 == '2' && n2 == '3') || (n1 == '3' && n2 == '2'));
+          !isSignError &&
+          ((n1 == '2' && n2 == '3') || (n1 == '3' && n2 == '2'));
 
       final String displayLine = isSignError
           ? '(x + 2)(x + 3) = 0   [sign error: +2 and +3 add to +5]'
@@ -380,8 +379,10 @@ class DemoQuadraticTutorScript implements TutorScript {
             ),
             tutorLine: TutorLinePayload(
               text: BoardStrings.tr(SoroLanguage.en, 'step2WrongCorrection'),
-              textYo:
-                  BoardStrings.tr(SoroLanguage.en, 'step2WrongCorrectionYo'),
+              textYo: BoardStrings.tr(
+                SoroLanguage.en,
+                'step2WrongCorrectionYo',
+              ),
               isCorrection: true,
             ),
             turnState: TutorTurnState.studentTurn,
@@ -395,7 +396,8 @@ class DemoQuadraticTutorScript implements TutorScript {
         TutorScriptEvent(
           boardVisibility: const BoardVisibilityPayload(
             visible: true,
-            reason: 'Factoring correct; waiting for student to write roots in blue',
+            reason:
+                'Factoring correct; waiting for student to write roots in blue',
           ),
           tutorLine: TutorLinePayload(
             text: BoardStrings.tr(SoroLanguage.en, 'rootsPrompt'),
@@ -421,8 +423,12 @@ class DemoQuadraticTutorScript implements TutorScript {
       final String r1 = _normalizeNum(values['r1'] ?? '');
       final String r2 = _normalizeNum(values['r2'] ?? '');
       final bool isCorrect =
-          (r1 == '2' && r2 == '3') || (r1 == '3' && r2 == '2') ||
-          r1 == '2' || r1 == '3' || r2 == '2' || r2 == '3';
+          (r1 == '2' && r2 == '3') ||
+          (r1 == '3' && r2 == '2') ||
+          r1 == '2' ||
+          r1 == '3' ||
+          r2 == '2' ||
+          r2 == '3';
 
       final String displayR1 = r1.isEmpty ? '2' : r1;
       final String displayR2 = r2.isEmpty ? '3' : r2;
@@ -448,10 +454,8 @@ class DemoQuadraticTutorScript implements TutorScript {
         _emit(
           const TutorScriptEvent(
             tutorLine: TutorLinePayload(
-              text:
-                  'If (x − 2) = 0 or (x − 3) = 0, what values of x make each bracket zero?',
-              textYo:
-                  'Tí (x − 2) = 0 tàbí (x − 3) = 0, iye x wo ni yóò mú kí àkámọ́ kọ̀ọ̀kan jẹ́ òdo? [needs native check]',
+              text: 'If (x − 2) = 0 or (x − 3) = 0, what values of x make each bracket zero?',
+              textYo: 'Tí (x − 2) = 0 tàbí (x − 3) = 0, iye x wo ni yóò mú kí àkámọ́ kọ̀ọ̀kan jẹ́ òdo? [needs native check]',
               isCorrection: true,
             ),
             turnState: TutorTurnState.studentTurn,
@@ -537,6 +541,95 @@ class DemoQuadraticTutorScript implements TutorScript {
           ),
         );
       }
+    }
+  }
+
+  @override
+  Future<void> solveForStudent() async {
+    _emit(
+      const TutorScriptEvent(
+        clearBlanks: true,
+        turnState: TutorTurnState.soroSpeaking,
+      ),
+    );
+    Future<void> line(
+      String text,
+      String caption, {
+      bool analogy = false,
+      PenMarkKind? mark,
+    }) async {
+      _emit(
+        TutorScriptEvent(
+          tutorLine: TutorLinePayload(
+            text: text,
+            textYo: '',
+            caption: caption,
+            captionYo: '',
+            isAnalogy: analogy,
+          ),
+        ),
+      );
+      await _waitSolve();
+      if (mark != null) {
+        _emit(TutorScriptEvent(penMark: mark));
+        await _waitSolve();
+      }
+    }
+
+    await line('x² − 5x + 6 = 0', 'Here is the equation we are solving.');
+    await line(
+      '? × ? = 6     ? + ? = −5',
+      'Step 1: find two numbers that multiply to 6 and add to −5.',
+    );
+    await line(
+      '−2 and −3',
+      'Step 2: −2 times −3 is 6, and −2 plus −3 is −5.',
+      mark: PenMarkKind.underline,
+    );
+    await line('(x − 2)(x − 3) = 0', 'Step 3: write it as two brackets.');
+    await line(
+      'Analogy: two gates, either one open lets you through.',
+      'Think of two gates: if either bracket is zero, the product is zero.',
+      analogy: true,
+    );
+    _emit(const TutorScriptEvent(rootsRevealed: true));
+    await line(
+      'x = 2   or   x = 3',
+      'Step 4: each bracket can be zero, so x is 2 or 3.',
+      mark: PenMarkKind.circleRoots,
+    );
+    await line('Checked', 'Both roots check out.', mark: PenMarkKind.tick);
+
+    _emit(
+      TutorScriptEvent(
+        boardVisibility: const BoardVisibilityPayload(
+          visible: true,
+          reason:
+              'Solve mode finished; back to guide mode with an unaided problem',
+        ),
+        tutorLine: TutorLinePayload(
+          text:
+              'Now you try: ${BoardStrings.tr(SoroLanguage.en, 'unaidedPrompt')}',
+          textYo: BoardStrings.tr(SoroLanguage.en, 'unaidedPromptYo'),
+          isUnaided: true,
+        ),
+        blankRow: const TutorBlankRowPayload(
+          stepId: QuadraticStepIds.unaided,
+          templateText: 'x² − 7x + 12 = 0   ⇒   x = ▢  or  x = ▢',
+          blanks: [
+            BlankSpec(id: 'u1', expected: '3', label: 'first root'),
+            BlankSpec(id: 'u2', expected: '4', label: 'second root'),
+          ],
+        ),
+        turnState: TutorTurnState.studentTurn,
+        rootsRevealed: true,
+      ),
+    );
+  }
+
+  Future<void> _waitSolve() async {
+    if (stepDelay > Duration.zero) {
+      await Future<void>.delayed(stepDelay * 6);
     }
   }
 
