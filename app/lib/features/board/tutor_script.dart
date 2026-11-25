@@ -4,34 +4,20 @@ import '../../l10n/soro_strings.dart';
 import 'board_strings.dart';
 
 /// Author of a notebook line (`tutor` in crimson, `student` in royal blue #1B56D0).
-enum ScriptAuthor {
-  tutor,
-  student,
-}
+enum ScriptAuthor { tutor, student }
 
 /// Turn state displayed in the bottom Voice Dock.
-enum TutorTurnState {
-  soroSpeaking,
-  studentTurn,
-  listening,
-}
+enum TutorTurnState { soroSpeaking, studentTurn, listening }
 
 /// Shape: `{id, expected}` representing a fillable blank in a tutor structure row.
 class BlankSpec {
-  const BlankSpec({
-    required this.id,
-    required this.expected,
-    this.label = '▢',
-  });
+  const BlankSpec({required this.id, required this.expected, this.label = '▢'});
 
   final String id;
   final String expected;
   final String label;
 
-  Map<String, String> toJson() => {
-        'id': id,
-        'expected': expected,
-      };
+  Map<String, String> toJson() => {'id': id, 'expected': expected};
 }
 
 /// Shape: `{author: tutor, text}` emitted by [TutorScript].
@@ -44,7 +30,13 @@ class TutorLinePayload {
     this.isCorrection = false,
     this.isPraise = false,
     this.isUnaided = false,
+    this.writeDuration,
+    this.audioUrl,
   });
+
+  /// How long the tutor pen should take to write this line (synced to voice).
+  final Duration? writeDuration;
+  final String? audioUrl;
 
   final ScriptAuthor author;
   final String text;
@@ -55,11 +47,11 @@ class TutorLinePayload {
   final bool isUnaided;
 
   Map<String, Object> toJson() => {
-        'author': author.name,
-        'text': text,
-        'text_yo': textYo,
-        'is_analogy': isAnalogy,
-      };
+    'author': author.name,
+    'text': text,
+    'text_yo': textYo,
+    'is_analogy': isAnalogy,
+  };
 }
 
 /// Shape: student answer line rendered in royal blue `#1B56D0`.
@@ -79,29 +71,26 @@ class StudentAnswerPayload {
   final bool isCorrect;
 
   Map<String, Object> toJson() => {
-        'author': ScriptAuthor.student.name,
-        'step_id': stepId,
-        'text': text,
-        'values': values,
-        'input_method': inputMethod,
-        'is_correct': isCorrect,
-      };
+    'author': ScriptAuthor.student.name,
+    'step_id': stepId,
+    'text': text,
+    'values': values,
+    'input_method': inputMethod,
+    'is_correct': isCorrect,
+  };
 }
 
 /// Shape: `board_visibility` control message emitted by the tutor script.
 class BoardVisibilityPayload {
-  const BoardVisibilityPayload({
-    required this.visible,
-    required this.reason,
-  });
+  const BoardVisibilityPayload({required this.visible, required this.reason});
 
   final bool visible;
   final String reason;
 
   Map<String, Object> toJson() => {
-        'board_visibility': visible,
-        'reason': reason,
-      };
+    'board_visibility': visible,
+    'reason': reason,
+  };
 }
 
 /// A step structure written by Sọ̀rọ̀ with blanks (`▢`) that the student fills in.
@@ -132,7 +121,21 @@ class TutorScriptEvent {
     this.boardVisibility,
     this.turnState,
     this.rootsRevealed,
+    this.caption,
+    this.captionYo,
+    this.thinking,
+    this.offline,
   });
+
+  /// Dock caption only (a `say` from the brain), not written on the page.
+  final String? caption;
+  final String? captionYo;
+
+  /// True while a brain request is in flight (shows the thinking indicator).
+  final bool? thinking;
+
+  /// True when the scripted fallback replaced the brain ('Offline tutor' chip).
+  final bool? offline;
 
   final TutorLinePayload? tutorLine;
   final TutorBlankRowPayload? blankRow;
@@ -234,8 +237,7 @@ class DemoQuadraticTutorScript implements TutorScript {
     _emit(
       TutorScriptEvent(
         tutorLine: TutorLinePayload(
-          text:
-              'Analogy: ${BoardStrings.tr(SoroLanguage.en, 'analogyText')}.',
+          text: 'Analogy: ${BoardStrings.tr(SoroLanguage.en, 'analogyText')}.',
           textYo: BoardStrings.tr(SoroLanguage.yo, 'analogyText'),
           isAnalogy: true,
         ),
@@ -297,10 +299,8 @@ class DemoQuadraticTutorScript implements TutorScript {
         _emit(
           const TutorScriptEvent(
             tutorLine: TutorLinePayload(
-              text:
-                  'Look closely at the signs in x² − 5x + 6 = 0. What sign is in front of 5x?',
-              textYo:
-                  'Wo àmì iwájú 5x nínú x² − 5x + 6 = 0 dáadáa. Àmì wo ló wà níbẹ̀? [needs native check]',
+              text: 'Look closely at the signs in x² − 5x + 6 = 0. What sign is in front of 5x?',
+              textYo: 'Wo àmì iwájú 5x nínú x² − 5x + 6 = 0 dáadáa. Àmì wo ló wà níbẹ̀? [needs native check]',
               isCorrection: true,
             ),
             turnState: TutorTurnState.studentTurn,
@@ -342,14 +342,16 @@ class DemoQuadraticTutorScript implements TutorScript {
       final String n2 = _normalizeNum(raw2);
 
       // Check if student made a sign error (e.g. typed -2/-3 or explicit +2/+3 sign error flag)
-      final bool isSignError = values['sign_error'] == 'true' ||
+      final bool isSignError =
+          values['sign_error'] == 'true' ||
           raw1.startsWith('+') ||
           raw2.startsWith('+') ||
           (n1 == '-2' && n2 == '-3') ||
           (n1 == '-3' && n2 == '-2');
 
       final bool isCorrectPair =
-          !isSignError && ((n1 == '2' && n2 == '3') || (n1 == '3' && n2 == '2'));
+          !isSignError &&
+          ((n1 == '2' && n2 == '3') || (n1 == '3' && n2 == '2'));
 
       final String displayLine = isSignError
           ? '(x + 2)(x + 3) = 0   [sign error: +2 and +3 add to +5]'
@@ -380,8 +382,10 @@ class DemoQuadraticTutorScript implements TutorScript {
             ),
             tutorLine: TutorLinePayload(
               text: BoardStrings.tr(SoroLanguage.en, 'step2WrongCorrection'),
-              textYo:
-                  BoardStrings.tr(SoroLanguage.en, 'step2WrongCorrectionYo'),
+              textYo: BoardStrings.tr(
+                SoroLanguage.en,
+                'step2WrongCorrectionYo',
+              ),
               isCorrection: true,
             ),
             turnState: TutorTurnState.studentTurn,
@@ -395,7 +399,8 @@ class DemoQuadraticTutorScript implements TutorScript {
         TutorScriptEvent(
           boardVisibility: const BoardVisibilityPayload(
             visible: true,
-            reason: 'Factoring correct; waiting for student to write roots in blue',
+            reason:
+                'Factoring correct; waiting for student to write roots in blue',
           ),
           tutorLine: TutorLinePayload(
             text: BoardStrings.tr(SoroLanguage.en, 'rootsPrompt'),
@@ -421,8 +426,12 @@ class DemoQuadraticTutorScript implements TutorScript {
       final String r1 = _normalizeNum(values['r1'] ?? '');
       final String r2 = _normalizeNum(values['r2'] ?? '');
       final bool isCorrect =
-          (r1 == '2' && r2 == '3') || (r1 == '3' && r2 == '2') ||
-          r1 == '2' || r1 == '3' || r2 == '2' || r2 == '3';
+          (r1 == '2' && r2 == '3') ||
+          (r1 == '3' && r2 == '2') ||
+          r1 == '2' ||
+          r1 == '3' ||
+          r2 == '2' ||
+          r2 == '3';
 
       final String displayR1 = r1.isEmpty ? '2' : r1;
       final String displayR2 = r2.isEmpty ? '3' : r2;
@@ -448,10 +457,8 @@ class DemoQuadraticTutorScript implements TutorScript {
         _emit(
           const TutorScriptEvent(
             tutorLine: TutorLinePayload(
-              text:
-                  'If (x − 2) = 0 or (x − 3) = 0, what values of x make each bracket zero?',
-              textYo:
-                  'Tí (x − 2) = 0 tàbí (x − 3) = 0, iye x wo ni yóò mú kí àkámọ́ kọ̀ọ̀kan jẹ́ òdo? [needs native check]',
+              text: 'If (x − 2) = 0 or (x − 3) = 0, what values of x make each bracket zero?',
+              textYo: 'Tí (x − 2) = 0 tàbí (x − 3) = 0, iye x wo ni yóò mú kí àkámọ́ kọ̀ọ̀kan jẹ́ òdo? [needs native check]',
               isCorrection: true,
             ),
             turnState: TutorTurnState.studentTurn,
