@@ -71,60 +71,26 @@ class BoardPlaceholderScreen extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Wrap(
-                              spacing: SoroTokens.s12,
-                              runSpacing: SoroTokens.s12,
-                              crossAxisAlignment: WrapCrossAlignment.center,
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: SoroTokens.s12,
-                                    vertical: SoroTokens.s4,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: SoroTokens.crimson,
-                                    borderRadius: BorderRadius.circular(
-                                      SoroTokens.rPill,
-                                    ),
-                                  ),
-                                  child: SoroLocalizedText(
-                                    'Sọ̀rọ̀ · Board Session',
-                                    language: SoroLanguage.yo,
-                                    style: SoroTokens.sans(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w700,
-                                      color: SoroTokens.paper,
-                                    ),
-                                  ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: SoroTokens.s12,
+                                vertical: SoroTokens.s4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: SoroTokens.crimson,
+                                borderRadius: BorderRadius.circular(
+                                  SoroTokens.rPill,
                                 ),
-                                if (language.needsNativeCheck)
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: SoroTokens.s12,
-                                      vertical: SoroTokens.s4,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: SoroTokens.sticky,
-                                      borderRadius: BorderRadius.circular(
-                                        SoroTokens.rPill,
-                                      ),
-                                      border: Border.all(
-                                        color: SoroTokens.control,
-                                      ),
-                                    ),
-                                    child: Text(
-                                      SoroStrings.tr(
-                                        language,
-                                        'nativeCheckFlag',
-                                      ),
-                                      style: SoroTokens.sans(
-                                        fontSize: 12.5,
-                                        fontWeight: FontWeight.w600,
-                                        color: SoroTokens.ink,
-                                      ),
-                                    ),
-                                  ),
-                              ],
+                              ),
+                              child: SoroLocalizedText(
+                                'Sọ̀rọ̀ · Board Session',
+                                language: SoroLanguage.yo,
+                                style: SoroTokens.sans(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w700,
+                                  color: SoroTokens.paper,
+                                ),
+                              ),
                             ),
                             const SizedBox(height: SoroTokens.s16),
                             Row(

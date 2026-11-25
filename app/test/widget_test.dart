@@ -53,11 +53,11 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Live'), findsOneWidget);
 
-      // 4. Language selector switches to Yorùbá and displays 'needs native check' flag
+      // 4. Language selector switches to Yorùbá (flagged needsNativeCheck in code only, not on screen)
       await tester.tap(find.byKey(const Key('lang-yo-button')));
       await tester.pumpAndSettle();
       expect(find.text('Kí ni kí á jọ yanju lónìí?'), findsOneWidget);
-      expect(find.byKey(const Key('yoruba-native-check-badge')), findsOneWidget);
+      expect(find.textContaining('needs native check'), findsNothing);
 
       // Switch back to English
       await tester.tap(find.byKey(const Key('lang-en-button')));

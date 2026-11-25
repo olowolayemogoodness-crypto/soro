@@ -190,6 +190,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       backgroundColor: SoroTokens.cream,
       body: SoroDottedPaperBackground(
+        showWatermark: false,
         child: SafeArea(
           child: FocusTraversalGroup(
             policy: OrderedTraversalPolicy(),
@@ -563,54 +564,25 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Wrap(
-                      spacing: SoroTokens.s8,
-                      runSpacing: 6,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 3,
-                          ),
-                          decoration: BoxDecoration(
-                            color: SoroTokens.blush,
-                            borderRadius:
-                                BorderRadius.circular(SoroTokens.rPill),
-                          ),
-                          child: SoroLocalizedText(
-                            SoroStrings.tr(lang, 'greetingBadge'),
-                            language: lang,
-                            style: SoroTokens.sans(
-                              fontSize: 12.5,
-                              fontWeight: FontWeight.w700,
-                              color: SoroTokens.crimsonDeep,
-                            ),
-                          ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: SoroTokens.blush,
+                        borderRadius:
+                            BorderRadius.circular(SoroTokens.rPill),
+                      ),
+                      child: SoroLocalizedText(
+                        SoroStrings.tr(lang, 'greetingBadge'),
+                        language: lang,
+                        style: SoroTokens.sans(
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w700,
+                          color: SoroTokens.crimsonDeep,
                         ),
-                        if (lang.needsNativeCheck)
-                          Container(
-                            key: const Key('yoruba-native-check-badge'),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 3,
-                            ),
-                            decoration: BoxDecoration(
-                              color: SoroTokens.sticky,
-                              borderRadius:
-                                  BorderRadius.circular(SoroTokens.rPill),
-                              border: Border.all(color: SoroTokens.control),
-                            ),
-                            child: Text(
-                              SoroStrings.tr(lang, 'nativeCheckFlag'),
-                              style: SoroTokens.sans(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
-                                color: SoroTokens.ink,
-                              ),
-                            ),
-                          ),
-                      ],
+                      ),
                     ),
                     const SizedBox(height: 6),
                     SoroLocalizedText(
@@ -685,57 +657,25 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Wrap(
-            alignment: WrapAlignment.spaceBetween,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            spacing: SoroTokens.s8,
-            runSpacing: SoroTokens.s8,
+          Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  ExcludeSemantics(
-                    child: SvgPicture.asset(
-                      'assets/mascot/soro-ilu-icon.svg',
-                      width: 26,
-                      height: 26,
-                    ),
-                  ),
-                  const SizedBox(width: SoroTokens.s8),
-                  Flexible(
-                    child: SoroLocalizedText(
-                      SoroStrings.tr(lang, 'composerHeading'),
-                      language: lang,
-                      style: SoroTokens.serif(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w600,
-                        color: SoroTokens.ink,
-                      ),
-                    ),
-                  ),
-                ],
+              ExcludeSemantics(
+                child: SvgPicture.asset(
+                  'assets/mascot/soro-ilu-icon.svg',
+                  width: 26,
+                  height: 26,
+                ),
               ),
-              // Yorùbá tone-mark proof badge so ọ̀ ẹ̀ ṣ rendering is always verifiable on screen
-              Semantics(
-                label: 'Yorùbá tone marks proof: ${SoroStrings.yorubaProofString}',
-                child: Container(
-                  key: const Key('yoruba-tone-proof'),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: SoroTokens.s12,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: SoroTokens.sky,
-                    borderRadius: BorderRadius.circular(SoroTokens.rPill),
-                  ),
-                  child: SoroLocalizedText(
-                    'Sọ̀rọ̀ · ọ̀ ẹ̀ ṣ',
-                    language: SoroLanguage.yo,
-                    style: SoroTokens.sans(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      color: SoroTokens.ink,
-                    ),
+              const SizedBox(width: SoroTokens.s8),
+              Flexible(
+                child: SoroLocalizedText(
+                  SoroStrings.tr(lang, 'composerHeading'),
+                  language: lang,
+                  style: SoroTokens.serif(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                    color: SoroTokens.ink,
                   ),
                 ),
               ),
@@ -1169,9 +1109,7 @@ class _LanguageOptionButton extends StatelessWidget {
     return Semantics(
       button: true,
       selected: isSelected,
-      label: locale.needsNativeCheck
-          ? '$label (needs native check)'
-          : label,
+      label: label,
       child: Material(
         color: isSelected ? SoroTokens.crimson : Colors.transparent,
         borderRadius: BorderRadius.circular(SoroTokens.rPill),

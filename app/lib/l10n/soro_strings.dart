@@ -129,78 +129,78 @@ class SoroStrings {
           'Kept off the home screen so your chat stays calm. Daily activity, subject breakdown, and unaided check records live here.',
       'progressBackToChatBtn': 'Back to home chat',
     },
+    // All Yorùbá strings below: needs native check (marked in code only, not on screen).
     SoroLanguage.yo: {
-      'appTitle': 'Sọ̀rọ̀',
-      'tagline': 'A ó jọ yanju rẹ̀ ní ìgbésẹ̀-ń-ìgbésẹ̀',
-      'languageSelectorLabel': 'Olùyàn èdè: Gẹ̀ẹ́sì àti Yorùbá (needs native check)',
-      'languagePillPrefix': 'Èdè:',
-      'nativeCheckFlag': 'Àkíyèsí: Yorùbá strings flagged — needs native check',
-      'networkLive': 'Live · Ó ń ṣiṣẹ́',
-      'networkWeak': 'Weak signal: voice only · Ohùn nìkan',
-      'networkOffline': 'Offline · Kò sí ìsopọ̀',
-      'networkStatusTooltip': 'Ipò ìsopọ̀ (tẹ̀ láti yí padà)',
-      'moreMenuLabel': 'Àṣàyàn míràn àti Ìlọsíwájú mi',
-      'myProgressEntry': 'My progress · Ìlọsíwájú mi',
-      'myProgressHiddenHint': 'Àkójọpọ̀ ìṣirò wà ní ìpamọ́ lórí ojú-ìwé ibẹ̀rẹ̀',
-      'greetingBadge': 'Ìlù · Olùkọ́ dùndún rẹ [needs native check]',
-      'greetingHeadline': 'Kí ni kí á jọ yanju lónìí?',
+      'appTitle': 'Sọ̀rọ̀', // needs native check
+      'tagline': 'A ó jọ yanju rẹ̀ ní ìgbésẹ̀-ń-ìgbésẹ̀', // needs native check
+      'languageSelectorLabel': 'Olùyàn èdè: Gẹ̀ẹ́sì àti Yorùbá', // needs native check
+      'languagePillPrefix': 'Èdè:', // needs native check
+      'networkLive': 'Live · Ó ń ṣiṣẹ́', // needs native check
+      'networkWeak': 'Weak signal: voice only · Ohùn nìkan', // needs native check
+      'networkOffline': 'Offline · Kò sí ìsopọ̀', // needs native check
+      'networkStatusTooltip': 'Ipò ìsopọ̀ (tẹ̀ láti yí padà)', // needs native check
+      'moreMenuLabel': 'Àṣàyàn míràn àti Ìlọsíwájú mi', // needs native check
+      'myProgressEntry': 'My progress · Ìlọsíwájú mi', // needs native check
+      'myProgressHiddenHint': 'Àkójọpọ̀ ìṣirò wà ní ìpamọ́ lórí ojú-ìwé ibẹ̀rẹ̀', // needs native check
+      'greetingBadge': 'Ìlù · Olùkọ́ dùndún rẹ', // needs native check
+      'greetingHeadline': 'Kí ni kí á jọ yanju lónìí?', // needs native check
       'greetingSubtitle':
-          'Kọ ìbéèrè rẹ, sọ ọ́ síta, tàbí fi kálámù (stylus) kọ ọ́. Sọ̀rọ̀ á tọ́ ọ sọ́nà ní ìgbésẹ̀-ń-ìgbésẹ̀ láì sọ ìdáhùn gbẹ̀yìn fún ọ. [needs native check]',
+          'Kọ ìbéèrè rẹ, sọ ọ́ síta, tàbí fi kálámù (stylus) kọ ọ́. Sọ̀rọ̀ á tọ́ ọ sọ́nà ní ìgbésẹ̀-ń-ìgbésẹ̀ láì sọ ìdáhùn gbẹ̀yìn fún ọ.', // needs native check
       'initialTutorMessage':
-          'Káàbọ̀! Yan koko-ọ̀rọ̀ kan ní ìsàlẹ̀ tàbí kọ ìbéèrè tirẹ. Nígbà tí a bá bẹ̀rẹ̀, pátákó ìwé-ìkọ̀wé á ṣí sílẹ̀ kí á lè jọ ṣe é. [needs native check]',
+          'Káàbọ̀! Yan koko-ọ̀rọ̀ kan ní ìsàlẹ̀ tàbí kọ ìbéèrè tirẹ. Nígbà tí a bá bẹ̀rẹ̀, pátákó ìwé-ìkọ̀wé á ṣí sílẹ̀ kí á lè jọ ṣe é.', // needs native check
       'initialTutorBilingualNote':
-          'Àtìlẹ́yìn èdè méjì: Gẹ̀ẹ́sì àti Yorùbá (gbòngbò · roots, ibùdó · vertex, ìlà-àárín · axis of symmetry). [needs native check]',
-      'composerHeading': 'Béèrè ohunkóhun · Ask anything',
+          'Àtìlẹ́yìn èdè méjì: Gẹ̀ẹ́sì àti Yorùbá (gbòngbò · roots, ibùdó · vertex, ìlà-àárín · axis of symmetry).', // needs native check
+      'composerHeading': 'Béèrè ohunkóhun · Ask anything', // needs native check
       'composerPlaceholder':
-          'Kọ ìṣòro tàbí koko-ẹ̀kọ́ — bíi x² − 5x + 6 = 0, tàbí kí ló dé tí ìfagagbága (friction) fi ń dá nǹkan dúró?… [needs native check]',
-      'composerTypeBtn': 'Kọ ọ́ · Type',
-      'composerSpeakBtn': 'Sọ̀rọ̀ · Speak',
-      'composerSpeakListening': 'Mo ń gbọ́… tẹ̀ láti parí',
-      'composerStylusBtn': 'Kálámù · Stylus',
-      'composerStylusActive': 'Pa pátákó kálámù dé',
-      'composerAskBtn': 'Béèrè & ṣí pátákó · Bẹ̀rẹ̀',
-      'stylusPadTitle': 'Pátákó ìkọ̀wé kálámù (Stylus & pointer pad)',
+          'Kọ ìṣòro tàbí koko-ẹ̀kọ́ — bíi x² − 5x + 6 = 0, tàbí kí ló dé tí ìfagagbága (friction) fi ń dá nǹkan dúró?…', // needs native check
+      'composerTypeBtn': 'Kọ ọ́ · Type', // needs native check
+      'composerSpeakBtn': 'Sọ̀rọ̀ · Speak', // needs native check
+      'composerSpeakListening': 'Mo ń gbọ́… tẹ̀ láti parí', // needs native check
+      'composerStylusBtn': 'Kálámù · Stylus', // needs native check
+      'composerStylusActive': 'Pa pátákó kálámù dé', // needs native check
+      'composerAskBtn': 'Béèrè & ṣí pátákó · Bẹ̀rẹ̀', // needs native check
+      'stylusPadTitle': 'Pátákó ìkọ̀wé kálámù (Stylus & pointer pad)', // needs native check
       'stylusPadHint':
-          'Fi kálámù tàbí ìka rẹ kọ ìṣedọ́gba pẹ̀lú yíǹkì buluu akẹ́kọ̀ọ́ (#1B56D0). [needs native check]',
-      'stylusClearBtn': 'Nu yíǹkì · Clear',
-      'stylusUseBtn': 'Béèrè láti inú ìkọ̀wé',
-      'stylusRecognisedPrefix': 'Ìṣòro tí a fi ọwọ́ kọ: ',
-      'stylusDefaultEquation': 'Yanju x² − 5x + 6 = 0 ní ìgbésẹ̀-ń-ìgbésẹ̀',
+          'Fi kálámù tàbí ìka rẹ kọ ìṣedọ́gba pẹ̀lú yíǹkì buluu akẹ́kọ̀ọ́ (#1B56D0).', // needs native check
+      'stylusClearBtn': 'Nu yíǹkì · Clear', // needs native check
+      'stylusUseBtn': 'Béèrè láti inú ìkọ̀wé', // needs native check
+      'stylusRecognisedPrefix': 'Ìṣòro tí a fi ọwọ́ kọ: ', // needs native check
+      'stylusDefaultEquation': 'Yanju x² − 5x + 6 = 0 ní ìgbésẹ̀-ń-ìgbésẹ̀', // needs native check
       'spokenSampleQuestion':
-          'Ṣé a lè jọ yanju x² − 5x + 6 = 0 ní ìgbésẹ̀-ń-ìgbésẹ̀?',
-      'suggestedTopicsHeading': 'Àwọn koko-ẹ̀kọ́ tí o lè fi bẹ̀rẹ̀ [needs native check]',
-      'chipQuadraticTitle': 'Solve a quadratic · Yanju ìṣedọ́gba kọ́dratiki',
-      'chipQuadraticPrompt': 'Ràn mí lọ́wọ́ láti yanju x² − 5x + 6 = 0 ní ìgbésẹ̀-ń-ìgbésẹ̀.',
-      'chipQuadraticTag': 'Maths · Ìṣedọ́gba Kọ́dratiki',
-      'chipFrictionTitle': 'Why does friction slow things down? · Ìfagagbága',
+          'Ṣé a lè jọ yanju x² − 5x + 6 = 0 ní ìgbésẹ̀-ń-ìgbésẹ̀?', // needs native check
+      'suggestedTopicsHeading': 'Àwọn koko-ẹ̀kọ́ tí o lè fi bẹ̀rẹ̀', // needs native check
+      'chipQuadraticTitle': 'Solve a quadratic · Yanju ìṣedọ́gba kọ́dratiki', // needs native check
+      'chipQuadraticPrompt': 'Ràn mí lọ́wọ́ láti yanju x² − 5x + 6 = 0 ní ìgbésẹ̀-ń-ìgbésẹ̀.', // needs native check
+      'chipQuadraticTag': 'Maths · Ìṣedọ́gba Kọ́dratiki', // needs native check
+      'chipFrictionTitle': 'Why does friction slow things down? · Ìfagagbága', // needs native check
       'chipFrictionPrompt':
-          'Kí ló dé tí friction fi ń dá nǹkan dúró? Fi àpẹẹrẹ ọkọ̀ danfo lórí òpópónà tútù ṣàlàyé.',
-      'chipFrictionTag': 'Physics · Agbára àti Ìṣípòpadà',
-      'chipPdfTitle': 'Explain a PDF concept · Ṣàlàyé ìwé PDF',
+          'Kí ló dé tí friction fi ń dá nǹkan dúró? Fi àpẹẹrẹ ọkọ̀ danfo lórí òpópónà tútù ṣàlàyé.', // needs native check
+      'chipFrictionTag': 'Physics · Agbára àti Ìṣípòpadà', // needs native check
+      'chipPdfTitle': 'Explain a PDF concept · Ṣàlàyé ìwé PDF', // needs native check
       'chipPdfPrompt':
-          'Ṣàlàyé koko-ẹ̀kọ́ kan láti inú ìwé PDF mi ní ìgbésẹ̀ rírọrùn.',
-      'chipPdfTag': 'Study help · Àkọsílẹ̀',
-      'chipCompleteSquareTitle': 'Complete the square: x² + 2x = 1',
+          'Ṣàlàyé koko-ẹ̀kọ́ kan láti inú ìwé PDF mi ní ìgbésẹ̀ rírọrùn.', // needs native check
+      'chipPdfTag': 'Study help · Àkọsílẹ̀', // needs native check
+      'chipCompleteSquareTitle': 'Complete the square: x² + 2x = 1', // needs native check
       'chipCompleteSquarePrompt':
-          'Fi bí a ṣe ń bẹ̀rẹ̀ completing the square fún x² + 2x = 1 hàn mí láì sọ gbòngbò rẹ̀.',
-      'chipCompleteSquareTag': 'Maths · Àljẹ́brà',
-      'chatSectionLabel': 'Ìtàn ìjíròrò · Conversation',
-      'chatTutorRole': 'Sọ̀rọ̀ · Olùkọ́',
-      'chatStudentRole': 'Ìwọ · Akẹ́kọ̀ọ́',
-      'chatOpenBoardAction': 'Working · Ṣí pátákó →',
+          'Fi bí a ṣe ń bẹ̀rẹ̀ completing the square fún x² + 2x = 1 hàn mí láì sọ gbòngbò rẹ̀.', // needs native check
+      'chipCompleteSquareTag': 'Maths · Àljẹ́brà', // needs native check
+      'chatSectionLabel': 'Ìtàn ìjíròrò · Conversation', // needs native check
+      'chatTutorRole': 'Sọ̀rọ̀ · Olùkọ́', // needs native check
+      'chatStudentRole': 'Ìwọ · Akẹ́kọ̀ọ́', // needs native check
+      'chatOpenBoardAction': 'Working · Ṣí pátákó →', // needs native check
       'chatTutorReplyPrefix':
-          'Jẹ́ kí á jọ ṣe èyí lórí pátákó ìwé-ìkọ̀wé. Lákọ̀ọ́kọ́, kí ni o kíyèsí nípa: ',
-      'boardPlaceholderTitle': 'Pátákó Ìwé-Ìkọ̀wé · Notebook Board (Placeholder)',
+          'Jẹ́ kí á jọ ṣe èyí lórí pátákó ìwé-ìkọ̀wé. Lákọ̀ọ́kọ́, kí ni o kíyèsí nípa: ', // needs native check
+      'boardPlaceholderTitle': 'Pátákó Ìwé-Ìkọ̀wé · Notebook Board (Placeholder)', // needs native check
       'boardPlaceholderSubtitle':
-          'Pátákó ìṣirò àti àtẹ kọ́dratiki kikun ń bọ̀ ní ìgbésẹ̀ A2. [needs native check]',
-      'boardActiveQuestionLabel': 'Ìbéèrè tí a ń yanju lórí pátákó:',
+          'Pátákó ìṣirò àti àtẹ kọ́dratiki kikun ń bọ̀ ní ìgbésẹ̀ A2.', // needs native check
+      'boardActiveQuestionLabel': 'Ìbéèrè tí a ń yanju lórí pátákó:', // needs native check
       'boardFirstStepPrompt':
-          'Sọ̀rọ̀ á kọ ààyè òfo — bíi (x − [ ? ])(x − [ ? ]) = 0 — kí ọwọ́ rẹ lè kọ́kọ́ ṣiṣẹ́.',
-      'boardBackToChatBtn': 'Padà sí ìjíròrò (Back to chat)',
-      'progressPlaceholderTitle': 'My progress · Ìlọsíwájú mi (Placeholder)',
+          'Sọ̀rọ̀ á kọ ààyè òfo — bíi (x − [ ? ])(x − [ ? ]) = 0 — kí ọwọ́ rẹ lè kọ́kọ́ ṣiṣẹ́.', // needs native check
+      'boardBackToChatBtn': 'Padà sí ìjíròrò (Back to chat)', // needs native check
+      'progressPlaceholderTitle': 'My progress · Ìlọsíwájú mi (Placeholder)', // needs native check
       'progressPlaceholderSubtitle':
-          'A fi pamọ́ kúrò lórí ojú-ìwé ibẹ̀rẹ̀ kí ìjíròrò rẹ lè bàlẹ̀. [needs native check]',
-      'progressBackToChatBtn': 'Padà sí ìjíròrò (Back to chat)',
+          'A fi pamọ́ kúrò lórí ojú-ìwé ibẹ̀rẹ̀ kí ìjíròrò rẹ lè bàlẹ̀.', // needs native check
+      'progressBackToChatBtn': 'Padà sí ìjíròrò (Back to chat)', // needs native check
     },
   };
 
