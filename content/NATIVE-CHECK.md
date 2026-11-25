@@ -60,6 +60,158 @@ Glossary entries where the Yorùbá equals the English are loanwords: propose a 
 - [ ] p2.s4 prompt: Kí ni a gbọ́dọ̀ ṣe sí ẹ̀gbẹ́ méjèèjì láti yọ square náà kúrò?
 - [ ] p2.s4 correction for `square root, positive only`: Nọ́mbà méjì ni square wọn lè dọ́gba pẹ̀lú nọ́mbà kan náà; àwọn wo ni?
 - [ ] p2.s4 hint 1: Ìṣe ìdà square ni a nílò; nọ́mbà méjì ló ní ìdáhùn.
+- [ ] p3 statement: Yànjú quadratic equation x² − 6x + 8 = 0
+- [ ] p3.s1 prompt: Wo quadratic equation tó wà lórí screen yìí; kí ni iye coefficient a, b, àti constant c tí o rí níbẹ̀?
+- [ ] p3.s1 correction for `b=6`: Dúró náà, wo àmì tó wà níwájú 6x: ṣé plus 6 ni tàbí minus 6?
+- [ ] p3.s1 correction for `c=-8`: Wo àmì tó wà níwájú 8 ní òpin equation náà: ṣé plus ni tàbí minus?
+- [ ] p3.s1 hint 1: Wo nọ́mbà tó dúró níwájú x², x, àti nọ́mbà tó dá dúró.
+- [ ] p3.s1 hint 2: Ìtọ́ka: ax² + bx + c = 0, kí ni nọ́mbà tó wà níwájú x?
+- [ ] p3.s2 prompt: Nọ́mbà méjì wo ni ìsọdipúpọ̀ wọn jẹ́ c, tí àròpọ̀ wọn sì jẹ́ b?
+- [ ] p3.s2 correction for `pair=2,4`: Wo àmì b lẹ́ẹ̀kan sí i: àròpọ̀ 2 àti 4 jẹ́ 6, ṣé ó bá b mu?
+- [ ] p3.s2 hint 1: Kọ àwọn nọ́mbà méjì tí ìsọdipúpọ̀ wọn jẹ́ 6 sílẹ̀ kí o wo àròpọ̀ olúkúlùkù wọn.
+- [ ] p3.s2 hint 2: Àwọn nọ́mbà méjèèjì ní àmì kan náà nítorí c jẹ́ positive.
+- [ ] p3.s3 prompt: Fi àwọn nọ́mbà méjì náà sí àwọn ibi tí ó ṣófo nínú brackets méjèèjì; kí ni o máa kọ sí bracket àkọ́kọ́?
+- [ ] p3.s3 correction for `factored=(x+2)(x+4)`: Tí o bá expand (x + 2)(x + 4), ṣé middle term máa fún wa −6x tàbí +6x?
+- [ ] p3.s3 hint 1: Expand brackets rẹ padà kí o wo middle term.
+- [ ] p3.s3 hint 2: Ṣé middle term tí o rí bá b mu?
+- [ ] p3.s4 prompt: Tí ìsọdipúpọ̀ bá jẹ́ zero, kí ni ó gbọ́dọ̀ jẹ́ òótọ́ nípa ọ̀kan nínú brackets náà?
+- [ ] p3.s4 correction for `both brackets must equal 1`: Tí ìsọdipúpọ̀ bá jẹ́ 1, kìí ṣe zero; kí ni nọ́mbà méjì tí ìsọdipúpọ̀ wọn jẹ́ zero?
+- [ ] p3.s4 hint 1: Ronú nípa 0 × 5 àti 7 × 0; kí ni ó wà ní ìbámu láàrin wọn?
+- [ ] p3.s5 prompt: Wo parabola náà: níbo ni ó ti kan x-axis, ṣé ó bá àwọn gbòǹgbò rẹ mu?
+- [ ] p3.s5 hint 1: Wo ibi tí ìlà náà ti kan x-axis lórí graph.
+- [ ] p4 statement: Yànjú quadratic equation x² + 5x + 6 = 0
+- [ ] p4.s1 prompt: Wo quadratic equation tó wà lórí screen yìí; kí ni iye coefficient a, b, àti constant c tí o rí níbẹ̀?
+- [ ] p4.s1 correction for `b=-5`: Dúró náà, wo àmì tó wà níwájú 5x: ṣé plus 5 ni tàbí minus 5?
+- [ ] p4.s1 correction for `c=-6`: Wo àmì tó wà níwájú 6 ní òpin equation náà: ṣé plus ni tàbí minus?
+- [ ] p4.s1 hint 1: Wo nọ́mbà tó dúró níwájú x², x, àti nọ́mbà tó dá dúró.
+- [ ] p4.s1 hint 2: Ìtọ́ka: ax² + bx + c = 0, kí ni nọ́mbà tó wà níwájú x?
+- [ ] p4.s2 prompt: Nọ́mbà méjì wo ni ìsọdipúpọ̀ wọn jẹ́ c, tí àròpọ̀ wọn sì jẹ́ b?
+- [ ] p4.s2 correction for `pair=-2,-3`: Wo àmì b lẹ́ẹ̀kan sí i: àròpọ̀ −2 àti −3 jẹ́ −5, ṣé ó bá b mu?
+- [ ] p4.s2 hint 1: Kọ àwọn nọ́mbà méjì tí ìsọdipúpọ̀ wọn jẹ́ 6 sílẹ̀ kí o wo àròpọ̀ olúkúlùkù wọn.
+- [ ] p4.s2 hint 2: Àwọn nọ́mbà méjèèjì ní àmì kan náà nítorí c jẹ́ positive.
+- [ ] p4.s3 prompt: Fi àwọn nọ́mbà méjì náà sí àwọn ibi tí ó ṣófo nínú brackets méjèèjì; kí ni o máa kọ sí bracket àkọ́kọ́?
+- [ ] p4.s3 correction for `factored=(x-2)(x-3)`: Tí o bá expand (x − 2)(x − 3), ṣé middle term máa fún wa +5x tàbí −5x?
+- [ ] p4.s3 hint 1: Expand brackets rẹ padà kí o wo middle term.
+- [ ] p4.s3 hint 2: Ṣé middle term tí o rí bá b mu?
+- [ ] p4.s4 prompt: Tí ìsọdipúpọ̀ bá jẹ́ zero, kí ni ó gbọ́dọ̀ jẹ́ òótọ́ nípa ọ̀kan nínú brackets náà?
+- [ ] p4.s4 correction for `both brackets must equal 1`: Tí ìsọdipúpọ̀ bá jẹ́ 1, kìí ṣe zero; kí ni nọ́mbà méjì tí ìsọdipúpọ̀ wọn jẹ́ zero?
+- [ ] p4.s4 hint 1: Ronú nípa 0 × 5 àti 7 × 0; kí ni ó wà ní ìbámu láàrin wọn?
+- [ ] p4.s5 prompt: Wo parabola náà: níbo ni ó ti kan x-axis, ṣé ó bá àwọn gbòǹgbò rẹ mu?
+- [ ] p4.s5 hint 1: Wo ibi tí ìlà náà ti kan x-axis lórí graph.
+- [ ] p5 statement: Yànjú quadratic equation x² − 1x − 6 = 0
+- [ ] p5.s1 prompt: Wo quadratic equation tó wà lórí screen yìí; kí ni iye coefficient a, b, àti constant c tí o rí níbẹ̀?
+- [ ] p5.s1 correction for `b=1`: Dúró náà, wo àmì tó wà níwájú 1x: ṣé plus 1 ni tàbí minus 1?
+- [ ] p5.s1 correction for `c=6`: Wo àmì tó wà níwájú 6 ní òpin equation náà: ṣé plus ni tàbí minus?
+- [ ] p5.s1 hint 1: Wo nọ́mbà tó dúró níwájú x², x, àti nọ́mbà tó dá dúró.
+- [ ] p5.s1 hint 2: Ìtọ́ka: ax² + bx + c = 0, kí ni nọ́mbà tó wà níwájú x?
+- [ ] p5.s2 prompt: Nọ́mbà méjì wo ni ìsọdipúpọ̀ wọn jẹ́ c, tí àròpọ̀ wọn sì jẹ́ b?
+- [ ] p5.s2 correction for `pair=3,-2`: Wo àmì b lẹ́ẹ̀kan sí i: àròpọ̀ 3 àti −2 jẹ́ 1, ṣé ó bá b mu?
+- [ ] p5.s2 hint 1: Kọ àwọn nọ́mbà méjì tí ìsọdipúpọ̀ wọn jẹ́ 6 sílẹ̀ kí o wo àròpọ̀ olúkúlùkù wọn.
+- [ ] p5.s2 hint 2: Àwọn nọ́mbà méjèèjì ní àmì kan náà nítorí c jẹ́ positive.
+- [ ] p5.s3 prompt: Fi àwọn nọ́mbà méjì náà sí àwọn ibi tí ó ṣófo nínú brackets méjèèjì; kí ni o máa kọ sí bracket àkọ́kọ́?
+- [ ] p5.s3 correction for `factored=(x+3)(x-2)`: Tí o bá expand (x + 3)(x − 2), ṣé middle term máa fún wa −1x tàbí +1x?
+- [ ] p5.s3 hint 1: Expand brackets rẹ padà kí o wo middle term.
+- [ ] p5.s3 hint 2: Ṣé middle term tí o rí bá b mu?
+- [ ] p5.s4 prompt: Tí ìsọdipúpọ̀ bá jẹ́ zero, kí ni ó gbọ́dọ̀ jẹ́ òótọ́ nípa ọ̀kan nínú brackets náà?
+- [ ] p5.s4 correction for `both brackets must equal 1`: Tí ìsọdipúpọ̀ bá jẹ́ 1, kìí ṣe zero; kí ni nọ́mbà méjì tí ìsọdipúpọ̀ wọn jẹ́ zero?
+- [ ] p5.s4 hint 1: Ronú nípa 0 × 5 àti 7 × 0; kí ni ó wà ní ìbámu láàrin wọn?
+- [ ] p5.s5 prompt: Wo parabola náà: níbo ni ó ti kan x-axis, ṣé ó bá àwọn gbòǹgbò rẹ mu?
+- [ ] p5.s5 hint 1: Wo ibi tí ìlà náà ti kan x-axis lórí graph.
+- [ ] p6 statement: Yànjú quadratic equation x² − 9x + 20 = 0
+- [ ] p6.s1 prompt: Wo quadratic equation tó wà lórí screen yìí; kí ni iye coefficient a, b, àti constant c tí o rí níbẹ̀?
+- [ ] p6.s1 correction for `b=9`: Dúró náà, wo àmì tó wà níwájú 9x: ṣé plus 9 ni tàbí minus 9?
+- [ ] p6.s1 correction for `c=-20`: Wo àmì tó wà níwájú 20 ní òpin equation náà: ṣé plus ni tàbí minus?
+- [ ] p6.s1 hint 1: Wo nọ́mbà tó dúró níwájú x², x, àti nọ́mbà tó dá dúró.
+- [ ] p6.s1 hint 2: Ìtọ́ka: ax² + bx + c = 0, kí ni nọ́mbà tó wà níwájú x?
+- [ ] p6.s2 prompt: Nọ́mbà méjì wo ni ìsọdipúpọ̀ wọn jẹ́ c, tí àròpọ̀ wọn sì jẹ́ b?
+- [ ] p6.s2 correction for `pair=4,5`: Wo àmì b lẹ́ẹ̀kan sí i: àròpọ̀ 4 àti 5 jẹ́ 9, ṣé ó bá b mu?
+- [ ] p6.s2 hint 1: Kọ àwọn nọ́mbà méjì tí ìsọdipúpọ̀ wọn jẹ́ 6 sílẹ̀ kí o wo àròpọ̀ olúkúlùkù wọn.
+- [ ] p6.s2 hint 2: Àwọn nọ́mbà méjèèjì ní àmì kan náà nítorí c jẹ́ positive.
+- [ ] p6.s3 prompt: Fi àwọn nọ́mbà méjì náà sí àwọn ibi tí ó ṣófo nínú brackets méjèèjì; kí ni o máa kọ sí bracket àkọ́kọ́?
+- [ ] p6.s3 correction for `factored=(x+4)(x+5)`: Tí o bá expand (x + 4)(x + 5), ṣé middle term máa fún wa −9x tàbí +9x?
+- [ ] p6.s3 hint 1: Expand brackets rẹ padà kí o wo middle term.
+- [ ] p6.s3 hint 2: Ṣé middle term tí o rí bá b mu?
+- [ ] p6.s4 prompt: Tí ìsọdipúpọ̀ bá jẹ́ zero, kí ni ó gbọ́dọ̀ jẹ́ òótọ́ nípa ọ̀kan nínú brackets náà?
+- [ ] p6.s4 correction for `both brackets must equal 1`: Tí ìsọdipúpọ̀ bá jẹ́ 1, kìí ṣe zero; kí ni nọ́mbà méjì tí ìsọdipúpọ̀ wọn jẹ́ zero?
+- [ ] p6.s4 hint 1: Ronú nípa 0 × 5 àti 7 × 0; kí ni ó wà ní ìbámu láàrin wọn?
+- [ ] p6.s5 prompt: Wo parabola náà: níbo ni ó ti kan x-axis, ṣé ó bá àwọn gbòǹgbò rẹ mu?
+- [ ] p6.s5 hint 1: Wo ibi tí ìlà náà ti kan x-axis lórí graph.
+- [ ] p7 statement: Yànjú quadratic equation x² − 8x + 15 = 0
+- [ ] p7.s1 prompt: Wo quadratic equation tó wà lórí screen yìí; kí ni iye coefficient a, b, àti constant c tí o rí níbẹ̀?
+- [ ] p7.s1 correction for `b=8`: Dúró náà, wo àmì tó wà níwájú 8x: ṣé plus 8 ni tàbí minus 8?
+- [ ] p7.s1 correction for `c=-15`: Wo àmì tó wà níwájú 15 ní òpin equation náà: ṣé plus ni tàbí minus?
+- [ ] p7.s1 hint 1: Wo nọ́mbà tó dúró níwájú x², x, àti nọ́mbà tó dá dúró.
+- [ ] p7.s1 hint 2: Ìtọ́ka: ax² + bx + c = 0, kí ni nọ́mbà tó wà níwájú x?
+- [ ] p7.s2 prompt: Nọ́mbà méjì wo ni ìsọdipúpọ̀ wọn jẹ́ c, tí àròpọ̀ wọn sì jẹ́ b?
+- [ ] p7.s2 correction for `pair=3,5`: Wo àmì b lẹ́ẹ̀kan sí i: àròpọ̀ 3 àti 5 jẹ́ 8, ṣé ó bá b mu?
+- [ ] p7.s2 hint 1: Kọ àwọn nọ́mbà méjì tí ìsọdipúpọ̀ wọn jẹ́ 6 sílẹ̀ kí o wo àròpọ̀ olúkúlùkù wọn.
+- [ ] p7.s2 hint 2: Àwọn nọ́mbà méjèèjì ní àmì kan náà nítorí c jẹ́ positive.
+- [ ] p7.s3 prompt: Fi àwọn nọ́mbà méjì náà sí àwọn ibi tí ó ṣófo nínú brackets méjèèjì; kí ni o máa kọ sí bracket àkọ́kọ́?
+- [ ] p7.s3 correction for `factored=(x+3)(x+5)`: Tí o bá expand (x + 3)(x + 5), ṣé middle term máa fún wa −8x tàbí +8x?
+- [ ] p7.s3 hint 1: Expand brackets rẹ padà kí o wo middle term.
+- [ ] p7.s3 hint 2: Ṣé middle term tí o rí bá b mu?
+- [ ] p7.s4 prompt: Tí ìsọdipúpọ̀ bá jẹ́ zero, kí ni ó gbọ́dọ̀ jẹ́ òótọ́ nípa ọ̀kan nínú brackets náà?
+- [ ] p7.s4 correction for `both brackets must equal 1`: Tí ìsọdipúpọ̀ bá jẹ́ 1, kìí ṣe zero; kí ni nọ́mbà méjì tí ìsọdipúpọ̀ wọn jẹ́ zero?
+- [ ] p7.s4 hint 1: Ronú nípa 0 × 5 àti 7 × 0; kí ni ó wà ní ìbámu láàrin wọn?
+- [ ] p7.s5 prompt: Wo parabola náà: níbo ni ó ti kan x-axis, ṣé ó bá àwọn gbòǹgbò rẹ mu?
+- [ ] p7.s5 hint 1: Wo ibi tí ìlà náà ti kan x-axis lórí graph.
+- [ ] p8 statement: Yànjú quadratic equation x² + 7x + 10 = 0
+- [ ] p8.s1 prompt: Wo quadratic equation tó wà lórí screen yìí; kí ni iye coefficient a, b, àti constant c tí o rí níbẹ̀?
+- [ ] p8.s1 correction for `b=-7`: Dúró náà, wo àmì tó wà níwájú 7x: ṣé plus 7 ni tàbí minus 7?
+- [ ] p8.s1 correction for `c=-10`: Wo àmì tó wà níwájú 10 ní òpin equation náà: ṣé plus ni tàbí minus?
+- [ ] p8.s1 hint 1: Wo nọ́mbà tó dúró níwájú x², x, àti nọ́mbà tó dá dúró.
+- [ ] p8.s1 hint 2: Ìtọ́ka: ax² + bx + c = 0, kí ni nọ́mbà tó wà níwájú x?
+- [ ] p8.s2 prompt: Nọ́mbà méjì wo ni ìsọdipúpọ̀ wọn jẹ́ c, tí àròpọ̀ wọn sì jẹ́ b?
+- [ ] p8.s2 correction for `pair=-2,-5`: Wo àmì b lẹ́ẹ̀kan sí i: àròpọ̀ −2 àti −5 jẹ́ −7, ṣé ó bá b mu?
+- [ ] p8.s2 hint 1: Kọ àwọn nọ́mbà méjì tí ìsọdipúpọ̀ wọn jẹ́ 6 sílẹ̀ kí o wo àròpọ̀ olúkúlùkù wọn.
+- [ ] p8.s2 hint 2: Àwọn nọ́mbà méjèèjì ní àmì kan náà nítorí c jẹ́ positive.
+- [ ] p8.s3 prompt: Fi àwọn nọ́mbà méjì náà sí àwọn ibi tí ó ṣófo nínú brackets méjèèjì; kí ni o máa kọ sí bracket àkọ́kọ́?
+- [ ] p8.s3 correction for `factored=(x-2)(x-5)`: Tí o bá expand (x − 2)(x − 5), ṣé middle term máa fún wa +7x tàbí −7x?
+- [ ] p8.s3 hint 1: Expand brackets rẹ padà kí o wo middle term.
+- [ ] p8.s3 hint 2: Ṣé middle term tí o rí bá b mu?
+- [ ] p8.s4 prompt: Tí ìsọdipúpọ̀ bá jẹ́ zero, kí ni ó gbọ́dọ̀ jẹ́ òótọ́ nípa ọ̀kan nínú brackets náà?
+- [ ] p8.s4 correction for `both brackets must equal 1`: Tí ìsọdipúpọ̀ bá jẹ́ 1, kìí ṣe zero; kí ni nọ́mbà méjì tí ìsọdipúpọ̀ wọn jẹ́ zero?
+- [ ] p8.s4 hint 1: Ronú nípa 0 × 5 àti 7 × 0; kí ni ó wà ní ìbámu láàrin wọn?
+- [ ] p8.s5 prompt: Wo parabola náà: níbo ni ó ti kan x-axis, ṣé ó bá àwọn gbòǹgbò rẹ mu?
+- [ ] p8.s5 hint 1: Wo ibi tí ìlà náà ti kan x-axis lórí graph.
+- [ ] p9 statement: Yànjú quadratic equation x² − 2x − 8 = 0
+- [ ] p9.s1 prompt: Wo quadratic equation tó wà lórí screen yìí; kí ni iye coefficient a, b, àti constant c tí o rí níbẹ̀?
+- [ ] p9.s1 correction for `b=2`: Dúró náà, wo àmì tó wà níwájú 2x: ṣé plus 2 ni tàbí minus 2?
+- [ ] p9.s1 correction for `c=8`: Wo àmì tó wà níwájú 8 ní òpin equation náà: ṣé plus ni tàbí minus?
+- [ ] p9.s1 hint 1: Wo nọ́mbà tó dúró níwájú x², x, àti nọ́mbà tó dá dúró.
+- [ ] p9.s1 hint 2: Ìtọ́ka: ax² + bx + c = 0, kí ni nọ́mbà tó wà níwájú x?
+- [ ] p9.s2 prompt: Nọ́mbà méjì wo ni ìsọdipúpọ̀ wọn jẹ́ c, tí àròpọ̀ wọn sì jẹ́ b?
+- [ ] p9.s2 correction for `pair=4,-2`: Wo àmì b lẹ́ẹ̀kan sí i: àròpọ̀ 4 àti −2 jẹ́ 2, ṣé ó bá b mu?
+- [ ] p9.s2 hint 1: Kọ àwọn nọ́mbà méjì tí ìsọdipúpọ̀ wọn jẹ́ 6 sílẹ̀ kí o wo àròpọ̀ olúkúlùkù wọn.
+- [ ] p9.s2 hint 2: Àwọn nọ́mbà méjèèjì ní àmì kan náà nítorí c jẹ́ positive.
+- [ ] p9.s3 prompt: Fi àwọn nọ́mbà méjì náà sí àwọn ibi tí ó ṣófo nínú brackets méjèèjì; kí ni o máa kọ sí bracket àkọ́kọ́?
+- [ ] p9.s3 correction for `factored=(x+4)(x-2)`: Tí o bá expand (x + 4)(x − 2), ṣé middle term máa fún wa −2x tàbí +2x?
+- [ ] p9.s3 hint 1: Expand brackets rẹ padà kí o wo middle term.
+- [ ] p9.s3 hint 2: Ṣé middle term tí o rí bá b mu?
+- [ ] p9.s4 prompt: Tí ìsọdipúpọ̀ bá jẹ́ zero, kí ni ó gbọ́dọ̀ jẹ́ òótọ́ nípa ọ̀kan nínú brackets náà?
+- [ ] p9.s4 correction for `both brackets must equal 1`: Tí ìsọdipúpọ̀ bá jẹ́ 1, kìí ṣe zero; kí ni nọ́mbà méjì tí ìsọdipúpọ̀ wọn jẹ́ zero?
+- [ ] p9.s4 hint 1: Ronú nípa 0 × 5 àti 7 × 0; kí ni ó wà ní ìbámu láàrin wọn?
+- [ ] p9.s5 prompt: Wo parabola náà: níbo ni ó ti kan x-axis, ṣé ó bá àwọn gbòǹgbò rẹ mu?
+- [ ] p9.s5 hint 1: Wo ibi tí ìlà náà ti kan x-axis lórí graph.
+- [ ] p10 statement: Yànjú quadratic equation x² + 3x − 10 = 0
+- [ ] p10.s1 prompt: Wo quadratic equation tó wà lórí screen yìí; kí ni iye coefficient a, b, àti constant c tí o rí níbẹ̀?
+- [ ] p10.s1 correction for `b=-3`: Dúró náà, wo àmì tó wà níwájú 3x: ṣé plus 3 ni tàbí minus 3?
+- [ ] p10.s1 correction for `c=10`: Wo àmì tó wà níwájú 10 ní òpin equation náà: ṣé plus ni tàbí minus?
+- [ ] p10.s1 hint 1: Wo nọ́mbà tó dúró níwájú x², x, àti nọ́mbà tó dá dúró.
+- [ ] p10.s1 hint 2: Ìtọ́ka: ax² + bx + c = 0, kí ni nọ́mbà tó wà níwájú x?
+- [ ] p10.s2 prompt: Nọ́mbà méjì wo ni ìsọdipúpọ̀ wọn jẹ́ c, tí àròpọ̀ wọn sì jẹ́ b?
+- [ ] p10.s2 correction for `pair=-5,2`: Wo àmì b lẹ́ẹ̀kan sí i: àròpọ̀ −5 àti 2 jẹ́ −3, ṣé ó bá b mu?
+- [ ] p10.s2 hint 1: Kọ àwọn nọ́mbà méjì tí ìsọdipúpọ̀ wọn jẹ́ 6 sílẹ̀ kí o wo àròpọ̀ olúkúlùkù wọn.
+- [ ] p10.s2 hint 2: Àwọn nọ́mbà méjèèjì ní àmì kan náà nítorí c jẹ́ positive.
+- [ ] p10.s3 prompt: Fi àwọn nọ́mbà méjì náà sí àwọn ibi tí ó ṣófo nínú brackets méjèèjì; kí ni o máa kọ sí bracket àkọ́kọ́?
+- [ ] p10.s3 correction for `factored=(x-5)(x+2)`: Tí o bá expand (x − 5)(x + 2), ṣé middle term máa fún wa +3x tàbí −3x?
+- [ ] p10.s3 hint 1: Expand brackets rẹ padà kí o wo middle term.
+- [ ] p10.s3 hint 2: Ṣé middle term tí o rí bá b mu?
+- [ ] p10.s4 prompt: Tí ìsọdipúpọ̀ bá jẹ́ zero, kí ni ó gbọ́dọ̀ jẹ́ òótọ́ nípa ọ̀kan nínú brackets náà?
+- [ ] p10.s4 correction for `both brackets must equal 1`: Tí ìsọdipúpọ̀ bá jẹ́ 1, kìí ṣe zero; kí ni nọ́mbà méjì tí ìsọdipúpọ̀ wọn jẹ́ zero?
+- [ ] p10.s4 hint 1: Ronú nípa 0 × 5 àti 7 × 0; kí ni ó wà ní ìbámu láàrin wọn?
+- [ ] p10.s5 prompt: Wo parabola náà: níbo ni ó ti kan x-axis, ṣé ó bá àwọn gbòǹgbò rẹ mu?
+- [ ] p10.s5 hint 1: Wo ibi tí ìlà náà ti kan x-axis lórí graph.
 - [ ] transfer check: Yànjú x² − 7x + 12 = 0 láìsí ìrànlọ́wọ́.
 
 ## physics-friction.json
