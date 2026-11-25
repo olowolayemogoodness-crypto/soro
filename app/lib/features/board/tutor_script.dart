@@ -2,6 +2,7 @@ import 'dart:async';
 
 import '../../l10n/soro_strings.dart';
 import 'board_strings.dart';
+import 'pen_timing.dart';
 import 'tutor_pen_writer.dart' show PenMarkKind;
 
 /// Author of a notebook line (`tutor` in crimson, `student` in royal blue #1B56D0).
@@ -33,7 +34,15 @@ class TutorLinePayload {
     this.isUnaided = false,
     this.caption,
     this.captionYo,
+    this.audioMs,
+    this.silent = false,
   });
+
+  /// Spoken length of this line in ms when the voice audio is known.
+  final int? audioMs;
+
+  /// A working line written without being said aloud (solve mode).
+  final bool silent;
 
   /// Dock caption for this line when it differs from the written text.
   final String? caption;
@@ -565,14 +574,15 @@ class DemoQuadraticTutorScript implements TutorScript {
             textYo: '',
             caption: caption,
             captionYo: caption,
+            silent: true,
             isAnalogy: analogy,
           ),
         ),
       );
-      await _waitSolve();
+      await _waitSolve(text);
       if (mark != null) {
         _emit(TutorScriptEvent(penMark: mark));
-        await _waitSolve();
+        await _waitSolve('', extra: 0.6);
       }
     }
 
@@ -627,10 +637,19 @@ class DemoQuadraticTutorScript implements TutorScript {
     );
   }
 
-  Future<void> _waitSolve() async {
-    if (stepDelay > Duration.zero) {
-      await Future<void>.delayed(stepDelay * 6);
-    }
+  /// Waits for the pen to finish [text] (silent speed) plus a short beat.
+  /// Scaled by [stepDelay] so tests with a tiny delay stay fast.
+  Future<void> _waitSolve(String text, {double extra = 0.4}) async {
+    if (stepDelay <= Duration.zero) return;
+    final double scale = stepDelay.inMilliseconds / 280.0;
+    final double seconds =
+        (text.isEmpty
+            ? 0.0
+            : penDurationFor(text, spoken: false).inMilliseconds / 1000.0) +
+        extra;
+    await Future<void>.delayed(
+      Duration(milliseconds: (seconds * 1000 * scale).round()),
+    );
   }
 
   @override

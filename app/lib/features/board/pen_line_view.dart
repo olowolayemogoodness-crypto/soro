@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'pen_timing.dart';
 import 'tutor_pen_writer.dart';
 
 /// One line of tutor handwriting on the notebook page: written stroke by
@@ -12,6 +13,9 @@ class PenLineView extends StatefulWidget {
     required this.color,
     required this.rule,
     this.marks = const <PenMarkKind>[],
+    this.audioMs,
+    this.spoken = true,
+    this.onStart,
     this.blankBuilder,
     this.pen = const HandwritingPen(),
   });
@@ -20,6 +24,16 @@ class PenLineView extends StatefulWidget {
   final Color color;
   final double rule;
   final List<PenMarkKind> marks;
+
+  /// Real length of the spoken audio for this line, when known.
+  final int? audioMs;
+
+  /// False for working lines the tutor writes without saying them.
+  final bool spoken;
+
+  /// Called the moment the pen touches down: start audio and caption here so
+  /// the voice and the writing begin together.
+  final VoidCallback? onStart;
   final Widget Function(int index, Rect rect)? blankBuilder;
   final TutorPenWriter pen;
 
@@ -39,6 +53,11 @@ class _PenLineViewState extends State<PenLineView> {
         widget.text,
         maxWidth: width,
         rule: widget.rule,
+        duration: penDurationFor(
+          widget.text,
+          audioMs: widget.audioMs,
+          spoken: widget.spoken,
+        ),
       );
       _markLayouts.clear();
     }
@@ -61,7 +80,11 @@ class _PenLineViewState extends State<PenLineView> {
                 children: [
                   Positioned.fill(
                     child: IgnorePointer(
-                      child: PenInk(layout: layout, color: widget.color),
+                      child: PenInk(
+                        layout: layout,
+                        color: widget.color,
+                        onStart: widget.onStart,
+                      ),
                     ),
                   ),
                   for (final PenMarkKind kind in widget.marks)

@@ -45,8 +45,12 @@ class _NotebookEntry {
     this.isUnaided = false,
     this.isCorrectStudentStep = false,
     this.inputMethod,
+    this.audioMs,
+    this.silent = false,
   });
 
+  final int? audioMs;
+  final bool silent;
   final List<PenMarkKind> marks = <PenMarkKind>[];
   final ScriptAuthor author;
   final String text;
@@ -209,6 +213,8 @@ class _BoardScreenState extends State<BoardScreen> {
             isCorrection: line.isCorrection,
             isPraise: line.isPraise,
             isUnaided: line.isUnaided,
+            audioMs: line.audioMs,
+            silent: line.silent,
           ),
         );
         if (!line.isAnalogy) {
@@ -1230,6 +1236,8 @@ class _BoardScreenState extends State<BoardScreen> {
               color: SoroTokens.crimson,
               rule: ruleSpacing,
               marks: List<PenMarkKind>.of(entry.marks),
+              audioMs: entry.audioMs,
+              spoken: !entry.silent,
             ),
           ),
           if (lang == SoroLanguage.yo &&
@@ -1286,6 +1294,7 @@ class _BoardScreenState extends State<BoardScreen> {
               text: row.templateText,
               color: SoroTokens.crimson,
               rule: ruleSpacing,
+              spoken: false,
               blankBuilder: (int i, Rect rect) {
                 if (i >= row.blanks.length) return const SizedBox.shrink();
                 final BlankSpec blank = row.blanks[i];

@@ -60,11 +60,14 @@ class PenLayout {
 /// Anything that can put tutor ink on the page. The scripted tutor drives it
 /// today; a live worker's `write_step` messages can drive the same calls.
 abstract interface class TutorPenWriter {
-  /// Lays out [text] as handwriting on ruled rows [rule] pixels tall.
+  /// Lays out [text] as handwriting on ruled rows [rule] pixels tall, spread
+  /// over [duration] so the pen finishes exactly when the voice (or the
+  /// planned time) does.
   PenLayout writeText(
     String text, {
     required double maxWidth,
     required double rule,
+    required Duration duration,
   });
 
   /// Lays out a hand-drawn [kind] mark for an already written [line].
@@ -74,9 +77,8 @@ abstract interface class TutorPenWriter {
 /// Default pen: single-line stroke font with a natural hand - gentle slant,
 /// baseline wobble, size and spacing jitter, pressure-shaped width.
 class HandwritingPen implements TutorPenWriter {
-  const HandwritingPen({this.charsPerSecond = 34, this.slantDegrees = 8});
+  const HandwritingPen({this.slantDegrees = 8});
 
-  final double charsPerSecond;
   final double slantDegrees;
 
   static const double _blankUnits = 20;
@@ -86,6 +88,7 @@ class HandwritingPen implements TutorPenWriter {
     String text, {
     required double maxWidth,
     required double rule,
+    required Duration duration,
   }) {
     final double s = rule / 17;
     final double slant = math.tan(slantDegrees * math.pi / 180);
@@ -228,8 +231,7 @@ class HandwritingPen implements TutorPenWriter {
     }
 
     // Timeline: each stroke costs its length plus a pen-lift, words a pause.
-    final int written = clusters.where((PenCluster c) => c.base != ' ').length;
-    final double seconds = (written / charsPerSecond).clamp(0.45, 2.4);
+    final double seconds = duration.inMilliseconds / 1000.0;
     double totalCost = 0;
     final List<double> costs = <double>[];
     for (int i = 0; i < strokes.length; i++) {
@@ -537,11 +539,13 @@ class PenInk extends StatefulWidget {
     required this.layout,
     required this.color,
     this.onDone,
+    this.onStart,
   });
 
   final PenLayout layout;
   final Color color;
   final VoidCallback? onDone;
+  final VoidCallback? onStart;
 
   @override
   State<PenInk> createState() => _PenInkState();
@@ -559,6 +563,7 @@ class _PenInkState extends State<PenInk> with SingleTickerProviderStateMixin {
     super.didChangeDependencies();
     if (_started) return;
     _started = true;
+    widget.onStart?.call();
     if (MediaQuery.maybeDisableAnimationsOf(context) ?? false) {
       _c.value = 1;
       widget.onDone?.call();
