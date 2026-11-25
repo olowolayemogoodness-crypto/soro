@@ -6,7 +6,7 @@ import 'package:app/main.dart';
 
 void main() {
   testWidgets(
-    'Soro home shell renders ask-anything composer, switches language to Yoruba, cycles network status, opens board on ask, and keeps My progress hidden by default',
+    'Soro home shell renders ask-anything composer, switches language to Yoruba, cycles network status, opens board on ask, and opens My progress in one tap',
     (WidgetTester tester) async {
       // Test at Android tablet landscape resolution (1280x800)
       tester.view.physicalSize = const Size(1280, 800);
@@ -25,17 +25,12 @@ void main() {
       expect(find.byKey(const Key('topic-chip-friction')), findsOneWidget);
       expect(find.byKey(const Key('topic-chip-pdf')), findsOneWidget);
 
-      // 2. Statistics / My progress entry is hidden by default on the home screen
-      expect(find.byKey(const Key('my-progress-entry-button')), findsNothing);
-
-      // Reveal hidden My progress entry via subtle more-options toggle and navigate
-      await tester.tap(find.byKey(const Key('more-options-toggle')));
-      await tester.pumpAndSettle();
+      // 2. One tap on "My progress" opens the dashboard (no statistics on home)
       expect(find.byKey(const Key('my-progress-entry-button')), findsOneWidget);
-
       await tester.tap(find.byKey(const Key('my-progress-entry-button')));
       await tester.pumpAndSettle();
-      expect(find.byKey(const Key('progress-placeholder-card')), findsOneWidget);
+      expect(find.byKey(const Key('progress-screen')), findsOneWidget);
+      expect(find.text('My progress'), findsOneWidget);
 
       // Return to home chat
       await tester.tap(find.byKey(const Key('progress-back-button')));

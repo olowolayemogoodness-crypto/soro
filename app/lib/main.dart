@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 
+import 'features/progress/progress_screen.dart';
+import 'features/progress/progress_strings.dart';
 import 'l10n/soro_strings.dart';
 import 'models/chat_models.dart';
 import 'screens/home_screen.dart';
@@ -167,12 +169,13 @@ class _SoroAppState extends State<SoroApp> {
           onBackToChat: _handleBackToHome,
         );
       case SoroRoute.progress:
-        return MyProgressPlaceholderScreen(
-          language: _language,
-          networkStatus: _networkStatus,
-          onLanguageChanged: _handleLanguageChanged,
-          onCycleNetworkStatus: _handleCycleNetworkStatus,
-          onBackToChat: _handleBackToHome,
+        return ProgressScreen(
+          initialLang:
+              _language == SoroLanguage.yo ? ProgressLang.yo : ProgressLang.en,
+          onLangChanged: (ProgressLang l) => _handleLanguageChanged(
+            l == ProgressLang.yo ? SoroLanguage.yo : SoroLanguage.en,
+          ),
+          onBack: _handleBackToHome,
         );
     }
   }

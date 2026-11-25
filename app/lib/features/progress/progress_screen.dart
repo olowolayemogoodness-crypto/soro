@@ -1,32 +1,32 @@
 import 'package:flutter/material.dart';
 
+import '../../theme/soro_theme.dart';
 import 'progress_data.dart';
 import 'progress_strings.dart';
 
 /// Route path for the "My progress" page. Register it in the app router.
 const String progressRoutePath = '/progress';
 
-// Temporary tokens (brand colours from the design board). Swap for the app
-// theme tokens once the shell lands.
+// Colours and fonts come from the app theme tokens.
 class _T {
-  static const crimson = Color(0xFFC31E49);
-  static const crimsonDeep = Color(0xFF9E1539);
-  static const blue = Color(0xFF1B56D0);
-  static const orange = Color(0xFFF38F1D);
-  static const ink = Color(0xFF292927);
-  static const ink2 = Color(0xFF565044);
-  static const cream = Color(0xFFF6F1DE);
-  static const sand = Color(0xFFEAE3CA);
-  static const line = Color(0xFFDDD4BA);
-  static const paper = Colors.white;
-  static const success = Color(0xFF1D7A48);
-  static const mint = Color(0xFFCBEAD4);
-  static const peach = Color(0xFFFFE0BE);
-  static const sticky = Color(0xFFFFE580);
-  static const lilac = Color(0xFFE5D4F3);
+  static const crimson = SoroTokens.crimson;
+  static const crimsonDeep = SoroTokens.crimsonDeep;
+  static const blue = SoroTokens.studentBlue;
+  static const orange = SoroTokens.orange;
+  static const ink = SoroTokens.ink;
+  static const ink2 = SoroTokens.ink2;
+  static const cream = SoroTokens.cream;
+  static const sand = SoroTokens.sand;
+  static const line = SoroTokens.line;
+  static const paper = SoroTokens.paper;
+  static const success = SoroTokens.success;
+  static const mint = SoroTokens.mint;
+  static const peach = SoroTokens.peach;
+  static const sticky = SoroTokens.sticky;
+  static const lilac = SoroTokens.lilac;
 
-  static const serif = 'Source Serif 4';
-  static const sans = 'Inter';
+  static const serif = SoroTokens.fontSerif;
+  static const sans = SoroTokens.fontSans;
 }
 
 enum ProgressView { student, parent }
@@ -41,6 +41,7 @@ class ProgressScreen extends StatefulWidget {
     this.initialLang = ProgressLang.en,
     this.initialView = ProgressView.student,
     this.onBack,
+    this.onLangChanged,
   });
 
   /// Defaults to seeded sample data until `GET /progress` is wired in.
@@ -48,6 +49,9 @@ class ProgressScreen extends StatefulWidget {
   final ProgressLang initialLang;
   final ProgressView initialView;
   final VoidCallback? onBack;
+
+  /// Lets the app keep its language in step with the selector on this page.
+  final ValueChanged<ProgressLang>? onLangChanged;
 
   @override
   State<ProgressScreen> createState() => _ProgressScreenState();
@@ -69,8 +73,10 @@ class _ProgressScreenState extends State<ProgressScreen> {
         textTheme: Theme.of(context).textTheme.apply(fontFamily: _T.sans, bodyColor: _T.ink, displayColor: _T.ink),
       ),
       child: Scaffold(
+        key: const Key('progress-screen'),
         backgroundColor: _T.cream,
-        body: SafeArea(
+        body: SoroDottedPaperBackground(
+          child: SafeArea(
           child: LayoutBuilder(builder: (context, c) {
             final wide = c.maxWidth >= 860;
             final pad = c.maxWidth < 500 ? 16.0 : 28.0;
@@ -109,6 +115,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
               ),
             );
           }),
+          ),
         ),
       ),
     );
@@ -118,6 +125,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
 
   Widget _header(bool narrow) {
     final back = IconButton(
+      key: const Key('progress-back-button'),
       tooltip: _t('back'),
       onPressed: widget.onBack ?? () => Navigator.maybePop(context),
       style: IconButton.styleFrom(minimumSize: const Size(48, 48), backgroundColor: _T.paper, side: const BorderSide(color: _T.line)),
@@ -138,7 +146,10 @@ class _ProgressScreenState extends State<ProgressScreen> {
         compact: narrow,
       ),
     );
-    final lang = _LangMenu(lang: _lang, label: _t('language'), onChanged: (l) => setState(() => _lang = l));
+    final lang = _LangMenu(lang: _lang, label: _t('language'), onChanged: (l) {
+      setState(() => _lang = l);
+      widget.onLangChanged?.call(l);
+    });
 
     if (narrow) {
       return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
