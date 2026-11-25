@@ -192,15 +192,17 @@ void main() {
       );
       await stylus.down(padCenter);
       await tester.pump();
-      // Concurrent palm touch while stylus is down is rejected
+      // Palm touch around stylus contact is rejected
       final TestGesture palmTouch = await tester.createGesture(
         kind: PointerDeviceKind.touch,
       );
+      await stylus.moveBy(const Offset(35, 10));
+      await stylus.up();
+      await tester.pump();
+      // Palm landing right after the stylus lifts is still rejected
       await palmTouch.down(padCenter + const Offset(10, 10));
       await tester.pump();
       await palmTouch.up();
-      await stylus.moveBy(const Offset(35, 10));
-      await stylus.up();
       await tester.pump(const Duration(milliseconds: 100));
       expect(find.byKey(const Key('palm-rejected-notice')), findsOneWidget);
 
@@ -237,6 +239,9 @@ void main() {
       );
 
       // After 10 seconds idle with no touch, pen or voice, the board tucks away and shows 'Working' card
+      FocusManager.instance.primaryFocus?.unfocus();
+      await tester.pump(const Duration(milliseconds: 100));
+      await tester.pump(const Duration(seconds: 11));
       await tester.pump(const Duration(seconds: 11));
       expect(find.byKey(const Key('working-reopen-card')), findsOneWidget);
 
