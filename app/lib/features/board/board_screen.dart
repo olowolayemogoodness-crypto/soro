@@ -128,7 +128,8 @@ class _BoardScreenState extends State<BoardScreen> {
   @override
   void initState() {
     super.initState();
-    _script = widget.tutorScript ??
+    _script =
+        widget.tutorScript ??
         BrainTutorScript(
           client: TutorClient(),
           question: widget.activeQuestion.trim().isEmpty

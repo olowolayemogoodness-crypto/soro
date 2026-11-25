@@ -5,8 +5,10 @@ import 'package:http/http.dart' as http;
 /// Base URL of the tutor API. Override with `--dart-define=SORO_API=http://host:port`.
 /// The default is the loopback address, reachable on a tablet through
 /// `adb reverse tcp:8000 tcp:8000`.
-const String kSoroApiBase =
-    String.fromEnvironment('SORO_API', defaultValue: 'http://127.0.0.1:8000');
+const String kSoroApiBase = String.fromEnvironment(
+  'SORO_API',
+  defaultValue: 'http://127.0.0.1:8000',
+);
 
 /// Per-request timeout; slower than this and the app falls back to the script.
 const Duration kTutorTimeout = Duration(seconds: 6);
@@ -23,7 +25,18 @@ class TutorClientException implements Exception {
 
 /// One board operation from `POST /tutor/turn`: `write`, `blank` or `mark`.
 class BoardOp {
-  const BoardOp({required this.op, this.text = '', this.kind, this.target});
+  const BoardOp({
+    required this.op,
+    this.text = '',
+    this.kind,
+    this.target,
+    this.audioUrl,
+    this.audioMs,
+  });
+
+  /// Optional voice clip for this step; the pen writes for [audioMs].
+  final String? audioUrl;
+  final int? audioMs;
 
   final String op;
   final String text;
@@ -40,7 +53,12 @@ class TutorTurnResponse {
     required this.analogy,
     required this.done,
     required this.source,
+    this.audioUrl,
+    this.audioMs,
   });
+
+  final String? audioUrl;
+  final int? audioMs;
 
   final String sessionId;
   final String stepId;
@@ -77,6 +95,10 @@ class TutorTurnResponse {
           text: raw['text'] is String ? raw['text'] as String : '',
           kind: raw['kind'] is String ? raw['kind'] as String : null,
           target: raw['target'] is String ? raw['target'] as String : null,
+          audioUrl: raw['audio_url'] is String
+              ? raw['audio_url'] as String
+              : null,
+          audioMs: raw['audio_ms'] is int ? raw['audio_ms'] as int : null,
         ),
       );
     }
@@ -90,6 +112,10 @@ class TutorTurnResponse {
       analogy: decoded['analogy'] is String ? decoded['analogy'] as String : '',
       done: decoded['done'] == true,
       source: decoded['source'] is String ? decoded['source'] as String : '',
+      audioUrl: decoded['audio_url'] is String
+          ? decoded['audio_url'] as String
+          : null,
+      audioMs: decoded['audio_ms'] is int ? decoded['audio_ms'] as int : null,
     );
   }
 }
@@ -100,10 +126,10 @@ class TutorClient {
     http.Client? httpClient,
     String baseUrl = kSoroApiBase,
     this.timeout = kTutorTimeout,
-  })  : _http = httpClient ?? http.Client(),
-        _base = baseUrl.endsWith('/')
-            ? baseUrl.substring(0, baseUrl.length - 1)
-            : baseUrl;
+  }) : _http = httpClient ?? http.Client(),
+       _base = baseUrl.endsWith('/')
+           ? baseUrl.substring(0, baseUrl.length - 1)
+           : baseUrl;
 
   final http.Client _http;
   final String _base;
@@ -129,9 +155,7 @@ class TutorClient {
       final http.Response res = await _http
           .post(
             Uri.parse('$_base/tutor/turn'),
-            headers: const <String, String>{
-              'Content-Type': 'application/json',
-            },
+            headers: const <String, String>{'Content-Type': 'application/json'},
             body: jsonEncode(payload),
           )
           .timeout(timeout);
@@ -161,3 +185,15 @@ final RegExp _solveIntent = RegExp(
 /// True when the student asked Soro to solve it rather than to guide them.
 /// "How do I solve ..." is a question for guidance and stays in guide mode.
 bool wantsSolve(String text) => _solveIntent.hasMatch(text);
+
+/// How long the pen should take to write [text]: the voice clip length when
+/// known, else about 2.6 words per second so writing keeps pace with speech.
+Duration writeDurationFor(String text, {int? audioMs}) {
+  if (audioMs != null && audioMs > 0) return Duration(milliseconds: audioMs);
+  final int words = text
+      .trim()
+      .split(RegExp(r'\s+'))
+      .where((String w) => w.isNotEmpty)
+      .length;
+  return Duration(milliseconds: (words / 2.6 * 1000).round());
+}

@@ -92,9 +92,7 @@ class _VoiceDockState extends State<VoiceDock> {
         ),
         decoration: const BoxDecoration(
           color: Color(0xFFF3F7FC),
-          border: Border(
-            top: BorderSide(color: Color(0xFFC4D6EC), width: 1.5),
-          ),
+          border: Border(top: BorderSide(color: Color(0xFFC4D6EC), width: 1.5)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -126,8 +124,9 @@ class _VoiceDockState extends State<VoiceDock> {
                               ),
                               decoration: BoxDecoration(
                                 color: turnBg,
-                                borderRadius:
-                                    BorderRadius.circular(SoroTokens.rPill),
+                                borderRadius: BorderRadius.circular(
+                                  SoroTokens.rPill,
+                                ),
                                 border: Border.all(
                                   color: SoroTokens.ink,
                                   width: 1.4,
@@ -140,8 +139,8 @@ class _VoiceDockState extends State<VoiceDock> {
                                     _isListening
                                         ? Icons.graphic_eq_rounded
                                         : (_isSpeaking
-                                            ? Icons.record_voice_over_rounded
-                                            : Icons.edit_note_rounded),
+                                              ? Icons.record_voice_over_rounded
+                                              : Icons.edit_note_rounded),
                                     size: 15,
                                     color: SoroTokens.ink,
                                   ),
@@ -169,8 +168,9 @@ class _VoiceDockState extends State<VoiceDock> {
                             ),
                             decoration: BoxDecoration(
                               color: SoroTokens.sticky,
-                              borderRadius:
-                                  BorderRadius.circular(SoroTokens.rPill),
+                              borderRadius: BorderRadius.circular(
+                                SoroTokens.rPill,
+                              ),
                               border: Border.all(color: SoroTokens.control),
                             ),
                             child: Text(
@@ -279,10 +279,7 @@ class _VoiceDockState extends State<VoiceDock> {
         onLongPressStart: (_) => widget.onListeningChanged(true),
         onLongPressEnd: (_) => widget.onListeningChanged(false),
         child: ConstrainedBox(
-          constraints: const BoxConstraints(
-            minWidth: 64,
-            minHeight: 64,
-          ),
+          constraints: const BoxConstraints(minWidth: 64, minHeight: 64),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -293,7 +290,9 @@ class _VoiceDockState extends State<VoiceDock> {
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: _isListening ? SoroTokens.crimsonDeep : SoroTokens.crimson,
+                  color: _isListening
+                      ? SoroTokens.crimsonDeep
+                      : SoroTokens.crimson,
                   border: Border.all(
                     color: _isListening ? SoroTokens.sun : SoroTokens.paper,
                     width: _isListening ? 3.0 : 2.0,
@@ -309,10 +308,7 @@ class _VoiceDockState extends State<VoiceDock> {
                   ],
                 ),
                 child: ExcludeSemantics(
-                  child: SvgPicture.asset(
-                    _mascotAsset(),
-                    fit: BoxFit.contain,
-                  ),
+                  child: SvgPicture.asset(_mascotAsset(), fit: BoxFit.contain),
                 ),
               ),
               const SizedBox(height: 3),
@@ -323,7 +319,9 @@ class _VoiceDockState extends State<VoiceDock> {
                 style: SoroTokens.sans(
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
-                  color: _isListening ? SoroTokens.crimsonDeep : SoroTokens.ink2,
+                  color: _isListening
+                      ? SoroTokens.crimsonDeep
+                      : SoroTokens.ink2,
                 ),
               ),
             ],
@@ -363,10 +361,7 @@ class _BilingualTermChip extends StatelessWidget {
             constraints: const BoxConstraints(
               minHeight: SoroTokens.minTapTarget,
             ),
-            padding: const EdgeInsets.symmetric(
-              horizontal: 12,
-              vertical: 6,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(SoroTokens.rSm),
               border: Border.all(
@@ -378,7 +373,9 @@ class _BilingualTermChip extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
-                  isPlaying ? Icons.volume_up_rounded : Icons.play_arrow_rounded,
+                  isPlaying
+                      ? Icons.volume_up_rounded
+                      : Icons.play_arrow_rounded,
                   size: 16,
                   color: SoroTokens.crimsonDeep,
                 ),

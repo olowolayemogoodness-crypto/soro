@@ -17,17 +17,17 @@ const String _guideBody = '''
  "analogy":"A missing tile","done":false,"source":"gemini"}''';
 
 TutorClient _client(MockClientHandler h, {Duration? timeout}) => TutorClient(
-      httpClient: MockClient(h),
-      baseUrl: 'http://test',
-      timeout: timeout ?? const Duration(milliseconds: 100),
-    );
+  httpClient: MockClient(h),
+  baseUrl: 'http://test',
+  timeout: timeout ?? const Duration(milliseconds: 100),
+);
 
 BrainTutorScript _script(TutorClient c, String q) => BrainTutorScript(
-      client: c,
-      question: q,
-      language: SoroLanguage.en,
-      fallback: DemoQuadraticTutorScript(stepDelay: Duration.zero),
-    );
+  client: c,
+  question: q,
+  language: SoroLanguage.en,
+  fallback: DemoQuadraticTutorScript(stepDelay: Duration.zero),
+);
 
 Future<List<TutorScriptEvent>> _collect(BrainTutorScript s) async {
   final List<TutorScriptEvent> out = <TutorScriptEvent>[];
@@ -38,19 +38,28 @@ Future<List<TutorScriptEvent>> _collect(BrainTutorScript s) async {
 }
 
 void main() {
+  audioTests();
   test('parses a valid turn reply', () {
     final TutorTurnResponse r = TutorTurnResponse.parse(_guideBody);
     expect(r.stepId, 's2');
     expect(r.say, 'What do we add?');
-    expect(r.board.map((BoardOp o) => o.op), <String>['write', 'blank', 'mark']);
+    expect(r.board.map((BoardOp o) => o.op), <String>[
+      'write',
+      'blank',
+      'mark',
+    ]);
     expect(r.source, 'gemini');
   });
 
   test('rejects invalid JSON and wrong shapes', () {
-    expect(() => TutorTurnResponse.parse('nope'),
-        throwsA(isA<TutorClientException>()));
-    expect(() => TutorTurnResponse.parse('{"say":1}'),
-        throwsA(isA<TutorClientException>()));
+    expect(
+      () => TutorTurnResponse.parse('nope'),
+      throwsA(isA<TutorClientException>()),
+    );
+    expect(
+      () => TutorTurnResponse.parse('{"say":1}'),
+      throwsA(isA<TutorClientException>()),
+    );
   });
 
   test('wantsSolve routes solve intent but not a guidance question', () {
@@ -98,26 +107,34 @@ void main() {
     expect(mode, 'solve');
   });
 
-  test('timeout falls back to the scripted tutor with the offline flag',
-      () async {
-    final BrainTutorScript s = _script(
-      _client((http.Request req) => Completer<http.Response>().future,
-          timeout: const Duration(milliseconds: 20)),
-      'x^2 - 5x + 6 = 0',
-    );
-    final List<TutorScriptEvent> ev = await _collect(s);
-    expect(ev.any((e) => e.offline == true), isTrue);
-    expect(ev.any((e) => e.blankRow?.stepId == QuadraticStepIds.coefficients),
-        isTrue);
-  });
+  test(
+    'timeout falls back to the scripted tutor with the offline flag',
+    () async {
+      final BrainTutorScript s = _script(
+        _client(
+          (http.Request req) => Completer<http.Response>().future,
+          timeout: const Duration(milliseconds: 20),
+        ),
+        'x^2 - 5x + 6 = 0',
+      );
+      final List<TutorScriptEvent> ev = await _collect(s);
+      expect(ev.any((e) => e.offline == true), isTrue);
+      expect(
+        ev.any((e) => e.blankRow?.stepId == QuadraticStepIds.coefficients),
+        isTrue,
+      );
+    },
+  );
 
   test('HTTP error and invalid JSON also fall back', () async {
     for (final http.Response r in <http.Response>[
       http.Response('boom', 500),
       http.Response('not json', 200),
     ]) {
-      final BrainTutorScript s =
-          _script(_client((http.Request req) async => r), 'x');
+      final BrainTutorScript s = _script(
+        _client((http.Request req) async => r),
+        'x',
+      );
       final List<TutorScriptEvent> ev = await _collect(s);
       expect(ev.any((e) => e.offline == true), isTrue);
     }
@@ -133,10 +150,32 @@ void main() {
       'x^2 + 2x = 1',
     );
     await _collect(s);
-    await s.submitBlankAnswers(stepId: 's2', values: {'b1-1': '1', 'b1-2': '1'});
+    await s.submitBlankAnswers(
+      stepId: 's2',
+      values: {'b1-1': '1', 'b1-2': '1'},
+    );
     expect(bodies, hasLength(2));
     expect(bodies[1]['text'], '1, 1');
     expect(bodies[1]['step_id'], 's2');
     expect(bodies[1].containsKey('problem'), isFalse);
+  });
+}
+
+void audioTests() {
+  test('audio fields parse and drive write duration', () {
+    final TutorTurnResponse r = TutorTurnResponse.parse(
+      '{"say":"hi","audio_url":"http://a/x.mp3","audio_ms":2000,'
+      '"board":[{"op":"write","text":"a b c","audio_ms":1500}]}',
+    );
+    expect(r.audioMs, 2000);
+    expect(r.board.first.audioMs, 1500);
+    expect(
+      writeDurationFor('x', audioMs: 1500),
+      const Duration(milliseconds: 1500),
+    );
+    expect(
+      writeDurationFor('one two three four five'),
+      const Duration(milliseconds: 1923),
+    );
   });
 }

@@ -14,9 +14,8 @@ class BrainTutorScript implements TutorScript {
     required this.language,
     TutorScript? fallback,
     String? sessionId,
-  })  : fallback = fallback ?? DemoQuadraticTutorScript(),
-        sessionId =
-            sessionId ?? 's${DateTime.now().millisecondsSinceEpoch}';
+  }) : fallback = fallback ?? DemoQuadraticTutorScript(),
+       sessionId = sessionId ?? 's${DateTime.now().millisecondsSinceEpoch}';
 
   final TutorClient client;
   final String question;
@@ -43,10 +42,10 @@ class BrainTutorScript implements TutorScript {
 
   @override
   Future<void> start() => _turn(
-        text: question,
-        mode: wantsSolve(question) ? TutorMode.solve : TutorMode.guide,
-        problem: question,
-      );
+    text: question,
+    mode: wantsSolve(question) ? TutorMode.solve : TutorMode.guide,
+    problem: question,
+  );
 
   /// Asks the brain to write out the full worked solution (Show me how).
   Future<void> requestSolve() =>
@@ -140,7 +139,15 @@ class BrainTutorScript implements TutorScript {
         case 'write':
           events.add(
             TutorScriptEvent(
-              tutorLine: TutorLinePayload(text: op.text, textYo: ''),
+              tutorLine: TutorLinePayload(
+                text: op.text,
+                textYo: '',
+                writeDuration: writeDurationFor(
+                  op.text,
+                  audioMs: op.audioMs ?? res.audioMs,
+                ),
+                audioUrl: op.audioUrl ?? res.audioUrl,
+              ),
             ),
           );
         case 'blank':
