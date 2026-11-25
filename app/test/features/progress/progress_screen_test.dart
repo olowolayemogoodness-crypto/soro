@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:soro/features/progress/progress_data.dart';
-import 'package:soro/features/progress/progress_screen.dart';
-import 'package:soro/features/progress/progress_strings.dart';
+import 'package:app/features/progress/progress_data.dart';
+import 'package:app/features/progress/progress_screen.dart';
+import 'package:app/features/progress/progress_strings.dart';
 
 void main() {
   group('currentStreak', () {

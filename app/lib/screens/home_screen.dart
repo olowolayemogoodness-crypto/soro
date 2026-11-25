@@ -71,7 +71,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   bool _isMicListening = false;
   bool _isStylusPadOpen = false;
-  bool _isMyProgressEntryRevealed = false;
 
   final List<StylusStroke> _strokes = <StylusStroke>[];
   StylusStroke? _activeStroke;
@@ -320,7 +319,7 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               _buildNetworkStatusPill(lang),
               _buildLanguageSelector(lang),
-              _buildHiddenMyProgressEntry(lang, reducedMotion),
+              _buildMyProgressEntry(lang, reducedMotion),
             ],
           ),
         ],
@@ -437,78 +436,40 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  /// Keeps statistics hidden on the home screen by default, providing a small
-  /// subtle disclosure toggle (`⋯`) that reveals the "My progress" entry when tapped.
-  Widget _buildHiddenMyProgressEntry(
+  /// One-tap entry to the "My progress" page. Only the button lives here; no
+  /// statistics are shown on the home screen.
+  Widget _buildMyProgressEntry(
     SoroLanguage lang,
     bool reducedMotion,
   ) {
-    return Wrap(
-      spacing: SoroTokens.s8,
-      runSpacing: SoroTokens.s8,
-      crossAxisAlignment: WrapCrossAlignment.center,
-      children: [
-        SizedBox(
-          height: SoroTokens.minTapTarget,
-          width: SoroTokens.minTapTarget,
-          child: IconButton(
-            key: const Key('more-options-toggle'),
-            tooltip: SoroStrings.tr(lang, 'moreMenuLabel'),
-            onPressed: () {
-              setState(() {
-                _isMyProgressEntryRevealed = !_isMyProgressEntryRevealed;
-              });
-            },
-            style: IconButton.styleFrom(
-              backgroundColor: _isMyProgressEntryRevealed
-                  ? SoroTokens.sand
-                  : SoroTokens.paper,
-              foregroundColor: SoroTokens.ink,
-              side: const BorderSide(color: SoroTokens.control, width: 1.5),
-            ),
-            icon: Icon(
-              _isMyProgressEntryRevealed
-                  ? Icons.close_rounded
-                  : Icons.more_horiz_rounded,
-              size: 20,
-            ),
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: SoroTokens.minTapTarget),
+      child: OutlinedButton.icon(
+        key: const Key('my-progress-entry-button'),
+        onPressed: widget.onOpenMyProgress,
+        style: OutlinedButton.styleFrom(
+          backgroundColor: SoroTokens.paper,
+          foregroundColor: SoroTokens.ink,
+          padding: const EdgeInsets.symmetric(horizontal: SoroTokens.s16),
+          side: const BorderSide(color: SoroTokens.crimson, width: 1.5),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(SoroTokens.rPill),
           ),
         ),
-        if (_isMyProgressEntryRevealed)
-          ConstrainedBox(
-            constraints: const BoxConstraints(
-              minHeight: SoroTokens.minTapTarget,
-            ),
-            child: OutlinedButton.icon(
-              key: const Key('my-progress-entry-button'),
-              onPressed: widget.onOpenMyProgress,
-              style: OutlinedButton.styleFrom(
-                backgroundColor: SoroTokens.paper,
-                foregroundColor: SoroTokens.ink,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: SoroTokens.s16,
-                ),
-                side: const BorderSide(color: SoroTokens.crimson, width: 1.5),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(SoroTokens.rPill),
-                ),
-              ),
-              icon: const Icon(
-                Icons.auto_graph_rounded,
-                size: 18,
-                color: SoroTokens.crimson,
-              ),
-              label: SoroLocalizedText(
-                SoroStrings.tr(lang, 'myProgressEntry'),
-                language: lang,
-                style: SoroTokens.sans(
-                  fontSize: 13.5,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
+        icon: const Icon(
+          Icons.auto_graph_rounded,
+          size: 18,
+          color: SoroTokens.crimson,
+        ),
+        label: SoroLocalizedText(
+          SoroStrings.tr(lang, 'myProgressEntry'),
+          language: lang,
+          style: SoroTokens.sans(
+            fontSize: 13.5,
+            fontWeight: FontWeight.w600,
           ),
-      ],
+        ),
+      ),
     );
   }
 
