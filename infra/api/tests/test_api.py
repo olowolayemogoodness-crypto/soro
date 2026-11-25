@@ -1,4 +1,5 @@
 import json
+from datetime import date
 
 import jwt
 import pytest
@@ -65,3 +66,59 @@ def test_token_errors(monkeypatch):
     assert client.post("/session/token", json=BODY).status_code == 503
     monkeypatch.setenv("LIVEKIT_MODE", "bogus")
     assert client.get("/health").status_code == 500
+
+
+def test_streak_consecutive_days_and_unique_repeats():
+    dates = [date(2026, 11, 20), date(2026, 11, 21), date(2026, 11, 21), date(2026, 11, 22)]
+    assert main.streak_from_dates(dates, date(2026, 11, 22)) == {
+        "current": 3, "longest": 3, "last_active_date": "2026-11-22"
+    }
+
+
+def test_streak_gap_resets_current_but_preserves_longest():
+    dates = [date(2026, 11, 15), date(2026, 11, 16), date(2026, 11, 18), date(2026, 11, 19)]
+    assert main.streak_from_dates(dates, date(2026, 11, 19)) == {
+        "current": 2, "longest": 2, "last_active_date": "2026-11-19"
+    }
+    assert main.streak_from_dates(dates, date(2026, 11, 21))["current"] == 0
+
+
+def test_empty_streak():
+    assert main.streak_from_dates([], date(2026, 11, 22)) == {
+        "current": 0, "longest": 0, "last_active_date": None
+    }
+
+
+def test_progress_without_database_is_service_unavailable(monkeypatch):
+    monkeypatch.delenv("DATABASE_URL", raising=False)
+    response = client.get("/progress")
+    assert response.status_code == 503
+    assert response.json()["detail"] == "DATABASE_URL is not configured"
+
+
+def test_progress_response_groups_days_and_topics_and_keeps_check_results():
+    rows = [
+        {
+            "session_id": "s1", "activity_date": date(2026, 11, 22), "subject": "Mathematics",
+            "topic": "Quadratics", "lesson": "Factoring", "steps_done": 2,
+            "check_result": "passed", "attempts": 1,
+        },
+        {
+            "session_id": "s2", "activity_date": date(2026, 11, 22), "subject": "Mathematics",
+            "topic": "Quadratics", "lesson": "Roots", "steps_done": 1,
+            "check_result": "needs_practice", "attempts": 2,
+        },
+        {
+            "session_id": "s3", "activity_date": date(2026, 11, 20), "subject": "Physics",
+            "topic": "Friction", "lesson": "Forces", "steps_done": 3,
+            "check_result": "not_taken", "attempts": 0,
+        },
+    ]
+    progress = main.assemble_progress({"id": "demo-learner", "display_name": "Demo learner"}, rows, date(2026, 11, 22))
+    assert progress["learner"]["display_name"] == "Demo learner"
+    assert [day["date"] for day in progress["days"]] == ["2026-11-22", "2026-11-20"]
+    assert [session["unaided_check"]["result"] for session in progress["days"][0]["sessions"]] == ["passed", "needs_practice"]
+    assert progress["topics"] == [
+        {"subject": "Mathematics", "topic": "Quadratics", "attempts": 3, "passed": 1, "needs_practice": 1},
+        {"subject": "Physics", "topic": "Friction", "attempts": 0, "passed": 0, "needs_practice": 0},
+    ]

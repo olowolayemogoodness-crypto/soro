@@ -32,8 +32,12 @@ services:
   api:
     build: ./api
     env_file: .env
+    depends_on:
+      postgres:
+        condition: service_healthy
     environment:
       SORO_CONTENT_DIR: /content
+      DATABASE_URL: "postgresql://soro:${POSTGRES_PASSWORD}@postgres:5432/soro"
     volumes:
       - ../content:/content:ro
     ports:
