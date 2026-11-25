@@ -135,7 +135,7 @@ void main() {
         ),
         findsWidgets,
       );
-      expect(find.text('a = ▢, b = ▢, c = ▢'), findsOneWidget);
+      expect(find.byKey(const Key('active-blank-template')), findsOneWidget);
       expect(find.text('Your turn: say it or write it'), findsOneWidget);
 
       // Voice orb tap-and-hold shows 'Listening…'
@@ -152,7 +152,7 @@ void main() {
       await tester.enterText(find.byKey(const Key('blank-input-a')), '1');
       await tester.enterText(find.byKey(const Key('blank-input-b')), '-5');
       await tester.enterText(find.byKey(const Key('blank-input-c')), '6');
-      await tester.tap(find.byKey(const Key('submit-blank-step-button')));
+      await tester.tap(find.byKey(const Key('send-work-button')));
       await tester.pump(const Duration(milliseconds: 200));
 
       // Student line appears in blue and Step 2 factoring opens
@@ -161,7 +161,7 @@ void main() {
         find.textContaining('Which two numbers multiply to 6 and add to −5?'),
         findsWidgets,
       );
-      expect(find.text('(x − ▢)(x − ▢) = 0'), findsOneWidget);
+      expect(find.byKey(const Key('active-blank-template')), findsOneWidget);
 
       // Wrong first answer (sign error) gets targeted correction question, never the answer
       await tester.ensureVisible(
@@ -175,43 +175,47 @@ void main() {
         findsWidgets,
       );
 
-      // Correct factoring answer via stylus pad with palm rejection
-      await tester.ensureVisible(
-        find.byKey(const Key('board-toggle-stylus-button')),
-      );
-      await tester.pump(const Duration(milliseconds: 200));
-      await tester.tap(find.byKey(const Key('board-toggle-stylus-button')));
-      await tester.pump(const Duration(milliseconds: 200));
-      await tester.ensureVisible(
-        find.byKey(const Key('board-stylus-listener')),
-      );
-      await tester.pump(const Duration(milliseconds: 200));
-      final Offset padCenter =
-          tester.getCenter(find.byKey(const Key('board-stylus-listener')));
-      final TestGesture stylus = await tester.createGesture(
-        kind: PointerDeviceKind.stylus,
-      );
-      await stylus.down(padCenter);
+      // Free ink: a stylus stroke anywhere on the page leaves ink, and palm
+      // touch is ignored while the stylus is down and just after it lifts
+      final Offset pageCenter =
+          tester.getCenter(find.byKey(const Key('board-ink-input'))) +
+              const Offset(0, 120);
+      int inkCount() => (tester
+              .widget<CustomPaint>(find.byKey(const Key('board-ink-layer')))
+              .painter! as BoardInkPainter)
+          .strokes
+          .length;
+      expect(inkCount(), 0);
+      final TestGesture stylus =
+          await tester.createGesture(kind: PointerDeviceKind.stylus);
+      await stylus.down(pageCenter);
       await tester.pump();
-      // Palm touch around stylus contact is rejected
-      final TestGesture palmTouch = await tester.createGesture(
-        kind: PointerDeviceKind.touch,
-      );
+      final TestGesture palmTouch =
+          await tester.createGesture(kind: PointerDeviceKind.touch);
+      await palmTouch.down(pageCenter + const Offset(60, 20));
+      await palmTouch.moveBy(const Offset(40, 0));
+      await palmTouch.up();
+      await stylus.moveBy(const Offset(35, 10));
       await stylus.moveBy(const Offset(35, 10));
       await stylus.up();
       await tester.pump();
-      // Palm landing right after the stylus lifts is still rejected
-      await palmTouch.down(padCenter + const Offset(10, 10));
-      await tester.pump();
+      expect(inkCount(), 1);
+      await palmTouch.down(pageCenter + const Offset(10, 90));
+      await palmTouch.moveBy(const Offset(40, 0));
       await palmTouch.up();
       await tester.pump(const Duration(milliseconds: 100));
-      expect(find.byKey(const Key('palm-rejected-notice')), findsOneWidget);
+      expect(inkCount(), 1);
 
-      await tester.ensureVisible(
-        find.byKey(const Key('board-apply-stylus-button')),
-      );
-      await tester.pump(const Duration(milliseconds: 200));
-      await tester.tap(find.byKey(const Key('board-apply-stylus-button')));
+      // Undo removes the stroke, redo brings it back
+      await tester.tap(find.byKey(const Key('tool-undo')));
+      await tester.pump();
+      expect(inkCount(), 0);
+      await tester.tap(find.byKey(const Key('tool-redo')));
+      await tester.pump();
+      expect(inkCount(), 1);
+
+      // Send my work to Soro marks the factoring step as answered
+      await tester.tap(find.byKey(const Key('send-work-button')));
       await tester.pump(const Duration(milliseconds: 200));
 
       // Correct badge lights up ('Ó tọ́ · Correct') and roots stay as '?' until student writes x = 2 or x = 3 in blue
@@ -224,10 +228,10 @@ void main() {
       await tester.enterText(find.byKey(const Key('blank-input-r1')), '2');
       await tester.enterText(find.byKey(const Key('blank-input-r2')), '3');
       await tester.ensureVisible(
-        find.byKey(const Key('submit-blank-step-button')),
+        find.byKey(const Key('send-work-button')),
       );
       await tester.pump(const Duration(milliseconds: 200));
-      await tester.tap(find.byKey(const Key('submit-blank-step-button')));
+      await tester.tap(find.byKey(const Key('send-work-button')));
       await tester.pump(const Duration(milliseconds: 200));
 
       expect(find.text('x = 2 or x = 3'), findsOneWidget);

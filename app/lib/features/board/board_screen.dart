@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math' as math;
 import 'dart:ui' show PointerDeviceKind;
 
 import 'package:flutter/material.dart';
@@ -14,17 +13,20 @@ import 'voice_dock.dart';
 /// Default idle duration before the notebook board tucks back into the chat.
 const Duration kBoardTuckAwayDelay = Duration(seconds: 10);
 
-/// A single stroke captured on the board's stylus handwriting pad.
-class BoardStylusStroke {
-  BoardStylusStroke({
+/// Ink tools on the notebook page.
+enum BoardInkTool { pen, eraser }
+
+/// A single freehand stroke written on the notebook page.
+class BoardInkStroke {
+  BoardInkStroke({
+    required this.color,
     required this.points,
     required this.widths,
-    required this.deviceKind,
   });
 
+  final Color color;
   final List<Offset> points;
   final List<double> widths;
-  final PointerDeviceKind deviceKind;
 }
 
 /// Entry in the notebook's worked calculation log.
@@ -108,14 +110,18 @@ class _BoardScreenState extends State<BoardScreen> {
   bool _isTyping = false;
   bool _isDrawing = false;
 
-  // Stylus & Palm Rejection state
-  bool _showStylusPad = false;
-  final List<BoardStylusStroke> _strokes = <BoardStylusStroke>[];
-  BoardStylusStroke? _activeStroke;
+  // Free ink on the page
+  final List<BoardInkStroke> _strokes = <BoardInkStroke>[];
+  final List<List<BoardInkStroke>> _undoStack = <List<BoardInkStroke>>[];
+  final List<List<BoardInkStroke>> _redoStack = <List<BoardInkStroke>>[];
+  BoardInkStroke? _activeStroke;
+  BoardInkTool _tool = BoardInkTool.pen;
+  Color _inkColor = SoroTokens.studentBlue;
+  bool _erasedInGesture = false;
+  bool _graphOpen = true;
+  int? _inkPointerId;
   int? _activeStylusPointerId;
   DateTime? _lastStylusEventTime;
-  PointerDeviceKind _lastPointerKind = PointerDeviceKind.stylus;
-  bool _palmRejectionTriggered = false;
 
   @override
   void initState() {
@@ -294,11 +300,6 @@ class _BoardScreenState extends State<BoardScreen> {
     final Map<String, String> values = <String, String>{};
     if (overrideValues != null) {
       values.addAll(overrideValues);
-      for (final entry in overrideValues.entries) {
-        if (_blankControllers.containsKey(entry.key)) {
-          _blankControllers[entry.key]!.text = entry.value;
-        }
-      }
     } else {
       for (final BlankSpec b in row.blanks) {
         final String v = (_blankControllers[b.id]?.text ?? '').trim();
@@ -315,35 +316,21 @@ class _BoardScreenState extends State<BoardScreen> {
     );
   }
 
-  Future<void> _handleApplyStylusStep() async {
-    final TutorBlankRowPayload? row = _activeBlankRow;
-    if (row == null) return;
 
-    final Map<String, String> expectedMap = <String, String>{
-      for (final BlankSpec b in row.blanks) b.id: b.expected,
-    };
-    setState(() {
-      _strokes.clear();
-      _showStylusPad = false;
-    });
-    await _handleSubmitCurrentBlanks(
-      inputMethod: 'Stylus (${_lastPointerKind.name})',
-      overrideValues: expectedMap,
-    );
-  }
+  // --- Free ink on the notebook page ---
+  bool _isStylus(PointerEvent e) =>
+      e.kind == PointerDeviceKind.stylus ||
+      e.kind == PointerDeviceKind.invertedStylus;
 
-  // --- Stylus & Palm Rejection Handler ---
+  /// Ignores touch while a stylus is down or was down in the last 800 ms, and
+  /// any touch with a large contact radius (a palm resting on the glass).
   bool _shouldRejectPalm(PointerEvent event) {
-    final bool isStylus = event.kind == PointerDeviceKind.stylus ||
-        event.kind == PointerDeviceKind.invertedStylus;
-    if (isStylus) return false;
-
-    // Reject touch events when a stylus pointer is currently down or was active within 800ms,
-    // or if the touch contact radius is large (palm resting on tablet glass).
+    if (_isStylus(event)) return false;
     if (event.kind == PointerDeviceKind.touch) {
       if (_activeStylusPointerId != null) return true;
-      if (_lastStylusEventTime != null &&
-          DateTime.now().difference(_lastStylusEventTime!) <
+      final DateTime? last = _lastStylusEventTime;
+      if (last != null &&
+          DateTime.now().difference(last) <
               const Duration(milliseconds: 800)) {
         return true;
       }
@@ -352,14 +339,124 @@ class _BoardScreenState extends State<BoardScreen> {
     return false;
   }
 
-  double _strokeWidthForEvent(PointerEvent event) {
-    final double pressure =
-        (event.pressure > 0 && event.pressure <= 1.0) ? event.pressure : 0.55;
-    if (event.kind == PointerDeviceKind.stylus ||
-        event.kind == PointerDeviceKind.invertedStylus) {
-      return 2.2 + (pressure * 3.2);
+  double _strokeWidthForEvent(PointerEvent event, double? previous) {
+    if (!_isStylus(event)) return 3.0;
+    final double range = event.pressureMax - event.pressureMin;
+    final double norm = range > 0
+        ? ((event.pressure - event.pressureMin) / range).clamp(0.0, 1.0)
+        : 0.5;
+    final double target = 1.8 + norm * 3.4;
+    return previous == null ? target : previous * 0.6 + target * 0.4;
+  }
+
+  void _trackStylus(PointerEvent event, {required bool isUp}) {
+    if (!_isStylus(event)) return;
+    if (isUp) {
+      if (event.pointer == _activeStylusPointerId) {
+        _activeStylusPointerId = null;
+      }
+    } else {
+      _activeStylusPointerId = event.pointer;
     }
-    return 3.0;
+    _lastStylusEventTime = DateTime.now();
+  }
+
+  void _pushHistory() {
+    _undoStack.add(List<BoardInkStroke>.of(_strokes));
+    _redoStack.clear();
+  }
+
+  void _eraseAt(Offset p) {
+    final int before = _strokes.length;
+    _strokes.removeWhere((BoardInkStroke s) {
+      for (final Offset q in s.points) {
+        if ((q - p).distance < 16) return true;
+      }
+      return false;
+    });
+    if (_strokes.length != before) _erasedInGesture = true;
+  }
+
+  void _onInkDown(PointerDownEvent event) {
+    if (_shouldRejectPalm(event)) return;
+    if (_inkPointerId != null) return;
+    _inkPointerId = event.pointer;
+    setState(() {
+      _isDrawing = true;
+      if (_tool == BoardInkTool.eraser) {
+        _pushHistory();
+        _erasedInGesture = false;
+        _eraseAt(event.localPosition);
+      } else {
+        _pushHistory();
+        _activeStroke = BoardInkStroke(
+          color: _inkColor,
+          points: <Offset>[event.localPosition],
+          widths: <double>[_strokeWidthForEvent(event, null)],
+        );
+        _strokes.add(_activeStroke!);
+      }
+    });
+    _resetIdleTimer();
+  }
+
+  void _onInkMove(PointerMoveEvent event) {
+    if (event.pointer != _inkPointerId) return;
+    setState(() {
+      if (_tool == BoardInkTool.eraser) {
+        _eraseAt(event.localPosition);
+      } else {
+        final BoardInkStroke? s = _activeStroke;
+        if (s == null) return;
+        s.points.add(event.localPosition);
+        s.widths.add(_strokeWidthForEvent(event, s.widths.last));
+      }
+    });
+    _resetIdleTimer();
+  }
+
+  void _endInk(PointerEvent event) {
+    if (event.pointer != _inkPointerId) return;
+    _inkPointerId = null;
+    setState(() {
+      _isDrawing = false;
+      _activeStroke = null;
+      if (_tool == BoardInkTool.eraser && !_erasedInGesture) {
+        _undoStack.removeLast();
+      }
+    });
+    _resetIdleTimer();
+  }
+
+  void _undo() {
+    if (_undoStack.isEmpty) return;
+    setState(() {
+      _redoStack.add(List<BoardInkStroke>.of(_strokes));
+      _strokes
+        ..clear()
+        ..addAll(_undoStack.removeLast());
+    });
+    _resetIdleTimer();
+  }
+
+  void _redo() {
+    if (_redoStack.isEmpty) return;
+    setState(() {
+      _undoStack.add(List<BoardInkStroke>.of(_strokes));
+      _strokes
+        ..clear()
+        ..addAll(_redoStack.removeLast());
+    });
+    _resetIdleTimer();
+  }
+
+  void _clearPage() {
+    if (_strokes.isEmpty) return;
+    setState(() {
+      _pushHistory();
+      _strokes.clear();
+    });
+    _resetIdleTimer();
   }
 
   @override
@@ -373,40 +470,32 @@ class _BoardScreenState extends State<BoardScreen> {
       onPointerHover: (_) => _resetIdleTimer(),
       child: Scaffold(
         key: const Key('board-screen'),
-        backgroundColor: SoroTokens.cream,
-        body: SoroDottedPaperBackground(
-          child: SafeArea(
-            child: LayoutBuilder(
-              builder: (BuildContext context, BoxConstraints constraints) {
-                final bool isPhone = constraints.maxWidth < 600;
-                final bool isWide = constraints.maxWidth >= 920;
+        backgroundColor: Colors.white,
+        body: SafeArea(
+          child: LayoutBuilder(
+            builder: (BuildContext context, BoxConstraints constraints) {
+              final bool isPhone = constraints.maxWidth < 600;
 
-                return Column(
-                  children: [
-                    _buildTopShellBar(lang, isPhone),
-                    Expanded(
-                      child: _isBoardVisible
-                          ? _buildBoardStage(
-                              context,
-                              lang,
-                              isPhone: isPhone,
-                              isWide: isWide,
-                            )
-                          : _buildTuckedAwayChatView(context, lang),
-                    ),
-                    VoiceDock(
-                      language: lang,
-                      networkStatus: widget.networkStatus,
-                      turnState: _turnState,
-                      captionEn: _currentCaptionEn,
-                      captionYo: _currentCaptionYo,
-                      onListeningChanged: _handleListeningChanged,
-                      compact: isPhone,
-                    ),
-                  ],
-                );
-              },
-            ),
+              return Column(
+                children: [
+                  _buildTopShellBar(lang, isPhone),
+                  Expanded(
+                    child: _isBoardVisible
+                        ? _buildBoardStage(context, lang, isPhone: isPhone)
+                        : _buildTuckedAwayChatView(context, lang),
+                  ),
+                  VoiceDock(
+                    language: lang,
+                    networkStatus: widget.networkStatus,
+                    turnState: _turnState,
+                    captionEn: _currentCaptionEn,
+                    captionYo: _currentCaptionYo,
+                    onListeningChanged: _handleListeningChanged,
+                    compact: isPhone,
+                  ),
+                ],
+              );
+            },
           ),
         ),
       ),
@@ -586,146 +675,53 @@ class _BoardScreenState extends State<BoardScreen> {
     );
   }
 
-  /// Wooden board frame + Ruled notebook page stage.
+  /// Wooden board frame holding the tool row and the writable notebook page.
   Widget _buildBoardStage(
     BuildContext context,
     SoroLanguage lang, {
     required bool isPhone,
-    required bool isWide,
   }) {
-    final double woodFrameThickness = isPhone ? 6.0 : (isWide ? 16.0 : 12.0);
+    final double woodFrameThickness = isPhone ? 5.0 : 10.0;
     final double marginLineX = isPhone ? 34.0 : 54.0;
+    final double ruleSpacing = isPhone ? 32.0 : 36.0;
 
-    return SingleChildScrollView(
-      padding: EdgeInsets.symmetric(
-        horizontal: isPhone ? SoroTokens.s8 : SoroTokens.s20,
-        vertical: isPhone ? SoroTokens.s8 : SoroTokens.s12,
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        isPhone ? SoroTokens.s8 : SoroTokens.s16,
+        isPhone ? SoroTokens.s8 : SoroTokens.s12,
+        isPhone ? SoroTokens.s8 : SoroTokens.s16,
+        isPhone ? SoroTokens.s8 : SoroTokens.s12,
       ),
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 1120),
+      child: Container(
+        key: const Key('wooden-board-frame'),
+        padding: EdgeInsets.all(woodFrameThickness),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFFA96C38), Color(0xFF8D5527), Color(0xFF70411B)],
+          ),
+          borderRadius: BorderRadius.circular(isPhone ? 18 : 22),
+          border: Border.all(color: const Color(0xFF4E2B0F), width: 2.5),
+          boxShadow: SoroTokens.e2,
+        ),
+        child: Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFFFFFEFA),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: const Color(0xFF593314), width: 2.0),
+          ),
+          clipBehavior: Clip.hardEdge,
           child: Column(
             children: [
-              // Wooden Classroom Board Frame
-              Container(
-                key: const Key('wooden-board-frame'),
-                padding: EdgeInsets.all(woodFrameThickness),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      Color(0xFFA96C38),
-                      Color(0xFF8D5527),
-                      Color(0xFF70411B),
-                    ],
-                  ),
-                  borderRadius: BorderRadius.circular(isPhone ? 20 : 24),
-                  border: Border.all(
-                    color: const Color(0xFF4E2B0F),
-                    width: 2.5,
-                  ),
-                  boxShadow: SoroTokens.e3,
-                ),
-                child: Container(
-                  key: const Key('ruled-notebook-page'),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFFFEFA),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: const Color(0xFF593314),
-                      width: 2.0,
-                    ),
-                  ),
-                  clipBehavior: Clip.hardEdge,
-                  child: CustomPaint(
-                    painter: _RuledNotebookPaperPainter(
-                      marginLineX: marginLineX,
-                      ruleSpacing: isPhone ? 32.0 : 36.0,
-                    ),
-                    child: Stack(
-                      children: [
-                        // Subtle single-colour logo watermark on the notebook sheet
-                        Positioned(
-                          right: 24,
-                          bottom: 24,
-                          child: IgnorePointer(
-                            child: ExcludeSemantics(
-                              child: Transform.rotate(
-                                angle: -3.0 * math.pi / 180.0,
-                                child: Opacity(
-                                  opacity: 0.04,
-                                  child: SvgPicture.asset(
-                                    'assets/brand/soro-logo-black.svg',
-                                    width: 240,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.fromLTRB(
-                            marginLineX + (isPhone ? 10 : 16),
-                            isPhone ? 12 : 16,
-                            isPhone ? 12 : 20,
-                            isPhone ? 16 : 20,
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              _buildNotebookTitleHeader(lang, isPhone),
-                              const SizedBox(height: SoroTokens.s12),
-                              if (isWide)
-                                Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Expanded(
-                                      flex: 3,
-                                      child: _buildWorkedStepsColumn(
-                                        lang,
-                                        isPhone,
-                                      ),
-                                    ),
-                                    const SizedBox(width: SoroTokens.s20),
-                                    Expanded(
-                                      flex: 2,
-                                      child: _buildSupportingParabolaCard(
-                                        lang,
-                                        isPhone,
-                                      ),
-                                    ),
-                                  ],
-                                )
-                              else ...[
-                                _buildWorkedStepsColumn(lang, isPhone),
-                                const SizedBox(height: SoroTokens.s16),
-                                _buildSupportingParabolaCard(lang, isPhone),
-                              ],
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              // Wooden marker ledge under the board
-              Container(
-                width: 220,
-                height: 7,
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Color(0xFF633815),
-                      Color(0xFF48270D),
-                    ],
-                  ),
-                  borderRadius: BorderRadius.vertical(
-                    bottom: Radius.circular(6),
-                  ),
+              _buildToolRow(lang, isPhone),
+              const Divider(height: 1, thickness: 1, color: Color(0xFFC4D6EC)),
+              Expanded(
+                child: _buildInkPage(
+                  lang,
+                  isPhone: isPhone,
+                  marginLineX: marginLineX,
+                  ruleSpacing: ruleSpacing,
                 ),
               ),
             ],
@@ -735,120 +731,382 @@ class _BoardScreenState extends State<BoardScreen> {
     );
   }
 
-  Widget _buildNotebookTitleHeader(SoroLanguage lang, bool isPhone) {
-    final String activeQ = widget.activeQuestion.trim();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Wrap(
-          alignment: WrapAlignment.spaceBetween,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          spacing: SoroTokens.s8,
-          runSpacing: SoroTokens.s8,
-          children: [
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ExcludeSemantics(
-                  child: SvgPicture.asset(
-                    'assets/mascot/soro-ilu-speaking.svg',
-                    width: isPhone ? 36 : 44,
-                    height: isPhone ? 36 : 44,
-                  ),
-                ),
-                const SizedBox(width: SoroTokens.s8),
-                Flexible(
-                  child: SoroLocalizedText(
-                    BoardStrings.tr(lang, 'problemTitle'),
-                    key: const Key('board-problem-title'),
-                    language: lang,
-                    style: SoroTokens.serif(
-                      fontSize: isPhone ? 21 : 26,
-                      fontWeight: FontWeight.w600,
-                      color: SoroTokens.ink,
-                    ),
-                  ),
-                ),
-              ],
+  Widget _toolButton({
+    required Key key,
+    required IconData icon,
+    required String tooltip,
+    required VoidCallback? onPressed,
+    bool selected = false,
+  }) {
+    return Tooltip(
+      message: tooltip,
+      child: Semantics(
+        button: true,
+        selected: selected,
+        label: tooltip,
+        child: SizedBox(
+          width: 48,
+          height: 48,
+          child: Material(
+            color: selected ? SoroTokens.skyDeep : Colors.transparent,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: BorderSide(
+                color: selected ? SoroTokens.studentBlue : Colors.transparent,
+                width: 1.6,
+              ),
             ),
-            Wrap(
-              spacing: 8,
-              runSpacing: 6,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: [
-                if (_factoringCompleted || _rootsRevealed || _unaidedCompleted)
-                  Container(
-                    key: const Key('correct-badge'),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 5,
-                    ),
-                    decoration: BoxDecoration(
-                      color: SoroTokens.mint,
-                      borderRadius: BorderRadius.circular(SoroTokens.rPill),
-                      border: Border.all(
-                        color: SoroTokens.successDeep,
-                        width: 1.5,
-                      ),
-                    ),
-                    child: SoroLocalizedText(
-                      BoardStrings.tr(lang, 'correctBadge'),
-                      language: SoroLanguage.yo,
-                      style: SoroTokens.sans(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                        color: SoroTokens.ink,
-                      ),
-                    ),
-                  ),
-                Container(
-                  key: const Key('palm-rejection-badge'),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: SoroTokens.skyDeep,
-                    borderRadius: BorderRadius.circular(SoroTokens.rPill),
-                    border: Border.all(color: SoroTokens.studentBlue),
-                  ),
-                  child: Text(
-                    BoardStrings.tr(lang, 'palmRejectionBadge'),
-                    style: SoroTokens.sans(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: SoroTokens.studentBlue,
-                    ),
+            child: InkResponse(
+              key: key,
+              onTap: onPressed,
+              radius: 26,
+              child: Icon(
+                icon,
+                size: 24,
+                color: onPressed == null
+                    ? SoroTokens.control
+                    : (selected ? SoroTokens.studentBlue : SoroTokens.ink),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _colorButton(String name, Color color) {
+    final bool selected = _inkColor == color;
+    return Tooltip(
+      message: 'Ink colour: $name',
+      child: Semantics(
+        button: true,
+        selected: selected,
+        label: 'Ink colour: $name',
+        child: InkResponse(
+          key: Key('ink-color-$name'),
+          onTap: () {
+            setState(() {
+              _inkColor = color;
+              _tool = BoardInkTool.pen;
+            });
+            _resetIdleTimer();
+          },
+          radius: 26,
+          child: SizedBox(
+            width: 48,
+            height: 48,
+            child: Center(
+              child: Container(
+                width: selected ? 30 : 26,
+                height: selected ? 30 : 26,
+                decoration: BoxDecoration(
+                  color: color,
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: selected ? SoroTokens.ink : Colors.white,
+                    width: selected ? 2.4 : 1.5,
                   ),
                 ),
-              ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildToolRow(SoroLanguage lang, bool isPhone) {
+    final bool canSend = _activeBlankRow != null && !_unaidedCompleted;
+    return Container(
+      color: const Color(0xFFFFFEFA),
+      height: 56,
+      padding: EdgeInsets.symmetric(horizontal: isPhone ? 4 : 10),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: [
+            _toolButton(
+              key: const Key('tool-pen'),
+              icon: Icons.edit_rounded,
+              tooltip: 'Pen',
+              selected: _tool == BoardInkTool.pen,
+              onPressed: () {
+                setState(() => _tool = BoardInkTool.pen);
+                _resetIdleTimer();
+              },
+            ),
+            _toolButton(
+              key: const Key('tool-eraser'),
+              icon: Icons.cleaning_services_rounded,
+              tooltip: 'Eraser',
+              selected: _tool == BoardInkTool.eraser,
+              onPressed: () {
+                setState(() => _tool = BoardInkTool.eraser);
+                _resetIdleTimer();
+              },
+            ),
+            const SizedBox(width: 6),
+            _colorButton('blue', SoroTokens.studentBlue),
+            _colorButton('black', SoroTokens.ink),
+            _colorButton('green', const Color(0xFF1E8E4A)),
+            const SizedBox(width: 6),
+            _toolButton(
+              key: const Key('tool-undo'),
+              icon: Icons.undo_rounded,
+              tooltip: 'Undo',
+              onPressed: _undoStack.isEmpty ? null : _undo,
+            ),
+            _toolButton(
+              key: const Key('tool-redo'),
+              icon: Icons.redo_rounded,
+              tooltip: 'Redo',
+              onPressed: _redoStack.isEmpty ? null : _redo,
+            ),
+            _toolButton(
+              key: const Key('tool-clear'),
+              icon: Icons.delete_outline_rounded,
+              tooltip: 'Clear page',
+              onPressed: _strokes.isEmpty ? null : _clearPage,
+            ),
+            const SizedBox(width: 16),
+            SizedBox(
+              height: 48,
+              child: ElevatedButton.icon(
+                key: const Key('send-work-button'),
+                onPressed: canSend ? () => _handleSubmitCurrentBlanks() : null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: SoroTokens.studentBlue,
+                  foregroundColor: SoroTokens.paper,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(SoroTokens.rPill),
+                  ),
+                ),
+                icon: const Icon(Icons.send_rounded, size: 18),
+                label: Text(
+                  BoardStrings.tr(lang, 'sendWorkBtn'),
+                  style: SoroTokens.sans(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: SoroTokens.paper,
+                  ),
+                ),
+              ),
             ),
           ],
         ),
-        if (activeQ.isNotEmpty &&
-            activeQ != BoardStrings.tr(lang, 'problemTitle')) ...[
-          const SizedBox(height: 4),
-          SoroLocalizedText(
-            activeQ,
-            key: const Key('board-active-question'),
-            language: lang,
-            style: SoroTokens.sans(
-              fontSize: 13.5,
-              fontWeight: FontWeight.w600,
-              color: SoroTokens.ink2,
+      ),
+    );
+  }
+
+  /// The writable page: ruled paper, tutor lines on top, ink drawn over all of
+  /// it. Ink listens underneath the content so buttons and blanks stay usable.
+  Widget _buildInkPage(
+    SoroLanguage lang, {
+    required bool isPhone,
+    required double marginLineX,
+    required double ruleSpacing,
+  }) {
+    final int shown = isPhone ? 4 : 6;
+    final int start = _entries.length > shown ? _entries.length - shown : 0;
+
+    return Listener(
+      key: const Key('board-ink-page'),
+      behavior: HitTestBehavior.translucent,
+      onPointerDown: (PointerDownEvent e) => _trackStylus(e, isUp: false),
+      onPointerMove: (PointerMoveEvent e) => _trackStylus(e, isUp: false),
+      onPointerUp: (PointerUpEvent e) => _trackStylus(e, isUp: true),
+      onPointerCancel: (PointerCancelEvent e) => _trackStylus(e, isUp: true),
+      child: CustomPaint(
+        key: const Key('ruled-notebook-page'),
+        painter: _RuledNotebookPaperPainter(
+          marginLineX: marginLineX,
+          ruleSpacing: ruleSpacing,
+        ),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            Listener(
+              key: const Key('board-ink-input'),
+              behavior: HitTestBehavior.opaque,
+              onPointerDown: _onInkDown,
+              onPointerMove: _onInkMove,
+              onPointerUp: _endInk,
+              onPointerCancel: _endInk,
+              child: const SizedBox.expand(),
+            ),
+            Positioned(
+              left: marginLineX + (isPhone ? 10 : 16),
+              right: isPhone ? 10 : 20,
+              top: 0,
+              bottom: 0,
+              child: ClipRect(
+                child: OverflowBox(
+                  alignment: Alignment.topLeft,
+                  minHeight: 0,
+                  maxHeight: double.infinity,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _buildNotebookTitleHeader(lang, isPhone, ruleSpacing),
+                      for (int i = start; i < _entries.length; i++)
+                        _buildNotebookEntryRow(_entries[i], lang, i, ruleSpacing),
+                      if (_activeBlankRow != null && !_unaidedCompleted)
+                        _buildActiveBlankRow(
+                          _activeBlankRow!,
+                          lang,
+                          isPhone,
+                          ruleSpacing,
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              right: isPhone ? 8 : 16,
+              bottom: isPhone ? 8 : 16,
+              child: _buildGraphPanel(lang, isPhone),
+            ),
+            IgnorePointer(
+              child: CustomPaint(
+                key: const Key('board-ink-layer'),
+                painter: BoardInkPainter(strokes: _strokes),
+                child: const SizedBox.expand(),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGraphPanel(SoroLanguage lang, bool isPhone) {
+    if (!_graphOpen) {
+      return Align(
+        alignment: Alignment.bottomRight,
+        child: SizedBox(
+          height: 48,
+          child: OutlinedButton.icon(
+            key: const Key('graph-toggle-button'),
+            onPressed: () {
+              setState(() => _graphOpen = true);
+              _resetIdleTimer();
+            },
+            style: OutlinedButton.styleFrom(
+              backgroundColor: const Color(0xFFFFFEFA),
+              foregroundColor: SoroTokens.ink,
+              side: const BorderSide(color: SoroTokens.control),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(SoroTokens.rPill),
+              ),
+            ),
+            icon: const Icon(Icons.show_chart_rounded, size: 18),
+            label: Text(
+              'Graph',
+              style: SoroTokens.sans(fontSize: 13, fontWeight: FontWeight.w700),
             ),
           ),
-        ] else
-          // Keep key available for tests checking board-active-question
+        ),
+      );
+    }
+    return SizedBox(
+      width: isPhone ? 200 : 250,
+      child: Stack(
+        children: [
+          _buildSupportingParabolaCard(lang, isPhone),
+          Positioned(
+            right: 0,
+            top: 0,
+            child: InkResponse(
+              key: const Key('graph-toggle-button'),
+              onTap: () {
+                setState(() => _graphOpen = false);
+                _resetIdleTimer();
+              },
+              radius: 24,
+              child: const SizedBox(
+                width: 48,
+                height: 48,
+                child: Icon(Icons.expand_more_rounded, size: 24),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNotebookTitleHeader(
+    SoroLanguage lang,
+    bool isPhone,
+    double ruleSpacing,
+  ) {
+    final String activeQ = widget.activeQuestion.trim();
+    final String title = BoardStrings.tr(lang, 'problemTitle');
+    final bool showQ = activeQ.isNotEmpty && activeQ != title;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Wrap(
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: SoroTokens.s8,
+          children: [
+            IgnorePointer(
+              child: SoroLocalizedText(
+                title,
+                key: const Key('board-problem-title'),
+                language: lang,
+                style: SoroTokens.serif(
+                  fontSize: isPhone ? 20 : 24,
+                  fontWeight: FontWeight.w600,
+                  color: SoroTokens.ink,
+                ).copyWith(height: ruleSpacing / (isPhone ? 20 : 24)),
+              ),
+            ),
+            if (_factoringCompleted || _rootsRevealed || _unaidedCompleted)
+              Container(
+                key: const Key('correct-badge'),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
+                decoration: BoxDecoration(
+                  color: SoroTokens.mint,
+                  borderRadius: BorderRadius.circular(SoroTokens.rPill),
+                  border: Border.all(color: SoroTokens.successDeep, width: 1.5),
+                ),
+                child: SoroLocalizedText(
+                  BoardStrings.tr(lang, 'correctBadge'),
+                  language: SoroLanguage.yo,
+                  style: SoroTokens.sans(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: SoroTokens.ink,
+                  ),
+                ),
+              ),
+          ],
+        ),
+        if (showQ)
+          IgnorePointer(
+            child: SoroLocalizedText(
+              activeQ,
+              key: const Key('board-active-question'),
+              language: lang,
+              style: SoroTokens.sans(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: SoroTokens.ink2,
+              ).copyWith(height: ruleSpacing / 14),
+            ),
+          )
+        else
           SizedBox(
             height: 0,
             child: Opacity(
               opacity: 0,
               child: Text(
-                activeQ.isEmpty
-                    ? BoardStrings.tr(lang, 'problemTitle')
-                    : activeQ,
+                activeQ.isEmpty ? title : activeQ,
                 key: const Key('board-active-question'),
               ),
             ),
@@ -857,634 +1115,173 @@ class _BoardScreenState extends State<BoardScreen> {
     );
   }
 
-  Widget _buildWorkedStepsColumn(SoroLanguage lang, bool isPhone) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        // Worked entries log (Tutor in Crimson #C31E49, Student in Royal Blue #1B56D0)
-        for (int i = 0; i < _entries.length; i++)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 10),
-            child: _buildNotebookEntryRow(_entries[i], lang, i),
-          ),
-
-        // Active Blank Structure Row written by Sọ̀rọ̀ for the student to fill
-        if (_activeBlankRow != null && !_unaidedCompleted) ...[
-          const SizedBox(height: 4),
-          _buildActiveBlankRowCard(_activeBlankRow!, lang, isPhone),
-        ],
-
-        const SizedBox(height: 12),
-        // Stylus Handwriting Pad on the Notebook Sheet
-        _buildBoardStylusSection(lang, isPhone),
-      ],
-    );
-  }
-
+  /// One line of the worked log, written straight onto the page: the tutor in
+  /// crimson, the student in royal blue.
   Widget _buildNotebookEntryRow(
     _NotebookEntry entry,
     SoroLanguage lang,
     int index,
+    double ruleSpacing,
   ) {
     final bool isTutor = entry.author == ScriptAuthor.tutor;
+    final double size = isTutor ? 17 : 20;
+    final TextStyle style = entry.isAnalogy
+        ? SoroTokens.serif(
+            fontSize: size,
+            fontStyle: FontStyle.italic,
+            fontWeight: FontWeight.w500,
+            color: SoroTokens.crimsonDeep,
+          )
+        : isTutor
+            ? SoroTokens.sans(
+                fontSize: size,
+                fontWeight: FontWeight.w700,
+                color: SoroTokens.crimsonDeep,
+              )
+            : SoroTokens.serif(
+                fontSize: size,
+                fontWeight: FontWeight.w600,
+                color: SoroTokens.studentBlue,
+              );
 
-    if (entry.isAnalogy) {
-      return Container(
-        key: const Key('board-analogy-line'),
-        padding: const EdgeInsets.symmetric(
-          horizontal: SoroTokens.s12,
-          vertical: SoroTokens.s8,
-        ),
-        decoration: BoxDecoration(
-          color: SoroTokens.sticky.withValues(alpha: 0.65),
-          borderRadius: BorderRadius.circular(SoroTokens.rSm),
-          border: Border.all(color: SoroTokens.control),
-        ),
-        child: Wrap(
-          spacing: 8,
-          runSpacing: 4,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-              decoration: BoxDecoration(
-                color: SoroTokens.orange,
-                borderRadius: BorderRadius.circular(SoroTokens.rPill),
-              ),
-              child: Text(
-                BoardStrings.tr(lang, 'analogyBadge'),
-                style: SoroTokens.sans(
-                  fontSize: 11.5,
-                  fontWeight: FontWeight.w700,
-                  color: SoroTokens.ink,
-                ),
-              ),
-            ),
-            SoroLocalizedText(
-              entry.text,
-              language: SoroLanguage.en,
-              style: SoroTokens.serif(
-                fontSize: 15.5,
-                fontStyle: FontStyle.italic,
-                fontWeight: FontWeight.w500,
-                color: SoroTokens.ink,
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return Container(
-      key: Key('notebook-entry-$index'),
-      padding: const EdgeInsets.symmetric(
-        horizontal: SoroTokens.s12,
-        vertical: 8,
-      ),
-      decoration: BoxDecoration(
-        color: isTutor
-            ? (entry.isCorrection
-                ? SoroTokens.peach.withValues(alpha: 0.65)
-                : SoroTokens.blush.withValues(alpha: 0.35))
-            : SoroTokens.skyDeep.withValues(alpha: 0.85),
-        borderRadius: BorderRadius.circular(SoroTokens.rSm),
-        border: Border.all(
-          color: isTutor ? SoroTokens.crimson : SoroTokens.studentBlue,
-          width: isTutor ? 1.3 : 1.8,
-        ),
-      ),
+    return IgnorePointer(
+      key: entry.isAnalogy ? const Key('board-analogy-line') : null,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        key: Key('notebook-entry-$index'),
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Wrap(
-            spacing: 8,
-            runSpacing: 4,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 2),
-                decoration: BoxDecoration(
-                  color: isTutor ? SoroTokens.crimson : SoroTokens.studentBlue,
-                  borderRadius: BorderRadius.circular(SoroTokens.rPill),
-                ),
-                child: Text(
-                  isTutor ? 'Sọ̀rọ̀ · Tutor' : 'You · Student (#1B56D0)',
-                  style: SoroTokens.sans(
-                    fontSize: 11.5,
-                    fontWeight: FontWeight.w700,
-                    color: SoroTokens.paper,
-                  ),
-                ),
-              ),
-              if (entry.isUnaided)
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 2,
-                  ),
-                  decoration: BoxDecoration(
-                    color: SoroTokens.lilac,
-                    borderRadius: BorderRadius.circular(SoroTokens.rPill),
-                    border: Border.all(color: SoroTokens.ink),
-                  ),
-                  child: Text(
-                    BoardStrings.tr(lang, 'unaidedNoHintsTag'),
-                    style: SoroTokens.sans(
-                      fontSize: 11.5,
-                      fontWeight: FontWeight.w700,
-                      color: SoroTokens.ink,
-                    ),
-                  ),
-                ),
-              if (!isTutor && entry.isCorrectStudentStep)
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 2,
-                  ),
-                  decoration: BoxDecoration(
-                    color: SoroTokens.mint,
-                    borderRadius: BorderRadius.circular(SoroTokens.rPill),
-                    border: Border.all(color: SoroTokens.successDeep),
-                  ),
-                  child: SoroLocalizedText(
-                    BoardStrings.tr(lang, 'correctBadge'),
-                    language: SoroLanguage.yo,
-                    style: SoroTokens.sans(
-                      fontSize: 11.5,
-                      fontWeight: FontWeight.w700,
-                      color: SoroTokens.ink,
-                    ),
-                  ),
-                ),
-              if (entry.inputMethod != null)
-                Text(
-                  '· ${entry.inputMethod}',
-                  style: SoroTokens.sans(
-                    fontSize: 11.5,
-                    fontWeight: FontWeight.w600,
-                    color: SoroTokens.ink2,
-                  ),
-                ),
-            ],
-          ),
-          const SizedBox(height: 6),
           SoroLocalizedText(
             entry.text,
             language: SoroLanguage.en,
-            style: isTutor
-                ? SoroTokens.sans(
-                    fontSize: 15.5,
-                    fontWeight: FontWeight.w700,
-                    color: SoroTokens.crimsonDeep,
-                  )
-                : SoroTokens.serif(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    color: SoroTokens.studentBlue,
-                  ),
+            style: style.copyWith(height: ruleSpacing / size),
           ),
           if (isTutor &&
               lang == SoroLanguage.yo &&
               entry.textYo != null &&
-              entry.textYo!.isNotEmpty) ...[
-            const SizedBox(height: 3),
+              entry.textYo!.isNotEmpty)
             SoroLocalizedText(
               entry.textYo!,
               language: SoroLanguage.yo,
               style: SoroTokens.sans(
-                fontSize: 13.5,
+                fontSize: 14,
                 fontWeight: FontWeight.w500,
                 color: SoroTokens.ink2,
-              ),
+              ).copyWith(height: ruleSpacing / 14),
             ),
-          ],
         ],
       ),
     );
   }
 
-  Widget _buildActiveBlankRowCard(
+  /// The tutor's step template as a crimson line with the blanks as inline
+  /// boxes the student can type into (or write beside).
+  Widget _buildActiveBlankRow(
     TutorBlankRowPayload row,
     SoroLanguage lang,
     bool isPhone,
+    double ruleSpacing,
   ) {
     final bool isFactorStep = row.stepId == QuadraticStepIds.factors;
+    final List<String> parts = row.templateText.split('▢');
+    final TextStyle lineStyle = SoroTokens.serif(
+      fontSize: isPhone ? 19 : 22,
+      fontWeight: FontWeight.w600,
+      color: SoroTokens.crimsonDeep,
+    );
+
+    final List<Widget> inline = <Widget>[];
+    for (int i = 0; i < parts.length; i++) {
+      if (parts[i].isNotEmpty) {
+        inline.add(IgnorePointer(child: Text(parts[i], style: lineStyle)));
+      }
+      if (i < parts.length - 1 && i < row.blanks.length) {
+        final BlankSpec blank = row.blanks[i];
+        inline.add(
+          SizedBox(
+            width: isPhone ? 54 : 64,
+            height: ruleSpacing - 4,
+            child: TextField(
+              key: Key('blank-input-${blank.id}'),
+              controller: _blankControllers[blank.id],
+              focusNode: _blankFocusNodes[blank.id],
+              onChanged: (_) => _notifyStudentTyping(),
+              onSubmitted: (_) => _handleSubmitCurrentBlanks(),
+              textAlign: TextAlign.center,
+              style: SoroTokens.serif(
+                fontSize: 19,
+                fontWeight: FontWeight.w600,
+                color: SoroTokens.studentBlue,
+              ),
+              decoration: InputDecoration(
+                isDense: true,
+                hintText: blank.label,
+                hintStyle: SoroTokens.sans(
+                  fontSize: 13,
+                  color: SoroTokens.studentBlue.withValues(alpha: 0.55),
+                ),
+                filled: true,
+                fillColor: SoroTokens.skyDeep.withValues(alpha: 0.7),
+                contentPadding: const EdgeInsets.symmetric(vertical: 4),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(6),
+                  borderSide: const BorderSide(
+                    color: SoroTokens.studentBlue,
+                    width: 1.4,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(6),
+                  borderSide: const BorderSide(
+                    color: SoroTokens.studentBlue,
+                    width: 2.2,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      }
+    }
 
     return Container(
       key: Key('active-blank-row-${row.stepId}'),
-      padding: const EdgeInsets.all(SoroTokens.s12),
-      decoration: BoxDecoration(
-        color: const Color(0xFFFFFEFA),
-        borderRadius: BorderRadius.circular(SoroTokens.rMd),
-        border: Border.all(
-          color: SoroTokens.crimson,
-          width: 2.0,
-        ),
-        boxShadow: SoroTokens.e1,
-      ),
+      padding: const EdgeInsets.only(top: 2),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Tutor's step structure template with blanks
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(
-                  color: SoroTokens.crimson,
-                  borderRadius: BorderRadius.circular(SoroTokens.rPill),
-                ),
-                child: Text(
-                  'Fill the blanks',
-                  style: SoroTokens.sans(
-                    fontSize: 11.5,
-                    fontWeight: FontWeight.w700,
-                    color: SoroTokens.paper,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  row.templateText,
-                  key: const Key('active-blank-template'),
-                  style: SoroTokens.serif(
-                    fontSize: isPhone ? 18 : 21,
-                    fontWeight: FontWeight.w600,
-                    color: SoroTokens.crimsonDeep,
-                  ),
-                ),
-              ),
-            ],
+          Semantics(
+            key: const Key('active-blank-template'),
+            label: row.templateText,
+            child: Wrap(
+              spacing: 6,
+              runSpacing: 2,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: inline,
+            ),
           ),
-          const SizedBox(height: 10),
-          // Blank input boxes in student royal-blue ink (#1B56D0)
-          Wrap(
-            spacing: 10,
-            runSpacing: 10,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              for (final BlankSpec blank in row.blanks)
-                SizedBox(
-                  width: isPhone ? 96 : 112,
-                  child: TextField(
-                    key: Key('blank-input-${blank.id}'),
-                    controller: _blankControllers[blank.id],
-                    focusNode: _blankFocusNodes[blank.id],
-                    onChanged: (_) => _notifyStudentTyping(),
-                    onSubmitted: (_) => _handleSubmitCurrentBlanks(),
-                    textAlign: TextAlign.center,
-                    style: SoroTokens.serif(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: SoroTokens.studentBlue,
-                    ),
-                    decoration: InputDecoration(
-                      labelText: '${blank.label} = ▢',
-                      labelStyle: SoroTokens.sans(
-                        fontSize: 12.5,
-                        fontWeight: FontWeight.w600,
-                        color: SoroTokens.studentBlue,
-                      ),
-                      hintText: '▢',
-                      filled: true,
-                      fillColor: SoroTokens.skyDeep,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 12,
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(SoroTokens.rSm),
-                        borderSide: const BorderSide(
-                          color: SoroTokens.studentBlue,
-                          width: 1.6,
-                        ),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(SoroTokens.rSm),
-                        borderSide: const BorderSide(
-                          color: SoroTokens.studentBlue,
-                          width: 2.4,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          // Action buttons (>= 48px tap targets)
-          Wrap(
-            spacing: 10,
-            runSpacing: 8,
-            children: [
-              ConstrainedBox(
-                constraints: const BoxConstraints(
-                  minHeight: SoroTokens.minTapTarget,
-                ),
-                child: ElevatedButton.icon(
-                  key: const Key('submit-blank-step-button'),
-                  onPressed: () => _handleSubmitCurrentBlanks(),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: SoroTokens.studentBlue,
-                    foregroundColor: SoroTokens.paper,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: SoroTokens.s16,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(SoroTokens.rPill),
-                    ),
-                  ),
-                  icon: const Icon(Icons.check_rounded, size: 18),
-                  label: Text(
-                    BoardStrings.tr(lang, 'checkStepBtn'),
-                    style: SoroTokens.sans(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: SoroTokens.paper,
-                    ),
-                  ),
-                ),
-              ),
-              if (isFactorStep)
-                ConstrainedBox(
-                  constraints: const BoxConstraints(
-                    minHeight: SoroTokens.minTapTarget,
-                  ),
-                  child: OutlinedButton.icon(
-                    key: const Key('demo-wrong-sign-button'),
-                    onPressed: () => _handleSubmitCurrentBlanks(
-                      inputMethod: 'Typed (sign error)',
-                      overrideValues: const {
-                        'f1': '+2',
-                        'f2': '+3',
-                        'sign_error': 'true',
-                      },
-                    ),
-                    style: OutlinedButton.styleFrom(
-                      backgroundColor: SoroTokens.peach,
-                      foregroundColor: SoroTokens.ink,
-                      side: const BorderSide(color: SoroTokens.ink, width: 1.3),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(SoroTokens.rPill),
-                      ),
-                    ),
-                    icon: const Icon(Icons.help_outline_rounded, size: 18),
-                    label: Text(
-                      BoardStrings.tr(lang, 'trySignErrorBtn'),
-                      style: SoroTokens.sans(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                        color: SoroTokens.ink,
-                      ),
-                    ),
-                  ),
-                ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBoardStylusSection(SoroLanguage lang, bool isPhone) {
-    return Container(
-      key: const Key('board-stylus-section'),
-      padding: const EdgeInsets.all(SoroTokens.s12),
-      decoration: BoxDecoration(
-        color: SoroTokens.skyDeep.withValues(alpha: 0.65),
-        borderRadius: BorderRadius.circular(SoroTokens.rMd),
-        border: Border.all(
-          color: SoroTokens.studentBlue,
-          width: 1.5,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Wrap(
-            alignment: WrapAlignment.spaceBetween,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            spacing: 8,
-            runSpacing: 6,
-            children: [
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(
-                    Icons.gesture_rounded,
-                    size: 18,
-                    color: SoroTokens.studentBlue,
-                  ),
-                  const SizedBox(width: 6),
-                  Flexible(
-                    child: Text(
-                      'Stylus & handwriting pad (Royal Blue #1B56D0 · Pointer: ${_lastPointerKind.name})',
-                      style: SoroTokens.sans(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                        color: SoroTokens.studentBlue,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              ConstrainedBox(
-                constraints: const BoxConstraints(
-                  minHeight: SoroTokens.minTapTarget,
-                ),
-                child: OutlinedButton.icon(
-                  key: const Key('board-toggle-stylus-button'),
-                  onPressed: () {
-                    setState(() {
-                      _showStylusPad = !_showStylusPad;
-                    });
-                    _resetIdleTimer();
+          if (isFactorStep)
+            SizedBox(
+              height: 48,
+              child: TextButton(
+                key: const Key('demo-wrong-sign-button'),
+                onPressed: () => _handleSubmitCurrentBlanks(
+                  inputMethod: 'Typed (sign error)',
+                  overrideValues: const {
+                    'f1': '+2',
+                    'f2': '+3',
+                    'sign_error': 'true',
                   },
-                  style: OutlinedButton.styleFrom(
-                    backgroundColor: SoroTokens.paper,
-                    foregroundColor: SoroTokens.ink,
-                    side: const BorderSide(color: SoroTokens.studentBlue),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(SoroTokens.rPill),
-                    ),
-                  ),
-                  icon: Icon(
-                    _showStylusPad
-                        ? Icons.expand_less_rounded
-                        : Icons.draw_rounded,
-                    size: 18,
-                    color: SoroTokens.studentBlue,
-                  ),
-                  label: Text(
-                    _showStylusPad
-                        ? 'Hide stylus pad'
-                        : BoardStrings.tr(lang, 'fillWithStylusBtn'),
-                    style: SoroTokens.sans(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
                 ),
-              ),
-            ],
-          ),
-          if (_palmRejectionTriggered) ...[
-            const SizedBox(height: 4),
-            Text(
-              BoardStrings.tr(lang, 'palmRejectedNotice'),
-              key: const Key('palm-rejected-notice'),
-              style: SoroTokens.sans(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: SoroTokens.crimsonDeep,
-              ),
-            ),
-          ],
-          if (_showStylusPad) ...[
-            const SizedBox(height: 8),
-            Container(
-              height: isPhone ? 110 : 130,
-              decoration: BoxDecoration(
-                color: const Color(0xFFFFFEFA),
-                borderRadius: BorderRadius.circular(SoroTokens.rSm),
-                border: Border.all(
-                  color: SoroTokens.studentBlue,
-                  width: 1.5,
-                ),
-              ),
-              clipBehavior: Clip.hardEdge,
-              child: Listener(
-                key: const Key('board-stylus-listener'),
-                behavior: HitTestBehavior.opaque,
-                onPointerDown: (PointerDownEvent event) {
-                  if (_shouldRejectPalm(event)) {
-                    setState(() {
-                      _palmRejectionTriggered = true;
-                    });
-                    return;
-                  }
-                  if (event.kind == PointerDeviceKind.stylus ||
-                      event.kind == PointerDeviceKind.invertedStylus) {
-                    _activeStylusPointerId = event.pointer;
-                    _lastStylusEventTime = DateTime.now();
-                  }
-                  setState(() {
-                    _isDrawing = true;
-                    _lastPointerKind = event.kind;
-                    _activeStroke = BoardStylusStroke(
-                      points: <Offset>[event.localPosition],
-                      widths: <double>[_strokeWidthForEvent(event)],
-                      deviceKind: event.kind,
-                    );
-                    _strokes.add(_activeStroke!);
-                  });
-                  _resetIdleTimer();
-                },
-                onPointerMove: (PointerMoveEvent event) {
-                  if (_shouldRejectPalm(event)) return;
-                  if (_activeStroke == null) return;
-                  if (event.kind == PointerDeviceKind.stylus ||
-                      event.kind == PointerDeviceKind.invertedStylus) {
-                    _lastStylusEventTime = DateTime.now();
-                  }
-                  setState(() {
-                    _activeStroke!.points.add(event.localPosition);
-                    _activeStroke!.widths.add(_strokeWidthForEvent(event));
-                  });
-                  _resetIdleTimer();
-                },
-                onPointerUp: (PointerUpEvent event) {
-                  if (event.pointer == _activeStylusPointerId) {
-                    _activeStylusPointerId = null;
-                    _lastStylusEventTime = DateTime.now();
-                  }
-                  setState(() {
-                    _isDrawing = false;
-                    _activeStroke = null;
-                  });
-                  _resetIdleTimer();
-                },
-                onPointerCancel: (PointerCancelEvent event) {
-                  if (event.pointer == _activeStylusPointerId) {
-                    _activeStylusPointerId = null;
-                  }
-                  setState(() {
-                    _isDrawing = false;
-                    _activeStroke = null;
-                  });
-                  _resetIdleTimer();
-                },
-                child: CustomPaint(
-                  painter: _BoardStylusCanvasPainter(strokes: _strokes),
-                  child: const SizedBox.expand(),
+                child: Text(
+                  BoardStrings.tr(lang, 'trySignErrorBtn'),
+                  style: SoroTokens.sans(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w700,
+                    color: SoroTokens.ink2,
+                  ),
                 ),
               ),
             ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 10,
-              runSpacing: 8,
-              alignment: WrapAlignment.spaceBetween,
-              children: [
-                ConstrainedBox(
-                  constraints: const BoxConstraints(
-                    minHeight: SoroTokens.minTapTarget,
-                  ),
-                  child: OutlinedButton.icon(
-                    key: const Key('board-clear-stylus-button'),
-                    onPressed: () {
-                      setState(() {
-                        _strokes.clear();
-                      });
-                      _resetIdleTimer();
-                    },
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: SoroTokens.ink,
-                      side: const BorderSide(color: SoroTokens.control),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(SoroTokens.rPill),
-                      ),
-                    ),
-                    icon: const Icon(Icons.refresh_rounded, size: 17),
-                    label: Text(
-                      BoardStrings.tr(lang, 'clearStylusBtn'),
-                      style: SoroTokens.sans(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ),
-                ConstrainedBox(
-                  constraints: const BoxConstraints(
-                    minHeight: SoroTokens.minTapTarget,
-                  ),
-                  child: ElevatedButton.icon(
-                    key: const Key('board-apply-stylus-button'),
-                    onPressed: _handleApplyStylusStep,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: SoroTokens.studentBlue,
-                      foregroundColor: SoroTokens.paper,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(SoroTokens.rPill),
-                      ),
-                    ),
-                    icon: const Icon(Icons.done_all_rounded, size: 18),
-                    label: Text(
-                      BoardStrings.tr(lang, 'applyStylusStepBtn'),
-                      style: SoroTokens.sans(
-                        fontSize: 13.5,
-                        fontWeight: FontWeight.w700,
-                        color: SoroTokens.paper,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
         ],
       ),
     );
@@ -1751,48 +1548,54 @@ class _RuledNotebookPaperPainter extends CustomPainter {
   }
 }
 
-/// Paints the student's royal-blue (`#1B56D0`) stylus strokes on the board pad.
-class _BoardStylusCanvasPainter extends CustomPainter {
-  const _BoardStylusCanvasPainter({required this.strokes});
+/// Paints the student's freehand strokes as smooth, pressure-width curves.
+class BoardInkPainter extends CustomPainter {
+  const BoardInkPainter({required this.strokes});
 
-  final List<BoardStylusStroke> strokes;
+  final List<BoardInkStroke> strokes;
 
   @override
   void paint(Canvas canvas, Size size) {
-    final rulePaint = Paint()
-      ..color = const Color(0xFFC4D6EC)
-      ..strokeWidth = 1.0;
-    for (double y = 28; y < size.height; y += 28) {
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), rulePaint);
-    }
-
-    for (final BoardStylusStroke stroke in strokes) {
-      if (stroke.points.isEmpty) continue;
-      final paint = Paint()
-        ..color = SoroTokens.studentBlue
+    for (final BoardInkStroke stroke in strokes) {
+      final List<Offset> pts = stroke.points;
+      if (pts.isEmpty) continue;
+      final Paint paint = Paint()
+        ..color = stroke.color
         ..strokeCap = StrokeCap.round
         ..strokeJoin = StrokeJoin.round
         ..style = PaintingStyle.stroke;
-
-      if (stroke.points.length == 1) {
+      if (pts.length < 3) {
         paint.strokeWidth = stroke.widths.first;
-        canvas.drawCircle(
-          stroke.points.first,
-          stroke.widths.first / 2,
-          paint..style = PaintingStyle.fill,
-        );
+        if (pts.length == 1) {
+          canvas.drawCircle(
+            pts.first,
+            stroke.widths.first / 2,
+            paint..style = PaintingStyle.fill,
+          );
+        } else {
+          canvas.drawLine(pts.first, pts.last, paint);
+        }
         continue;
       }
-
-      for (int i = 0; i < stroke.points.length - 1; i++) {
+      Offset prevMid = pts.first;
+      for (int i = 1; i < pts.length - 1; i++) {
+        final Offset mid = (pts[i] + pts[i + 1]) / 2;
         paint.strokeWidth = stroke.widths[i];
-        canvas.drawLine(stroke.points[i], stroke.points[i + 1], paint);
+        canvas.drawPath(
+          Path()
+            ..moveTo(prevMid.dx, prevMid.dy)
+            ..quadraticBezierTo(pts[i].dx, pts[i].dy, mid.dx, mid.dy),
+          paint,
+        );
+        prevMid = mid;
       }
+      paint.strokeWidth = stroke.widths.last;
+      canvas.drawLine(prevMid, pts.last, paint);
     }
   }
 
   @override
-  bool shouldRepaint(covariant _BoardStylusCanvasPainter oldDelegate) => true;
+  bool shouldRepaint(covariant BoardInkPainter oldDelegate) => true;
 }
 
 /// Paints the supporting parabola curve for `y = x² − 5x + 6` with hollow `?`
