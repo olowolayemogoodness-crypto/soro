@@ -105,7 +105,8 @@ class BoardScreen extends StatefulWidget {
 
 class _BoardScreenState extends State<BoardScreen> {
   late final TutorScript _script;
-  late final TutorSpeaker _speaker = widget.speaker ?? DeviceTutorSpeaker();
+  late final TutorSpeaker _speaker =
+      widget.speaker ?? DeviceTutorSpeaker(baseUrl: kSoroApiBase);
   Object? _speakingTarget;
   bool _muted = false;
   StreamSubscription<TutorScriptEvent>? _subscription;
