@@ -1,0 +1,415 @@
+{
+  "topic_id": "math101-quadratics",
+  "subject": "mathematics",
+  "lang": "yo",
+  "sim": "quadratic-notebook",
+  "visual": "quadratic-graph",
+  "glossary": [
+    {
+      "id": "quadratic",
+      "yo": "quadratic",
+      "en": "quadratic equation",
+      "audio": "quadratic.mp3"
+    },
+    {
+      "id": "equation",
+      "yo": "ìdọ́gba",
+      "en": "equation",
+      "audio": "equation.mp3"
+    },
+    {
+      "id": "coefficient",
+      "yo": "coefficient",
+      "en": "coefficient",
+      "audio": "coefficient.mp3"
+    },
+    {
+      "id": "constant",
+      "yo": "constant",
+      "en": "constant term",
+      "audio": "constant.mp3"
+    },
+    {
+      "id": "factorise",
+      "yo": "factorise",
+      "en": "factorise",
+      "audio": "factorise.mp3"
+    },
+    {
+      "id": "brackets",
+      "yo": "brackets",
+      "en": "brackets",
+      "audio": "brackets.mp3"
+    },
+    {
+      "id": "root",
+      "yo": "gbòǹgbò",
+      "en": "root of an equation",
+      "audio": "root.mp3"
+    },
+    {
+      "id": "parabola",
+      "yo": "parabola",
+      "en": "parabola",
+      "audio": "parabola.mp3"
+    },
+    {
+      "id": "x_axis",
+      "yo": "x-axis",
+      "en": "x-axis",
+      "audio": "x_axis.mp3"
+    },
+    {
+      "id": "vertex",
+      "yo": "ògógó ìyípadà",
+      "en": "vertex",
+      "audio": "vertex.mp3"
+    },
+    {
+      "id": "product",
+      "yo": "ìsọdipúpọ̀",
+      "en": "product",
+      "audio": "product.mp3"
+    },
+    {
+      "id": "sum",
+      "yo": "àròpọ̀",
+      "en": "sum",
+      "audio": "sum.mp3"
+    },
+    {
+      "id": "expand",
+      "yo": "expand",
+      "en": "expand brackets",
+      "audio": "expand.mp3"
+    },
+    {
+      "id": "term",
+      "yo": "term",
+      "en": "term",
+      "audio": "term.mp3"
+    },
+    {
+      "id": "variable",
+      "yo": "ayípadà",
+      "en": "variable",
+      "audio": "variable.mp3"
+    },
+    {
+      "id": "sign",
+      "yo": "àmì",
+      "en": "sign (plus or minus)",
+      "audio": "sign.mp3"
+    },
+    {
+      "id": "zero_product",
+      "yo": "zero product rule",
+      "en": "zero product rule",
+      "audio": "zero_product.mp3"
+    },
+    {
+      "id": "perfect_square",
+      "yo": "perfect square",
+      "en": "perfect square",
+      "audio": "perfect_square.mp3"
+    },
+    {
+      "id": "completing_square",
+      "yo": "completing the square",
+      "en": "completing the square",
+      "audio": "completing_square.mp3"
+    },
+    {
+      "id": "solution",
+      "yo": "ojútùú",
+      "en": "solution",
+      "audio": "solution.mp3"
+    }
+  ],
+  "problems": [
+    {
+      "id": "p1",
+      "statement_yo": "Yànjú quadratic equation x² − 5x + 6 = 0",
+      "statement_en": "Solve x² − 5x + 6 = 0",
+      "equation": "x² − 5x + 6 = 0",
+      "steps": [
+        {
+          "id": "s1",
+          "prompt_yo": "Wo quadratic equation tó wà lórí screen yìí; kí ni iye coefficient a, b, àti constant c tí o rí níbẹ̀?",
+          "prompt_en": "What are the values of coefficient a, b, and constant c?",
+          "acceptable_concepts": [
+            "a=1",
+            "b=-5",
+            "c=6"
+          ],
+          "misconceptions": {
+            "b=5": "Dúró náà, wo àmì tó wà níwájú 5x: ṣé plus five ni tàbí minus five?",
+            "c=-6": "Wo àmì tó wà níwájú 6 ní òpin equation náà: ṣé plus ni tàbí minus?"
+          },
+          "hint_ladder": [
+            "Wo nọ́mbà tó dúró níwájú x², x, àti nọ́mbà tó dá dúró.",
+            "Ìtọ́ka: ax² + bx + c = 0, kí ni nọ́mbà tó wà níwájú x?"
+          ],
+          "canvas_ops": [
+            {
+              "op": "write_step",
+              "params": {
+                "step_id": "s1",
+                "latex_or_text": "a = ?, b = ?, c = ?",
+                "author": "tutor",
+                "reveal_answer": false
+              }
+            }
+          ],
+          "term_ids": [
+            "coefficient",
+            "constant"
+          ]
+        },
+        {
+          "id": "s2",
+          "prompt_yo": "Nọ́mbà méjì wo ni ìsọdipúpọ̀ wọn jẹ́ c, tí àròpọ̀ wọn sì jẹ́ b?",
+          "prompt_en": "Which two numbers multiply to give c and add up to b?",
+          "acceptable_concepts": [
+            "pair=-2,-3",
+            "pair=-3,-2"
+          ],
+          "misconceptions": {
+            "pair=2,3": "Wo àmì b lẹ́ẹ̀kan sí i: àròpọ̀ 2 àti 3 jẹ́ 5, ṣé ó bá b mu?",
+            "pair=1,6": "Ìsọdipúpọ̀ 1 àti 6 jẹ́ 6, ṣùgbọ́n kí ni àròpọ̀ wọn, ṣé ó bá b mu?"
+          },
+          "hint_ladder": [
+            "Kọ àwọn nọ́mbà méjì tí ìsọdipúpọ̀ wọn jẹ́ 6 sílẹ̀ kí o wo àròpọ̀ olúkúlùkù wọn.",
+            "Àwọn nọ́mbà méjèèjì ní àmì kan náà nítorí c jẹ́ positive."
+          ],
+          "canvas_ops": [
+            {
+              "op": "write_step",
+              "params": {
+                "step_id": "s2",
+                "latex_or_text": "? × ? = c,  ? + ? = b",
+                "author": "tutor",
+                "reveal_answer": false
+              }
+            }
+          ],
+          "term_ids": [
+            "product",
+            "sum"
+          ]
+        },
+        {
+          "id": "s3",
+          "prompt_yo": "Fi àwọn nọ́mbà méjì náà sí àwọn ibi tí ó ṣófo nínú brackets méjèèjì; kí ni o máa kọ sí bracket àkọ́kọ́?",
+          "prompt_en": "Fill the blanks in the two brackets with your numbers; what goes in the first bracket?",
+          "acceptable_concepts": [
+            "factored=(x-2)(x-3)"
+          ],
+          "misconceptions": {
+            "factored=(x+2)(x+3)": "Tí o bá expand (x + 2)(x + 3), ṣé middle term máa fún wa −5x tàbí +5x?",
+            "factored=(x-1)(x-6)": "Tí o bá expand (x − 1)(x − 6), ṣé middle term máa fún wa −5x?"
+          },
+          "hint_ladder": [
+            "Expand brackets rẹ padà kí o wo middle term.",
+            "Ṣé middle term tí o rí bá b mu?"
+          ],
+          "canvas_ops": [
+            {
+              "op": "write_step",
+              "params": {
+                "step_id": "s3",
+                "latex_or_text": "(x - ?)(x - ?) = 0",
+                "author": "tutor",
+                "reveal_answer": false
+              }
+            }
+          ],
+          "term_ids": [
+            "factorise",
+            "brackets",
+            "expand"
+          ]
+        },
+        {
+          "id": "s4",
+          "prompt_yo": "Tí ìsọdipúpọ̀ bá jẹ́ zero, kí ni ó gbọ́dọ̀ jẹ́ òótọ́ nípa ọ̀kan nínú brackets náà?",
+          "prompt_en": "If a product equals zero, what must be true about one of the brackets?",
+          "acceptable_concepts": [
+            "one bracket = 0"
+          ],
+          "misconceptions": {
+            "both brackets must equal 1": "Tí ìsọdipúpọ̀ bá jẹ́ 1, kìí ṣe zero; kí ni nọ́mbà méjì tí ìsọdipúpọ̀ wọn jẹ́ zero?"
+          },
+          "hint_ladder": [
+            "Ronú nípa 0 × 5 àti 7 × 0; kí ni ó wà ní ìbámu láàrin wọn?"
+          ],
+          "canvas_ops": [
+            {
+              "op": "write_step",
+              "params": {
+                "step_id": "s4",
+                "latex_or_text": "x - ? = 0  or  x - ? = 0",
+                "author": "tutor",
+                "reveal_answer": false
+              }
+            }
+          ],
+          "term_ids": [
+            "zero_product"
+          ]
+        },
+        {
+          "id": "s5",
+          "prompt_yo": "Wo parabola náà: níbo ni ó ti kan x-axis, ṣé ó bá àwọn gbòǹgbò rẹ mu?",
+          "prompt_en": "Look at the parabola: where does it cross the x-axis, and does that match your roots?",
+          "acceptable_concepts": [
+            "crossings match roots"
+          ],
+          "misconceptions": {},
+          "hint_ladder": [
+            "Wo ibi tí ìlà náà ti kan x-axis lórí graph."
+          ],
+          "canvas_ops": [
+            {
+              "op": "highlight",
+              "params": {
+                "target": "roots"
+              }
+            }
+          ],
+          "term_ids": [
+            "root",
+            "parabola",
+            "x_axis"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "p2",
+      "statement_yo": "Yànjú x² + 2x = 1 nípa completing the square",
+      "statement_en": "Solve x² + 2x = 1 by completing the square",
+      "equation": "x² + 2x = 1",
+      "steps": [
+        {
+          "id": "s1",
+          "prompt_yo": "Gbé constant náà sí apá ọ̀tún equation; kí ni ó máa ṣẹlẹ̀ sí apá òsì?",
+          "prompt_en": "Move the constant to the right-hand side; what does the left side look like now?",
+          "acceptable_concepts": [
+            "x^2+2x=1"
+          ],
+          "misconceptions": {},
+          "hint_ladder": [
+            "Equation náà ti rí bẹ́ẹ̀ tẹ́lẹ̀: kí ni apá òsì rẹ̀?"
+          ],
+          "canvas_ops": [
+            {
+              "op": "write_step",
+              "params": {
+                "step_id": "s1",
+                "latex_or_text": "x² + 2x = ?",
+                "author": "tutor",
+                "reveal_answer": false
+              }
+            }
+          ],
+          "term_ids": [
+            "completing_square"
+          ]
+        },
+        {
+          "id": "s2",
+          "prompt_yo": "Nọ́mbà wo ni a lè fi kún ẹ̀gbẹ́ méjèèjì kí apá òsì lè di perfect square?",
+          "prompt_en": "What number can we add to both sides so the left side becomes a perfect square?",
+          "acceptable_concepts": [
+            "add 1"
+          ],
+          "misconceptions": {
+            "add 2": "Ìdajì b ni a nílò, kìí ṣe b fúnra rẹ̀; kí ni ìdajì b?",
+            "add 4": "Ìdajì b ni a máa ṣe square; kí ni ìdajì b kí a tó ṣe square rẹ̀?"
+          },
+          "hint_ladder": [
+            "Mú ìdajì coefficient ti x, lẹ́yìn náà ṣe square rẹ̀."
+          ],
+          "canvas_ops": [
+            {
+              "op": "write_step",
+              "params": {
+                "step_id": "s2",
+                "latex_or_text": "x² + 2x + ? = ? + ?",
+                "author": "tutor",
+                "reveal_answer": false
+              }
+            }
+          ],
+          "term_ids": [
+            "perfect_square"
+          ]
+        },
+        {
+          "id": "s3",
+          "prompt_yo": "Kọ apá òsì gẹ́gẹ́ bí perfect square; kí ni ó wà nínú brackets náà?",
+          "prompt_en": "Write the left side as a perfect square; what goes inside the brackets?",
+          "acceptable_concepts": [
+            "(x+1)^2"
+          ],
+          "misconceptions": {
+            "(x+2)^2": "Tí o bá expand (x + 2)², ṣé middle term jẹ́ 2x tàbí 4x?"
+          },
+          "hint_ladder": [
+            "Expand brackets rẹ padà kí o wo middle term."
+          ],
+          "canvas_ops": [
+            {
+              "op": "write_step",
+              "params": {
+                "step_id": "s3",
+                "latex_or_text": "(x + ?)² = ?",
+                "author": "tutor",
+                "reveal_answer": false
+              }
+            }
+          ],
+          "term_ids": [
+            "perfect_square"
+          ]
+        },
+        {
+          "id": "s4",
+          "prompt_yo": "Kí ni a gbọ́dọ̀ ṣe sí ẹ̀gbẹ́ méjèèjì láti yọ square náà kúrò?",
+          "prompt_en": "What do we do to both sides to remove the square?",
+          "acceptable_concepts": [
+            "square root, plus or minus"
+          ],
+          "misconceptions": {
+            "square root, positive only": "Nọ́mbà méjì ni square wọn lè dọ́gba pẹ̀lú nọ́mbà kan náà; àwọn wo ni?"
+          },
+          "hint_ladder": [
+            "Ìṣe ìdà square ni a nílò; nọ́mbà méjì ló ní ìdáhùn."
+          ],
+          "canvas_ops": [
+            {
+              "op": "write_step",
+              "params": {
+                "step_id": "s4",
+                "latex_or_text": "x + ? = ± ?",
+                "author": "tutor",
+                "reveal_answer": false
+              }
+            }
+          ],
+          "term_ids": [
+            "root"
+          ]
+        }
+      ]
+    }
+  ],
+  "transfer_check": {
+    "id": "quad-tc-01",
+    "variant_of": "p1",
+    "statement_yo": "Yànjú x² − 7x + 12 = 0 láìsí ìrànlọ́wọ́.",
+    "statement_en": "Solve x² − 7x + 12 = 0 without help.",
+    "assist": false
+  }
+}

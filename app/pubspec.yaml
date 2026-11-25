@@ -1,0 +1,41 @@
+name: app
+description: "Sọ̀rọ̀ — Ask-anything co-solve study table (Flutter web app shell & home screen)."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.13.7
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  flutter_svg: ^2.0.17
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/brand/soro-logo-colour.svg
+    - assets/brand/soro-logo-black.svg
+    - assets/mascot/soro-ilu-encouraging.svg
+    - assets/mascot/soro-ilu-listening.svg
+    - assets/mascot/soro-ilu-speaking.svg
+    - assets/mascot/soro-ilu-icon.svg
+
+  fonts:
+    - family: SourceSerif4
+      fonts:
+        - asset: assets/fonts/SourceSerif4-Regular.ttf
+        - asset: assets/fonts/SourceSerif4-Italic.ttf
+          style: italic
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter-Regular.ttf
+        - asset: assets/fonts/Inter-Italic.ttf
+          style: italic

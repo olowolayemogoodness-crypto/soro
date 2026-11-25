@@ -1,0 +1,45 @@
+# Soro M5 stack on Nobus: LiveKit SFU + Postgres + FastAPI.
+# Run from infra/ with infra/.env present (see .env.example).
+services:
+  livekit:
+    image: livekit/livekit-server:v1.13.11
+    command: --config /etc/livekit.yaml
+    # Host networking: WebRTC needs the whole 50000-60000/udp range without NAT.
+    network_mode: host
+    environment:
+      LIVEKIT_KEYS: "${NOBUS_LIVEKIT_API_KEY}: ${NOBUS_LIVEKIT_API_SECRET}"
+    volumes:
+      - ./livekit.yaml:/etc/livekit.yaml:ro
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: soro
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: soro
+    volumes:
+      # Point PGDATA_DIR at the Nobus FBS block volume mount once it exists.
+      - ${PGDATA_DIR:-./pgdata}:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U soro"]
+      interval: 10s
+      retries: 5
+    restart: unless-stopped
+
+  api:
+    build: ./api
+    env_file: .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SORO_CONTENT_DIR: /content
+      DATABASE_URL: "postgresql://soro:${POSTGRES_PASSWORD}@postgres:5432/soro"
+    volumes:
+      - ../content:/content:ro
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
