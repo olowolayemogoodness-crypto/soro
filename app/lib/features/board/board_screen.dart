@@ -848,54 +848,69 @@ class _BoardScreenState extends State<BoardScreen> {
       color: const Color(0xFFFFFEFA),
       height: 56,
       padding: EdgeInsets.symmetric(horizontal: isPhone ? 4 : 10),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: [
-            _toolButton(
-              key: const Key('tool-pen'),
-              icon: Icons.edit_rounded,
-              tooltip: 'Pen',
-              selected: _tool == BoardInkTool.pen,
-              onPressed: () {
-                setState(() => _tool = BoardInkTool.pen);
-                _resetIdleTimer();
-              },
+      child: Row(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  _toolButton(
+                    key: const Key('tool-pen'),
+                    icon: Icons.edit_rounded,
+                    tooltip: 'Pen',
+                    selected: _tool == BoardInkTool.pen,
+                    onPressed: () {
+                      setState(() => _tool = BoardInkTool.pen);
+                      _resetIdleTimer();
+                    },
+                  ),
+                  _toolButton(
+                    key: const Key('tool-eraser'),
+                    icon: Icons.cleaning_services_rounded,
+                    tooltip: 'Eraser',
+                    selected: _tool == BoardInkTool.eraser,
+                    onPressed: () {
+                      setState(() => _tool = BoardInkTool.eraser);
+                      _resetIdleTimer();
+                    },
+                  ),
+                  const SizedBox(width: 6),
+                  _colorButton('blue', SoroTokens.studentBlue),
+                  _colorButton('black', SoroTokens.ink),
+                  _colorButton('green', const Color(0xFF1E8E4A)),
+                  const SizedBox(width: 6),
+                  _toolButton(
+                    key: const Key('tool-undo'),
+                    icon: Icons.undo_rounded,
+                    tooltip: 'Undo',
+                    onPressed: _undoStack.isEmpty ? null : _undo,
+                  ),
+                  _toolButton(
+                    key: const Key('tool-redo'),
+                    icon: Icons.redo_rounded,
+                    tooltip: 'Redo',
+                    onPressed: _redoStack.isEmpty ? null : _redo,
+                  ),
+                  _toolButton(
+                    key: const Key('tool-clear'),
+                    icon: Icons.delete_outline_rounded,
+                    tooltip: 'Clear page',
+                    onPressed: _strokes.isEmpty ? null : _clearPage,
+                  ),
+                ],
+              ),
             ),
+          ),
+          const SizedBox(width: 12),
+          if (MediaQuery.sizeOf(context).width < 900)
             _toolButton(
-              key: const Key('tool-eraser'),
-              icon: Icons.cleaning_services_rounded,
-              tooltip: 'Eraser',
-              selected: _tool == BoardInkTool.eraser,
-              onPressed: () {
-                setState(() => _tool = BoardInkTool.eraser);
-                _resetIdleTimer();
-              },
-            ),
-            const SizedBox(width: 6),
-            _colorButton('blue', SoroTokens.studentBlue),
-            _colorButton('black', SoroTokens.ink),
-            _colorButton('green', const Color(0xFF1E8E4A)),
-            const SizedBox(width: 6),
-            _toolButton(
-              key: const Key('tool-undo'),
-              icon: Icons.undo_rounded,
-              tooltip: 'Undo',
-              onPressed: _undoStack.isEmpty ? null : _undo,
-            ),
-            _toolButton(
-              key: const Key('tool-redo'),
-              icon: Icons.redo_rounded,
-              tooltip: 'Redo',
-              onPressed: _redoStack.isEmpty ? null : _redo,
-            ),
-            _toolButton(
-              key: const Key('tool-clear'),
-              icon: Icons.delete_outline_rounded,
-              tooltip: 'Clear page',
-              onPressed: _strokes.isEmpty ? null : _clearPage,
-            ),
-            const SizedBox(width: 12),
+              key: const Key('show-me-how-button'),
+              icon: Icons.lightbulb_outline_rounded,
+              tooltip: BoardStrings.tr(lang, 'showMeHowBtn'),
+              onPressed: _requestSolve,
+            )
+          else
             SizedBox(
               height: 48,
               child: OutlinedButton(
@@ -918,33 +933,32 @@ class _BoardScreenState extends State<BoardScreen> {
                 ),
               ),
             ),
-            const SizedBox(width: 10),
-            SizedBox(
-              height: 48,
-              child: ElevatedButton.icon(
-                key: const Key('send-work-button'),
-                onPressed: canSend ? () => _handleSubmitCurrentBlanks() : null,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: SoroTokens.studentBlue,
-                  foregroundColor: SoroTokens.paper,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(SoroTokens.rPill),
-                  ),
+          const SizedBox(width: 10),
+          SizedBox(
+            height: 48,
+            child: ElevatedButton.icon(
+              key: const Key('send-work-button'),
+              onPressed: canSend ? () => _handleSubmitCurrentBlanks() : null,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: SoroTokens.studentBlue,
+                foregroundColor: SoroTokens.paper,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(SoroTokens.rPill),
                 ),
-                icon: const Icon(Icons.send_rounded, size: 18),
-                label: Text(
-                  BoardStrings.tr(lang, 'sendWorkBtn'),
-                  style: SoroTokens.sans(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: SoroTokens.paper,
-                  ),
+              ),
+              icon: const Icon(Icons.send_rounded, size: 18),
+              label: Text(
+                BoardStrings.tr(lang, 'sendWorkBtn'),
+                style: SoroTokens.sans(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: SoroTokens.paper,
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

@@ -87,13 +87,13 @@ class HandwritingPen implements TutorPenWriter {
     required double maxWidth,
     required double rule,
   }) {
-    final double s = rule / 15.5;
+    final double s = rule / 17;
     final double slant = math.tan(slantDegrees * math.pi / 180);
     final math.Random rnd = math.Random(text.hashCode);
     final List<PenCluster> clusters = PenFont.clusters(text);
 
     double unitsOf(PenCluster c) {
-      if (c.base == ' ') return 3.4;
+      if (c.base == ' ') return 4.6;
       if (c.base == '▢') return _blankUnits;
       if (c.base == '²' || c.base == '³') return 3.2;
       if (c.base == '✓') return 7;
@@ -121,7 +121,7 @@ class HandwritingPen implements TutorPenWriter {
     int row = 0;
     double usedWidth = 0;
     final double gap = 1.5 * s;
-    final double space = 3.4 * s;
+    final double space = 4.6 * s;
     final double phase = rnd.nextDouble() * 6;
 
     for (final List<int> word in words) {
@@ -473,7 +473,7 @@ class PenInkPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final double base = layout.rule / 15.5 * 0.95;
+    final double base = layout.rule / 17 * 0.98;
     final Paint paint = Paint()
       ..color = color
       ..strokeCap = StrokeCap.round

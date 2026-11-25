@@ -564,7 +564,7 @@ class DemoQuadraticTutorScript implements TutorScript {
             text: text,
             textYo: '',
             caption: caption,
-            captionYo: '',
+            captionYo: caption,
             isAnalogy: analogy,
           ),
         ),
