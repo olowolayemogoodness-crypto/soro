@@ -1,0 +1,77 @@
+{
+  "topic_id": "physics-friction",
+  "subject": "physics",
+  "lang": "yo",
+  "sim": "friction-illustration",
+  "visual": "friction-crate",
+  "glossary": [
+    {
+      "id": "friction",
+      "yo": "ìfọ́wọ́pa",
+      "en": "friction",
+      "audio": "friction.mp3"
+    },
+    {
+      "id": "surface",
+      "yo": "ojú ilẹ̀",
+      "en": "surface",
+      "audio": "surface.mp3"
+    },
+    {
+      "id": "force",
+      "yo": "agbára",
+      "en": "force",
+      "audio": "force.mp3"
+    }
+  ],
+  "problems": [
+    {
+      "id": "f1",
+      "statement_yo": "Kí ló mú kí crate náà dín ìyára rẹ̀ kù lórí ojú ilẹ̀ tó yàtọ̀?",
+      "statement_en": "Why does the crate slow down on a different surface?",
+      "equation": "",
+      "steps": [
+        {
+          "id": "s1",
+          "prompt_yo": "Tì crate náà lórí ilẹ̀ dídán; kí ni o ṣàkíyèsí nípa ìyára rẹ̀?",
+          "prompt_en": "Push the crate on the smooth floor; what do you notice about its speed?",
+          "acceptable_concepts": [
+            "keeps moving"
+          ],
+          "misconceptions": {},
+          "hint_ladder": [
+            "Wo bí crate náà ṣe ń lọ lẹ́yìn tí o ti dẹ́kun títì."
+          ],
+          "canvas_ops": [],
+          "term_ids": [
+            "force"
+          ]
+        },
+        {
+          "id": "s2",
+          "prompt_yo": "Yí ojú ilẹ̀ padà sí ilẹ̀ tó rẹ̀ jù; kí ló mú kí crate náà dín ìyára kù?",
+          "prompt_en": "Change to a rougher surface; what slows the crate down?",
+          "acceptable_concepts": [
+            "friction"
+          ],
+          "misconceptions": {},
+          "hint_ladder": [
+            "Ronú nípa danfo tó ń yọ̀ lórí ọ̀nà tó tutù, kí ni ó dín ìyára rẹ̀ kù?"
+          ],
+          "canvas_ops": [],
+          "term_ids": [
+            "friction",
+            "surface"
+          ]
+        }
+      ]
+    }
+  ],
+  "transfer_check": {
+    "id": "fric-tc-01",
+    "variant_of": "f1",
+    "statement_yo": "Ṣàlàyé ìdí tí crate fi dúró yára lórí ilẹ̀ onígbà.",
+    "statement_en": "Explain why a crate stops faster on a rough floor.",
+    "assist": false
+  }
+}
