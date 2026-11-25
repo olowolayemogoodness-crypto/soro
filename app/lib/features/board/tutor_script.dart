@@ -2,6 +2,8 @@ import 'dart:async';
 
 import '../../l10n/soro_strings.dart';
 import 'board_strings.dart';
+import 'pen_timing.dart';
+import 'tutor_pen_writer.dart' show PenMarkKind;
 
 /// Author of a notebook line (`tutor` in crimson, `student` in royal blue #1B56D0).
 enum ScriptAuthor { tutor, student }
@@ -32,12 +34,25 @@ class TutorLinePayload {
     this.isUnaided = false,
     this.writeDuration,
     this.audioUrl,
+    this.caption,
+    this.captionYo,
+    this.audioMs,
+    this.silent = false,
   });
 
   /// How long the tutor pen should take to write this line (synced to voice).
   final Duration? writeDuration;
   final String? audioUrl;
 
+  /// Spoken length of this line in ms when the voice audio is known.
+  final int? audioMs;
+
+  /// A working line written without being said aloud (solve mode).
+  final bool silent;
+
+  /// Dock caption for this line when it differs from the written text.
+  final String? caption;
+  final String? captionYo;
   final ScriptAuthor author;
   final String text;
   final String textYo;
@@ -125,6 +140,8 @@ class TutorScriptEvent {
     this.captionYo,
     this.thinking,
     this.offline,
+    this.penMark,
+    this.clearBlanks = false,
   });
 
   /// Dock caption only (a `say` from the brain), not written on the page.
@@ -137,6 +154,11 @@ class TutorScriptEvent {
   /// True when the scripted fallback replaced the brain ('Offline tutor' chip).
   final bool? offline;
 
+  /// Hand-drawn mark to add to the most recently written tutor line.
+  final PenMarkKind? penMark;
+
+  /// Drops the open blank row (the tutor is writing the solution itself).
+  final bool clearBlanks;
   final TutorLinePayload? tutorLine;
   final TutorBlankRowPayload? blankRow;
   final StudentAnswerPayload? studentAnswer;
@@ -166,6 +188,10 @@ abstract class TutorScript {
     required Map<String, String> values,
     String inputMethod = 'Typed',
   });
+
+  /// Solve mode: the student explicitly asked, so write the full worked
+  /// solution, then return to guide mode with a similar unaided problem.
+  Future<void> solveForStudent() async {}
 
   void dispose();
 }
@@ -545,6 +571,105 @@ class DemoQuadraticTutorScript implements TutorScript {
         );
       }
     }
+  }
+
+  @override
+  Future<void> solveForStudent() async {
+    _emit(
+      const TutorScriptEvent(
+        clearBlanks: true,
+        turnState: TutorTurnState.soroSpeaking,
+      ),
+    );
+    Future<void> line(
+      String text,
+      String caption, {
+      bool analogy = false,
+      PenMarkKind? mark,
+    }) async {
+      _emit(
+        TutorScriptEvent(
+          tutorLine: TutorLinePayload(
+            text: text,
+            textYo: '',
+            caption: caption,
+            captionYo: caption,
+            silent: true,
+            isAnalogy: analogy,
+          ),
+        ),
+      );
+      await _waitSolve(text);
+      if (mark != null) {
+        _emit(TutorScriptEvent(penMark: mark));
+        await _waitSolve('', extra: 0.6);
+      }
+    }
+
+    await line('x² − 5x + 6 = 0', 'Here is the equation we are solving.');
+    await line(
+      '? × ? = 6     ? + ? = −5',
+      'Step 1: find two numbers that multiply to 6 and add to −5.',
+    );
+    await line(
+      '−2 and −3',
+      'Step 2: −2 times −3 is 6, and −2 plus −3 is −5.',
+      mark: PenMarkKind.underline,
+    );
+    await line('(x − 2)(x − 3) = 0', 'Step 3: write it as two brackets.');
+    await line(
+      'Analogy: two gates, either one open lets you through.',
+      'Think of two gates: if either bracket is zero, the product is zero.',
+      analogy: true,
+    );
+    _emit(const TutorScriptEvent(rootsRevealed: true));
+    await line(
+      'x = 2   or   x = 3',
+      'Step 4: each bracket can be zero, so x is 2 or 3.',
+      mark: PenMarkKind.circleRoots,
+    );
+    await line('Checked', 'Both roots check out.', mark: PenMarkKind.tick);
+
+    _emit(
+      TutorScriptEvent(
+        boardVisibility: const BoardVisibilityPayload(
+          visible: true,
+          reason:
+              'Solve mode finished; back to guide mode with an unaided problem',
+        ),
+        tutorLine: TutorLinePayload(
+          text:
+              'Now you try: ${BoardStrings.tr(SoroLanguage.en, 'unaidedPrompt')}',
+          textYo: BoardStrings.tr(SoroLanguage.en, 'unaidedPromptYo'),
+          isUnaided: true,
+        ),
+        blankRow: const TutorBlankRowPayload(
+          stepId: QuadraticStepIds.unaided,
+          templateText: 'x² − 7x + 12 = 0   ⇒   x = ▢  or  x = ▢',
+          blanks: [
+            BlankSpec(id: 'u1', expected: '3', label: 'first root'),
+            BlankSpec(id: 'u2', expected: '4', label: 'second root'),
+          ],
+        ),
+        turnState: TutorTurnState.studentTurn,
+        rootsRevealed: true,
+      ),
+    );
+  }
+
+  /// Waits for the pen to finish [text] (silent speed) plus a short beat.
+  /// Scaled by [stepDelay] so tests with a tiny delay stay fast.
+  Future<void> _waitSolve(String text, {double extra = 0.4}) async {
+    if (stepDelay <= Duration.zero) return;
+    final double scale = stepDelay.inMilliseconds / 280.0;
+    final double seconds =
+        (text.isEmpty
+            ? 0.0
+            : penDurationFor(text, spoken: false).inMilliseconds / 1000.0) +
+        extra;
+    await Future<void>.delayed(
+      Duration(milliseconds: (seconds * 1000 * scale).round()),
+    );
   }
 
   @override
