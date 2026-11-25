@@ -132,7 +132,21 @@ class TutorScriptEvent {
     this.boardVisibility,
     this.turnState,
     this.rootsRevealed,
+    this.caption,
+    this.captionYo,
+    this.thinking,
+    this.offline,
   });
+
+  /// Dock caption only (a `say` from the brain), not written on the page.
+  final String? caption;
+  final String? captionYo;
+
+  /// True while a brain request is in flight (shows the thinking indicator).
+  final bool? thinking;
+
+  /// True when the scripted fallback replaced the brain ('Offline tutor' chip).
+  final bool? offline;
 
   final TutorLinePayload? tutorLine;
   final TutorBlankRowPayload? blankRow;

@@ -7,6 +7,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../l10n/soro_strings.dart';
 import '../../theme/soro_theme.dart';
 import 'board_strings.dart';
+import 'brain_tutor_script.dart';
+import 'tutor_client.dart';
 import 'tutor_script.dart';
 import 'voice_dock.dart';
 
@@ -97,6 +99,8 @@ class _BoardScreenState extends State<BoardScreen> {
   String _currentCaptionYo = BoardStrings.tr(SoroLanguage.en, 'step1Yo');
 
   bool _isBoardVisible = true;
+  bool _thinking = false;
+  bool _offline = false;
   bool _isPinned = false;
   bool _rootsRevealed = false;
   bool _factoringCompleted = false;
@@ -124,7 +128,18 @@ class _BoardScreenState extends State<BoardScreen> {
   @override
   void initState() {
     super.initState();
-    _script = widget.tutorScript ?? DemoQuadraticTutorScript();
+    _script = widget.tutorScript ??
+        BrainTutorScript(
+          client: TutorClient(),
+          question: widget.activeQuestion.trim().isEmpty
+              ? BoardStrings.tr(SoroLanguage.en, 'problemTitle')
+              : widget.activeQuestion.trim(),
+          language: widget.language,
+        );
+    if (widget.tutorScript == null) {
+      _currentCaptionEn = 'Soro is thinking…';
+      _currentCaptionYo = '';
+    }
     _subscription = _script.events.listen(_handleScriptEvent);
     _script.start();
     _resetIdleTimer();
@@ -155,6 +170,12 @@ class _BoardScreenState extends State<BoardScreen> {
       }
       if (event.turnState != null) {
         _turnState = event.turnState!;
+      }
+      if (event.thinking != null) _thinking = event.thinking!;
+      if (event.offline != null) _offline = event.offline!;
+      if (event.caption != null) {
+        _currentCaptionEn = event.caption!;
+        _currentCaptionYo = event.captionYo ?? '';
       }
       if (event.rootsRevealed != null) {
         _rootsRevealed = event.rootsRevealed!;
@@ -481,6 +502,7 @@ class _BoardScreenState extends State<BoardScreen> {
                         ? _buildBoardStage(context, lang, isPhone: isPhone)
                         : _buildTuckedAwayChatView(context, lang),
                   ),
+                  if (_thinking || _offline) _buildBrainStatus(),
                   VoiceDock(
                     language: lang,
                     networkStatus: widget.networkStatus,
@@ -1035,6 +1057,60 @@ class _BoardScreenState extends State<BoardScreen> {
               ),
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  /// Thinking indicator while the brain answers, plus the honest offline chip.
+  Widget _buildBrainStatus() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: SoroTokens.s4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          if (_thinking)
+            Row(
+              key: const Key('brain-thinking'),
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(
+                  width: 14,
+                  height: 14,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+                const SizedBox(width: SoroTokens.s8),
+                Text(
+                  'Soro is thinking…',
+                  style: SoroTokens.serif(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: SoroTokens.crimsonDeep,
+                  ),
+                ),
+              ],
+            ),
+          if (_thinking && _offline) const SizedBox(width: SoroTokens.s12),
+          if (_offline)
+            Container(
+              key: const Key('offline-tutor-chip'),
+              padding: const EdgeInsets.symmetric(
+                horizontal: SoroTokens.s8,
+                vertical: 2,
+              ),
+              decoration: BoxDecoration(
+                border: Border.all(color: SoroTokens.crimsonDeep),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                'Offline tutor',
+                style: SoroTokens.serif(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: SoroTokens.crimsonDeep,
+                ),
+              ),
+            ),
         ],
       ),
     );
