@@ -1,3 +1,4 @@
+import copy
 import json
 import re
 from pathlib import Path
@@ -78,7 +79,42 @@ def test_analogy_once_and_dropped_when_it_does_not_help():
 
 
 def test_leak_guard_blocks_answer_in_correction():
-    w = Walker(PACK)
+    w = Walker(copy.deepcopy(PACK))  # this test edits the pack; never share it
     w.step["misconceptions"]["b=5"] = "The roots are x = 2 and x = 3, right?"
     t = w.submit("b=5")
     assert "x = 2" not in t.text_en and one_question(t.text_en)
+
+
+FACTORABLE = [p["id"] for p in PACK["problems"] if p["id"] != "p2"]
+
+
+def _answer(step):
+    a = step["acceptable_concepts"]
+    if a[0].startswith("a="):
+        return ", ".join(a)
+    if a[0].startswith("pair="):
+        return " and ".join(a[0].split("=")[1].split(","))
+    if a[0].startswith("factored="):
+        return a[0].split("=")[1] + "=0"
+    return "one bracket must be zero" if step["id"] == "s4" else "yes they match"
+
+
+@pytest.mark.parametrize("pid", FACTORABLE)
+def test_every_factorable_problem_runs_to_transfer_without_leaking(pid):
+    w = Walker(PACK, pid)
+    prob = w.problem
+    # roots/factors of THIS problem, from its own concepts; must never appear in tutor text
+    tutor_text, turns = [], [w.open()]
+    for s in prob["steps"]:
+        for key, txt in s["misconceptions"].items():       # each known error gets its targeted fix
+            if key.startswith(("b=", "c=", "pair=", "factored=")):
+                t = Walker(PACK, pid)
+                t.i = prob["steps"].index(s)
+                got = t.submit(key.split("=", 1)[1] if key.startswith("factored=") else key.replace("=", " = ", 1) if key[0] in "bc" else key.split("=")[1].replace(",", " and "))
+                assert got.kind == "misconception" and got.text_yo == txt and one_question(got.text_yo), (pid, s["id"], key)
+    for s in prob["steps"]:
+        turns.append(w.submit(_answer(s)))
+    assert turns[-1].kind == "transfer" and one_question(turns[-1].text_yo)
+    for t in turns:
+        tutor_text += [t.text_en, t.text_yo] + [o["params"].get("latex_or_text", "") for o in t.canvas_ops if o["params"].get("author") == "tutor"]
+    assert not any(w._leaks(x) for x in tutor_text), pid
