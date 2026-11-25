@@ -26,6 +26,8 @@ KEYWORDS = {
     "p1.s5": [r"\b(match|matches|same|yes|agree)\b", r"\bcross"],
     "p2.s4": [r"square\s*root", r"root\b", r"±|plus or minus|plus and minus"],
 }
+KEYWORDS["*.s4"] = KEYWORDS["p1.s4"]  # factorable problems p3.. share the p1 prose steps
+KEYWORDS["*.s5"] = KEYWORDS["p1.s5"]
 
 READY_EN = "Ready to try one on your own, with no help from me?"
 READY_YO = "Ṣé o ṣetán láti gbìyànjú ọ̀kan fúnra rẹ, láìsí ìrànlọ́wọ́ mi?"  # needs native check
@@ -179,7 +181,7 @@ class Walker:
         if results and all(r is True for r in results):
             return "correct", None
         if any(r is None for r in results):  # prose step
-            kw = KEYWORDS.get(f"{self.problem['id']}.{step['id']}", [])
+            kw = KEYWORDS.get(f"{self.problem['id']}.{step['id']}") or KEYWORDS.get(f"*.{step['id']}", [])
             if any(re.search(p, text, re.I) for p in kw):
                 return "correct", None
         if self.judge:
