@@ -1,0 +1,236 @@
+{
+ "math101-quadratics": {
+  "p1": {
+   "s1": [
+    "coefficient",
+    "constant"
+   ],
+   "s2": [
+    "product",
+    "sum"
+   ],
+   "s3": [
+    "factorise",
+    "brackets",
+    "expand"
+   ],
+   "s4": [
+    "zero_product"
+   ],
+   "s5": [
+    "root",
+    "parabola",
+    "x_axis"
+   ]
+  },
+  "p2": {
+   "s1": [
+    "completing_square"
+   ],
+   "s2": [
+    "perfect_square"
+   ],
+   "s3": [
+    "perfect_square"
+   ],
+   "s4": [
+    "root"
+   ]
+  },
+  "p3": {
+   "s1": [
+    "coefficient",
+    "constant"
+   ],
+   "s2": [
+    "product",
+    "sum"
+   ],
+   "s3": [
+    "factorise",
+    "brackets",
+    "expand"
+   ],
+   "s4": [
+    "zero_product"
+   ],
+   "s5": [
+    "root",
+    "parabola",
+    "x_axis"
+   ]
+  },
+  "p4": {
+   "s1": [
+    "coefficient",
+    "constant"
+   ],
+   "s2": [
+    "product",
+    "sum"
+   ],
+   "s3": [
+    "factorise",
+    "brackets",
+    "expand"
+   ],
+   "s4": [
+    "zero_product"
+   ],
+   "s5": [
+    "root",
+    "parabola",
+    "x_axis"
+   ]
+  },
+  "p5": {
+   "s1": [
+    "coefficient",
+    "constant"
+   ],
+   "s2": [
+    "product",
+    "sum"
+   ],
+   "s3": [
+    "factorise",
+    "brackets",
+    "expand"
+   ],
+   "s4": [
+    "zero_product"
+   ],
+   "s5": [
+    "root",
+    "parabola",
+    "x_axis"
+   ]
+  },
+  "p6": {
+   "s1": [
+    "coefficient",
+    "constant"
+   ],
+   "s2": [
+    "product",
+    "sum"
+   ],
+   "s3": [
+    "factorise",
+    "brackets",
+    "expand"
+   ],
+   "s4": [
+    "zero_product"
+   ],
+   "s5": [
+    "root",
+    "parabola",
+    "x_axis"
+   ]
+  },
+  "p7": {
+   "s1": [
+    "coefficient",
+    "constant"
+   ],
+   "s2": [
+    "product",
+    "sum"
+   ],
+   "s3": [
+    "factorise",
+    "brackets",
+    "expand"
+   ],
+   "s4": [
+    "zero_product"
+   ],
+   "s5": [
+    "root",
+    "parabola",
+    "x_axis"
+   ]
+  },
+  "p8": {
+   "s1": [
+    "coefficient",
+    "constant"
+   ],
+   "s2": [
+    "product",
+    "sum"
+   ],
+   "s3": [
+    "factorise",
+    "brackets",
+    "expand"
+   ],
+   "s4": [
+    "zero_product"
+   ],
+   "s5": [
+    "root",
+    "parabola",
+    "x_axis"
+   ]
+  },
+  "p9": {
+   "s1": [
+    "coefficient",
+    "constant"
+   ],
+   "s2": [
+    "product",
+    "sum"
+   ],
+   "s3": [
+    "factorise",
+    "brackets",
+    "expand"
+   ],
+   "s4": [
+    "zero_product"
+   ],
+   "s5": [
+    "root",
+    "parabola",
+    "x_axis"
+   ]
+  },
+  "p10": {
+   "s1": [
+    "coefficient",
+    "constant"
+   ],
+   "s2": [
+    "product",
+    "sum"
+   ],
+   "s3": [
+    "factorise",
+    "brackets",
+    "expand"
+   ],
+   "s4": [
+    "zero_product"
+   ],
+   "s5": [
+    "root",
+    "parabola",
+    "x_axis"
+   ]
+  }
+ },
+ "physics-friction": {
+  "f1": {
+   "s1": [
+    "force"
+   ],
+   "s2": [
+    "friction",
+    "surface"
+   ]
+  }
+ }
+}
