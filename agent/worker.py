@@ -53,6 +53,16 @@ async def publish(room, events: list, spoken: str | None = None) -> None:
             log.warning("lk.transcription send failed: %s", e)
 
 
+def speak(session, text: str) -> None:
+    """Speak a tutor line (Spitch). Interruptible: the student can barge in. Never raises."""
+    if session is None or not text:
+        return
+    try:
+        session.say(text, allow_interruptions=True, add_to_chat_ctx=False)
+    except Exception as e:  # voice is best-effort; captions and ink are the contract
+        log.warning("speech failed: %s", e)
+
+
 def build_agent(tutor, room):
     from livekit.agents import Agent, StopResponse
 
@@ -66,6 +76,7 @@ def build_agent(tutor, room):
                 reply = await asyncio.to_thread(tutor.handle, text)  # blocking HTTP: keep off the loop
                 log.info("turn kind=%s provider=%s %dms", reply.kind, reply.provider, reply.latency_ms)
                 await publish(room, reply.events, reply.spoken_yo)
+                speak(self.session, reply.spoken_yo)
             raise StopResponse()  # suppress the default LLM reply
 
     return SoroAgent()
@@ -78,8 +89,11 @@ async def entrypoint(ctx) -> None:
     from tutor import Tutor
 
     await ctx.connect()
-    tutor = Tutor(json.loads(PACK.read_text(encoding="utf-8")))
+    # Voice path speaks the verified pack text: the brain call added 1.5-6 s and broke the 3 s budget.
+    # Set SORO_USE_BRAIN=1 to let the brain rephrase replies (slower, less predictable).
+    tutor = Tutor(json.loads(PACK.read_text(encoding="utf-8")), use_brain=os.getenv("SORO_USE_BRAIN", "0") == "1")
     room = ctx.room
+    holder: dict = {"session": None}
 
     def on_data(pkt) -> None:  # typed or tapped answers: client -> agent (student-action contract)
         if pkt.topic != "soro.student_action":
@@ -92,19 +106,27 @@ async def entrypoint(ctx) -> None:
             async def go() -> None:
                 reply = await asyncio.to_thread(tutor.handle, str(msg["value"]))
                 await publish(room, reply.events, reply.spoken_yo)
+                speak(holder["session"], reply.spoken_yo)
             asyncio.create_task(go())
 
     room.on("data_received", on_data)
 
+    tts = None
+    if os.getenv("SORO_TTS_MODE", "spitch_with_cache") != "off" and os.getenv("SPITCH_API_KEY"):
+        from livekit.plugins import spitch
+        tts = spitch.TTS(language="yo", voice=os.getenv("SORO_TTS_VOICE", "sade"))
     session = AgentSession(
+        tts=tts,
         stt=groq.STT(model=os.getenv("SORO_STT_MODEL", "whisper-large-v3-turbo"),
                      language=os.getenv("SORO_STT_LANGUAGE") or "en", prompt=STT_HINT),
         vad=silero.VAD.load(),
         turn_detection="vad",
     )
     await session.start(agent=build_agent(tutor, room), room=room)
+    holder["session"] = session if tts else None
     opening = tutor.start()
     await publish(room, opening.events, opening.spoken_yo)
+    speak(holder["session"], opening.spoken_yo)
 
 
 if __name__ == "__main__":
