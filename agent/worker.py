@@ -89,7 +89,9 @@ async def entrypoint(ctx) -> None:
     from tutor import Tutor
 
     await ctx.connect()
-    tutor = Tutor(json.loads(PACK.read_text(encoding="utf-8")))
+    # Voice path speaks the verified pack text: the brain call added 1.5-6 s and broke the 3 s budget.
+    # Set SORO_USE_BRAIN=1 to let the brain rephrase replies (slower, less predictable).
+    tutor = Tutor(json.loads(PACK.read_text(encoding="utf-8")), use_brain=os.getenv("SORO_USE_BRAIN", "0") == "1")
     room = ctx.room
     holder: dict = {"session": None}
 
