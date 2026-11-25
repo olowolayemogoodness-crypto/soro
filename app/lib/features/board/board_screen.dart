@@ -93,10 +93,8 @@ class _BoardScreenState extends State<BoardScreen> {
 
   TutorTurnState _turnState = TutorTurnState.soroSpeaking;
   TutorTurnState _turnStateBeforeListening = TutorTurnState.studentTurn;
-  String _currentCaptionEn =
-      BoardStrings.tr(SoroLanguage.en, 'step1Prompt');
-  String _currentCaptionYo =
-      BoardStrings.tr(SoroLanguage.en, 'step1Yo');
+  String _currentCaptionEn = BoardStrings.tr(SoroLanguage.en, 'step1Prompt');
+  String _currentCaptionYo = BoardStrings.tr(SoroLanguage.en, 'step1Yo');
 
   bool _isBoardVisible = true;
   bool _isPinned = false;
@@ -234,7 +232,8 @@ class _BoardScreenState extends State<BoardScreen> {
 
     _idleTimer = Timer(widget.tuckAwayDelay, () {
       if (!mounted) return;
-      final bool busy = _isPinned ||
+      final bool busy =
+          _isPinned ||
           _isTyping ||
           _hasActiveBlankFocus ||
           _isDrawing ||
@@ -316,7 +315,6 @@ class _BoardScreenState extends State<BoardScreen> {
     );
   }
 
-
   // --- Free ink on the notebook page ---
   bool _isStylus(PointerEvent e) =>
       e.kind == PointerDeviceKind.stylus ||
@@ -330,8 +328,7 @@ class _BoardScreenState extends State<BoardScreen> {
       if (_activeStylusPointerId != null) return true;
       final DateTime? last = _lastStylusEventTime;
       if (last != null &&
-          DateTime.now().difference(last) <
-              const Duration(milliseconds: 800)) {
+          DateTime.now().difference(last) < const Duration(milliseconds: 800)) {
         return true;
       }
       if (event.radiusMajor > 28.0) return true;
@@ -510,9 +507,7 @@ class _BoardScreenState extends State<BoardScreen> {
       ),
       decoration: BoxDecoration(
         color: SoroTokens.cream.withValues(alpha: 0.95),
-        border: const Border(
-          bottom: BorderSide(color: SoroTokens.line),
-        ),
+        border: const Border(bottom: BorderSide(color: SoroTokens.line)),
       ),
       child: Wrap(
         alignment: WrapAlignment.spaceBetween,
@@ -580,8 +575,9 @@ class _BoardScreenState extends State<BoardScreen> {
                   key: const Key('board-pin-button'),
                   onPressed: _handleTogglePin,
                   style: OutlinedButton.styleFrom(
-                    backgroundColor:
-                        _isPinned ? SoroTokens.sun : SoroTokens.paper,
+                    backgroundColor: _isPinned
+                        ? SoroTokens.sun
+                        : SoroTokens.paper,
                     foregroundColor: SoroTokens.ink,
                     side: BorderSide(
                       color: _isPinned ? SoroTokens.ink : SoroTokens.control,
@@ -618,7 +614,8 @@ class _BoardScreenState extends State<BoardScreen> {
                   key: const Key('board-network-status-pill'),
                   onPressed: widget.onCycleNetworkStatus,
                   style: OutlinedButton.styleFrom(
-                    backgroundColor: widget.networkStatus ==
+                    backgroundColor:
+                        widget.networkStatus ==
                             SoroNetworkStatus.weakSignalVoiceOnly
                         ? SoroTokens.warn
                         : SoroTokens.paper,
@@ -951,7 +948,12 @@ class _BoardScreenState extends State<BoardScreen> {
                     children: [
                       _buildNotebookTitleHeader(lang, isPhone, ruleSpacing),
                       for (int i = start; i < _entries.length; i++)
-                        _buildNotebookEntryRow(_entries[i], lang, i, ruleSpacing),
+                        _buildNotebookEntryRow(
+                          _entries[i],
+                          lang,
+                          i,
+                          ruleSpacing,
+                        ),
                       if (_activeBlankRow != null && !_unaidedCompleted)
                         _buildActiveBlankRow(
                           _activeBlankRow!,
@@ -1069,7 +1071,10 @@ class _BoardScreenState extends State<BoardScreen> {
             if (_factoringCompleted || _rootsRevealed || _unaidedCompleted)
               Container(
                 key: const Key('correct-badge'),
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 3,
+                ),
                 decoration: BoxDecoration(
                   color: SoroTokens.mint,
                   borderRadius: BorderRadius.circular(SoroTokens.rPill),
@@ -1133,16 +1138,16 @@ class _BoardScreenState extends State<BoardScreen> {
             color: SoroTokens.crimsonDeep,
           )
         : isTutor
-            ? SoroTokens.sans(
-                fontSize: size,
-                fontWeight: FontWeight.w700,
-                color: SoroTokens.crimsonDeep,
-              )
-            : SoroTokens.serif(
-                fontSize: size,
-                fontWeight: FontWeight.w600,
-                color: SoroTokens.studentBlue,
-              );
+        ? SoroTokens.sans(
+            fontSize: size,
+            fontWeight: FontWeight.w700,
+            color: SoroTokens.crimsonDeep,
+          )
+        : SoroTokens.serif(
+            fontSize: size,
+            fontWeight: FontWeight.w600,
+            color: SoroTokens.studentBlue,
+          );
 
     return IgnorePointer(
       key: entry.isAnalogy ? const Key('board-analogy-line') : null,
@@ -1309,12 +1314,15 @@ class _BoardScreenState extends State<BoardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            BoardStrings.tr(lang, 'graphSupportHeading'),
-            style: SoroTokens.sans(
-              fontSize: 12.5,
-              fontWeight: FontWeight.w700,
-              color: SoroTokens.ink2,
+          Padding(
+            padding: const EdgeInsets.only(right: 36),
+            child: Text(
+              BoardStrings.tr(lang, 'graphSupportHeading'),
+              style: SoroTokens.sans(
+                fontSize: 12.5,
+                fontWeight: FontWeight.w700,
+                color: SoroTokens.ink2,
+              ),
             ),
           ),
           const SizedBox(height: 8),
@@ -1433,8 +1441,9 @@ class _BoardScreenState extends State<BoardScreen> {
                             ),
                             decoration: BoxDecoration(
                               color: SoroTokens.sun,
-                              borderRadius:
-                                  BorderRadius.circular(SoroTokens.rPill),
+                              borderRadius: BorderRadius.circular(
+                                SoroTokens.rPill,
+                              ),
                               border: Border.all(color: SoroTokens.ink),
                             ),
                             child: Text(
@@ -1616,8 +1625,16 @@ class _SupportingParabolaPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round;
 
     // x-axis and y-axis
-    canvas.drawLine(Offset(12, axisY), Offset(size.width - 12, axisY), axisPaint);
-    canvas.drawLine(Offset(axisX, 10), Offset(axisX, size.height - 10), axisPaint);
+    canvas.drawLine(
+      Offset(12, axisY),
+      Offset(size.width - 12, axisY),
+      axisPaint,
+    );
+    canvas.drawLine(
+      Offset(axisX, 10),
+      Offset(axisX, size.height - 10),
+      axisPaint,
+    );
 
     // Parabola curve crossing at root1X and root2X
     final double root1X = size.width * 0.46;
