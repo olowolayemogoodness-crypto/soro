@@ -1,6 +1,4 @@
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 /// Core design system tokens from the Sọ̀rọ̀ design study (`soro-feel` & `soro-ui` §2).
 ///
@@ -152,7 +150,7 @@ class SoroTokens {
   static ThemeData buildTheme() {
     final base = ThemeData(
       useMaterial3: true,
-      scaffoldBackgroundColor: cream,
+      scaffoldBackgroundColor: paper,
       fontFamily: fontSans,
       colorScheme: const ColorScheme.light(
         primary: crimson,
@@ -185,13 +183,13 @@ class SoroTokens {
   }
 }
 
-/// Faint 16px dotted-paper study table background with the subtle single-colour
-/// `soro-logo-black.svg` watermark rotated -4 degrees behind the workspace.
+/// Plain white study background shared by every screen. The dotted paper and
+/// watermark were retired; [showWatermark] is kept so call sites still compile.
 class SoroDottedPaperBackground extends StatelessWidget {
   const SoroDottedPaperBackground({
     super.key,
     required this.child,
-    this.showWatermark = true,
+    this.showWatermark = false,
   });
 
   final Widget child;
@@ -199,59 +197,6 @@ class SoroDottedPaperBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ColoredBox(
-      color: SoroTokens.cream,
-      child: CustomPaint(
-        painter: const _DottedPaperPainter(),
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            if (showWatermark)
-              IgnorePointer(
-                child: ExcludeSemantics(
-                  child: Align(
-                    alignment: const Alignment(0.0, -0.15),
-                    child: Transform.rotate(
-                      angle: -4.0 * math.pi / 180.0,
-                      child: Opacity(
-                        opacity: 0.05,
-                        child: SvgPicture.asset(
-                          'assets/brand/soro-logo-black.svg',
-                          width: 320,
-                          fit: BoxFit.contain,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            child,
-          ],
-        ),
-      ),
-    );
+    return ColoredBox(color: SoroTokens.paper, child: child);
   }
-}
-
-class _DottedPaperPainter extends CustomPainter {
-  const _DottedPaperPainter();
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = SoroTokens.dot
-      ..style = PaintingStyle.fill;
-
-    const double step = SoroTokens.dotGridSize;
-    const double radius = 1.15;
-
-    for (double y = step / 2; y < size.height; y += step) {
-      for (double x = step / 2; x < size.width; x += step) {
-        canvas.drawCircle(Offset(x, y), radius, paint);
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

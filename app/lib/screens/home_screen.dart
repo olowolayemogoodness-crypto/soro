@@ -4,7 +4,11 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import '../l10n/soro_strings.dart';
 import '../models/chat_models.dart';
+import '../features/graph_friction/graph_friction_screen.dart';
+import '../features/progress/progress_data.dart';
 import '../theme/soro_theme.dart';
+import '../widgets/soro_empty_state.dart';
+import 'home_dashboard.dart';
 
 /// A single ink stroke captured via pointer events on the inline stylus pad.
 class StylusStroke {
@@ -75,36 +79,16 @@ class _HomeScreenState extends State<HomeScreen> {
   final List<StylusStroke> _strokes = <StylusStroke>[];
   StylusStroke? _activeStroke;
 
-  static const List<SuggestedTopic> _suggestedTopics = [
-    SuggestedTopic(
-      id: 'quadratic',
-      titleKey: 'chipQuadraticTitle',
-      promptKey: 'chipQuadraticPrompt',
-      tagKey: 'chipQuadraticTag',
-    ),
-    SuggestedTopic(
-      id: 'friction',
-      titleKey: 'chipFrictionTitle',
-      promptKey: 'chipFrictionPrompt',
-      tagKey: 'chipFrictionTag',
-    ),
-    SuggestedTopic(
-      id: 'pdf',
-      titleKey: 'chipPdfTitle',
-      promptKey: 'chipPdfPrompt',
-      tagKey: 'chipPdfTag',
-    ),
-    SuggestedTopic(
-      id: 'complete-square',
-      titleKey: 'chipCompleteSquareTitle',
-      promptKey: 'chipCompleteSquarePrompt',
-      tagKey: 'chipCompleteSquareTag',
-    ),
-  ];
+  late final int _streak = ProgressData.sample().streak;
+
+  final ScrollController _scrollController = ScrollController();
+  final GlobalKey _askCardKey = GlobalKey();
+  int _navIndex = 0;
 
   @override
   void dispose() {
     _textController.dispose();
+    _scrollController.dispose();
     _composerFocusNode.dispose();
     super.dispose();
   }
@@ -184,12 +168,18 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final bool reducedMotion = MediaQuery.disableAnimationsOf(context);
     final SoroLanguage lang = widget.language;
+    final bool onDashboard = _navIndex == 0 || _navIndex == 3;
 
     return Scaffold(
-      backgroundColor: SoroTokens.cream,
+      backgroundColor: SoroTokens.paper,
+      bottomNavigationBar: SoroBottomNav(
+        language: lang,
+        selected: _navIndex,
+        onSelect: _handleNavSelect,
+      ),
       body: SoroDottedPaperBackground(
-        showWatermark: false,
         child: SafeArea(
+          bottom: false,
           child: FocusTraversalGroup(
             policy: OrderedTraversalPolicy(),
             child: Column(
@@ -199,53 +189,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: _buildAppShellHeader(context, lang, reducedMotion),
                 ),
                 Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: SoroTokens.s16,
-                      vertical: SoroTokens.s20,
-                    ),
-                    child: Center(
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 760),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            FocusTraversalOrder(
-                              order: const NumericFocusOrder(2),
-                              child: _buildIluGreetingSection(
-                                context,
-                                lang,
-                                reducedMotion,
-                              ),
-                            ),
-                            const SizedBox(height: SoroTokens.s12),
-                            FocusTraversalOrder(
-                              order: const NumericFocusOrder(3),
-                              child: _buildCalmChatSection(context, lang),
-                            ),
-                            const SizedBox(height: SoroTokens.s12),
-                            FocusTraversalOrder(
-                              order: const NumericFocusOrder(4),
-                              child: _buildAskAnythingComposer(
-                                context,
-                                lang,
-                                reducedMotion,
-                              ),
-                            ),
-                            const SizedBox(height: SoroTokens.s16),
-                            FocusTraversalOrder(
-                              order: const NumericFocusOrder(5),
-                              child: _buildSuggestedTopicsSection(
-                                context,
-                                lang,
-                              ),
-                            ),
-                            const SizedBox(height: SoroTokens.s16),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
+                  child: onDashboard
+                      ? _buildDashboard(context, lang, reducedMotion)
+                      : _buildComingSoon(lang),
                 ),
               ],
             ),
@@ -255,53 +201,181 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildAppShellHeader(
+  void _handleNavSelect(int index) {
+    setState(() => _navIndex = index);
+    if (index == 0) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_scrollController.hasClients) {
+          _scrollController.jumpTo(0);
+        }
+      });
+    } else if (index == 3) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final BuildContext? target = _askCardKey.currentContext;
+        if (target != null) {
+          Scrollable.ensureVisible(
+            target,
+            duration: MediaQuery.disableAnimationsOf(context)
+                ? Duration.zero
+                : SoroTokens.mBase,
+            alignment: 0.05,
+          );
+        }
+        _composerFocusNode.requestFocus();
+      });
+    }
+  }
+
+  void _openDefaultProblem() =>
+      widget.onOpenBoard(SoroStrings.tr(widget.language, 'chipQuadraticPrompt'));
+
+  Widget _buildComingSoon(SoroLanguage lang) {
+    return Center(
+      child: SoroEmptyState(
+        key: const Key('coming-soon-state'),
+        title: SoroStrings.tr(lang, 'soonTitle'),
+        message: SoroStrings.tr(lang, 'soonMessage'),
+        actionLabel: SoroStrings.tr(lang, 'soonAction'),
+        onAction: () => _handleNavSelect(0),
+      ),
+    );
+  }
+
+  Widget _buildDashboard(
+    BuildContext context,
+    SoroLanguage lang,
+    bool reducedMotion,
+  ) {
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        final bool wide = constraints.maxWidth >= 900;
+        final Widget hero = SoroHeroCard(
+          language: lang,
+          onStart: _openDefaultProblem,
+        );
+        final Widget ask = KeyedSubtree(
+          key: _askCardKey,
+          child: _buildAskSoroCard(context, lang, reducedMotion),
+        );
+        final Widget learn = _buildContinueLearning(lang);
+        final Widget quick = _buildQuickLinks(lang, wide);
+        final Widget today = _buildTodaySection(lang);
+        return SingleChildScrollView(
+          controller: _scrollController,
+          padding: const EdgeInsets.fromLTRB(
+            SoroTokens.s16,
+            SoroTokens.s16,
+            SoroTokens.s16,
+            SoroTokens.s24,
+          ),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 1180),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  hero,
+                  const SizedBox(height: SoroTokens.s20),
+                  if (wide)
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(flex: 6, child: ask),
+                        const SizedBox(width: SoroTokens.s20),
+                        Expanded(flex: 5, child: learn),
+                      ],
+                    )
+                  else ...[
+                    ask,
+                    const SizedBox(height: SoroTokens.s20),
+                    learn,
+                  ],
+                  const SizedBox(height: SoroTokens.s24),
+                  quick,
+                  const SizedBox(height: SoroTokens.s24),
+                  today,
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _sectionHeading(SoroLanguage lang, String key) {
+    return Padding(
+      padding: const EdgeInsets.only(
+        left: SoroTokens.s4,
+        bottom: SoroTokens.s12,
+      ),
+      child: Semantics(
+        header: true,
+        child: SoroLocalizedText(
+          SoroStrings.tr(lang, key),
+          language: lang,
+          style: SoroTokens.serif(fontSize: 22, fontWeight: FontWeight.w600),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAskSoroCard(
     BuildContext context,
     SoroLanguage lang,
     bool reducedMotion,
   ) {
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: SoroTokens.s20,
-        vertical: SoroTokens.s12,
-      ),
+      key: const Key('ask-soro-card'),
+      padding: const EdgeInsets.all(SoroTokens.s20),
       decoration: BoxDecoration(
-        color: SoroTokens.cream.withValues(alpha: 0.94),
-        border: const Border(
-          bottom: BorderSide(color: SoroTokens.line),
-        ),
+        color: SoroTokens.skyDeep,
+        borderRadius: BorderRadius.circular(SoroTokens.rLg),
+        border: Border.all(color: SoroTokens.sky, width: 1.5),
+        boxShadow: SoroTokens.e2,
       ),
-      child: Wrap(
-        alignment: WrapAlignment.spaceBetween,
-        crossAxisAlignment: WrapCrossAlignment.center,
-        spacing: SoroTokens.s12,
-        runSpacing: SoroTokens.s12,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Brand lockup with traced under-dotted Sọ̀rọ̀ colour logo
           Row(
-            mainAxisSize: MainAxisSize.min,
             children: [
-              Semantics(
-                label: 'Sọ̀rọ̀ primary colour logo with Yorùbá under-dots',
-                image: true,
-                child: SvgPicture.asset(
-                  'assets/brand/soro-logo-colour.svg',
-                  key: const Key('soro-header-logo'),
-                  height: 40,
+              Container(
+                width: 52,
+                height: 52,
+                padding: const EdgeInsets.all(6),
+                decoration: const BoxDecoration(
+                  color: SoroTokens.paper,
+                  shape: BoxShape.circle,
+                ),
+                child: ExcludeSemantics(
+                  child: SvgPicture.asset(
+                    _isMicListening
+                        ? 'assets/mascot/soro-ilu-listening.svg'
+                        : 'assets/mascot/soro-ilu-icon.svg',
+                  ),
                 ),
               ),
               const SizedBox(width: SoroTokens.s12),
-              Flexible(
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
                   children: [
+                    Semantics(
+                      header: true,
+                      child: SoroLocalizedText(
+                        SoroStrings.tr(lang, 'askCardTitle'),
+                        language: lang,
+                        style: SoroTokens.serif(
+                          fontSize: 26,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
                     SoroLocalizedText(
-                      SoroStrings.tr(lang, 'tagline'),
+                      SoroStrings.tr(lang, 'askCardSubtitle'),
                       language: lang,
                       style: SoroTokens.sans(
-                        fontSize: 13.5,
-                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
                         color: SoroTokens.ink2,
                       ),
                     ),
@@ -310,19 +384,401 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ],
           ),
-
-          // Right shell controls: Plain-word network status, Language selector, Hidden-by-default My progress
-          Wrap(
-            spacing: SoroTokens.s8,
-            runSpacing: SoroTokens.s8,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              _buildNetworkStatusPill(lang),
-              _buildLanguageSelector(lang),
-              _buildMyProgressEntry(lang, reducedMotion),
-            ],
+          const SizedBox(height: SoroTokens.s16),
+          FocusTraversalOrder(
+            order: const NumericFocusOrder(3),
+            child: _buildCalmChatSection(context, lang),
+          ),
+          FocusTraversalOrder(
+            order: const NumericFocusOrder(4),
+            child: _buildAskAnythingComposer(context, lang, reducedMotion),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildContinueLearning(SoroLanguage lang) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _sectionHeading(lang, 'continueHeading'),
+        SoroLearnCard(
+          key: const Key('learn-card-quadratic'),
+          language: lang,
+          tint: SoroTokens.peach,
+          accent: SoroTokens.orange,
+          icon: Icons.functions_rounded,
+          tag: SoroStrings.tr(lang, 'chipQuadraticTag'),
+          title: SoroStrings.tr(lang, 'chipQuadraticTitle'),
+          line: SoroStrings.tr(lang, 'learnQuadraticLine'),
+          onTap: _openDefaultProblem,
+        ),
+        const SizedBox(height: SoroTokens.s12),
+        SoroLearnCard(
+          key: const Key('learn-card-friction'),
+          language: lang,
+          tint: SoroTokens.mint,
+          accent: SoroTokens.success,
+          icon: Icons.speed_rounded,
+          tag: SoroStrings.tr(lang, 'chipFrictionTag'),
+          title: SoroStrings.tr(lang, 'chipFrictionTitle'),
+          line: SoroStrings.tr(lang, 'learnFrictionLine'),
+          onTap: () => widget
+              .onOpenBoard(SoroStrings.tr(lang, 'chipFrictionPrompt')),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildQuickLinks(SoroLanguage lang, bool wide) {
+    final List<Widget> tiles = [
+      SoroQuickTile(
+        key: const Key('quick-progress'),
+        label: SoroStrings.tr(lang, 'myProgressEntry'),
+        icon: Icons.auto_graph_rounded,
+        tint: SoroTokens.blush,
+        accent: SoroTokens.crimson,
+        onTap: widget.onOpenMyProgress,
+      ),
+      SoroQuickTile(
+        key: const Key('quick-glossary'),
+        label: SoroStrings.tr(lang, 'qlGlossary'),
+        icon: Icons.translate_rounded,
+        tint: SoroTokens.lilac,
+        accent: const Color(0xFF6B3FA0),
+        onTap: () => _showGlossary(lang),
+      ),
+      SoroQuickTile(
+        key: const Key('quick-graph-friction'),
+        label: SoroStrings.tr(lang, 'qlGraphFriction'),
+        icon: Icons.show_chart_rounded,
+        tint: SoroTokens.sky,
+        accent: SoroTokens.studentBlue,
+        onTap: () => Navigator.of(context).pushNamed(kGraphFrictionRoute),
+      ),
+      SoroQuickTile(
+        key: const Key('quick-pdf'),
+        label: SoroStrings.tr(lang, 'chipPdfTitle'),
+        icon: Icons.picture_as_pdf_rounded,
+        tint: SoroTokens.sand,
+        accent: SoroTokens.control,
+        soonNote: SoroStrings.tr(lang, 'qlSoon'),
+      ),
+    ];
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _sectionHeading(lang, 'quickHeading'),
+        LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints c) {
+            final int cols = wide ? 4 : 2;
+            const double gap = SoroTokens.s12;
+            final double w = (c.maxWidth - gap * (cols - 1)) / cols;
+            return Wrap(
+              spacing: gap,
+              runSpacing: gap,
+              children: [
+                for (final Widget t in tiles) SizedBox(width: w, child: t),
+              ],
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  void _showGlossary(SoroLanguage lang) {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: SoroTokens.paper,
+      isScrollControlled: true,
+      builder: (BuildContext ctx) => SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(SoroTokens.s24),
+          child: Column(
+            key: const Key('glossary-sheet'),
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SoroLocalizedText(
+                SoroStrings.tr(lang, 'glossaryTitle'),
+                language: lang,
+                style: SoroTokens.serif(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: SoroTokens.s12),
+              for (final String k in const [
+                'glossaryTerm1',
+                'glossaryTerm2',
+                'glossaryTerm3',
+                'glossaryTerm4',
+              ])
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 6),
+                  child: Text(
+                    SoroStrings.tr(lang, k),
+                    style: SoroTokens.sans(fontSize: 16),
+                  ),
+                ),
+              const SizedBox(height: SoroTokens.s12),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: () => Navigator.of(ctx).pop(),
+                  style: TextButton.styleFrom(
+                    minimumSize: const Size(
+                      SoroTokens.minTapTarget,
+                      SoroTokens.minTapTarget,
+                    ),
+                  ),
+                  child: Text(SoroStrings.tr(lang, 'glossaryClose')),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTodaySection(SoroLanguage lang) {
+    final Widget streak = Container(
+      key: const Key('today-streak-card'),
+      padding: const EdgeInsets.all(SoroTokens.s20),
+      decoration: BoxDecoration(
+        color: SoroTokens.sun.withValues(alpha: 0.55),
+        borderRadius: BorderRadius.circular(SoroTokens.rLg),
+        boxShadow: SoroTokens.e1,
+      ),
+      child: Semantics(
+        label: '$_streak ${SoroStrings.tr(lang, 'streakLabel')}',
+        excludeSemantics: true,
+        child: Row(
+          children: [
+            const Icon(
+              Icons.local_fire_department_rounded,
+              color: SoroTokens.crimson,
+              size: 40,
+            ),
+            const SizedBox(width: SoroTokens.s12),
+            Text(
+              '$_streak',
+              style: SoroTokens.serif(fontSize: 40, fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(width: SoroTokens.s12),
+            Expanded(
+              child: Text(
+                SoroStrings.tr(lang, 'streakLabel'),
+                style: SoroTokens.sans(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+    final Widget plan = Container(
+      key: const Key('today-plan-card'),
+      padding: const EdgeInsets.all(SoroTokens.s8),
+      decoration: BoxDecoration(
+        color: SoroTokens.paper,
+        borderRadius: BorderRadius.circular(SoroTokens.rLg),
+        border: Border.all(color: SoroTokens.line),
+        boxShadow: SoroTokens.e1,
+      ),
+      child: SoroEmptyState(
+        title: SoroStrings.tr(lang, 'planEmptyTitle'),
+        message: SoroStrings.tr(lang, 'planEmptyMessage'),
+        actionLabel: SoroStrings.tr(lang, 'heroCta'),
+        onAction: _openDefaultProblem,
+      ),
+    );
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints c) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _sectionHeading(lang, 'todayHeading'),
+            if (c.maxWidth >= 700)
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(flex: 2, child: streak),
+                  const SizedBox(width: SoroTokens.s16),
+                  Expanded(flex: 3, child: plan),
+                ],
+              )
+            else ...[
+              streak,
+              const SizedBox(height: SoroTokens.s12),
+              plan,
+            ],
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildAppShellHeader(
+    BuildContext context,
+    SoroLanguage lang,
+    bool reducedMotion,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: SoroTokens.s16,
+        vertical: SoroTokens.s8,
+      ),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1180),
+          child: Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: SoroTokens.s12,
+            runSpacing: SoroTokens.s8,
+            children: [
+              Wrap(
+                spacing: SoroTokens.s16,
+                runSpacing: SoroTokens.s4,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  Semantics(
+                    label: 'Sọ̀rọ̀ primary colour logo with Yorùbá under-dots',
+                    image: true,
+                    child: SvgPicture.asset(
+                      'assets/brand/soro-logo-colour.svg',
+                      key: const Key('soro-header-logo'),
+                      height: 32,
+                    ),
+                  ),
+                  SoroLocalizedText(
+                    SoroStrings.tr(lang, 'helloName'),
+                    key: const Key('greeting-headline'),
+                    language: lang,
+                    style: SoroTokens.serif(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  if (lang.needsNativeCheck)
+                    Container(
+                      key: const Key('yoruba-native-check-badge'),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: SoroTokens.sticky,
+                        borderRadius: BorderRadius.circular(SoroTokens.rPill),
+                        border: Border.all(color: SoroTokens.control),
+                      ),
+                      child: Text(
+                        SoroStrings.tr(lang, 'nativeCheckFlag'),
+                        style: SoroTokens.sans(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              Wrap(
+                spacing: SoroTokens.s8,
+                runSpacing: SoroTokens.s8,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  _buildNetworkStatusPill(lang),
+                  _buildLanguageSelector(lang),
+                  _buildMyProgressEntry(lang, reducedMotion),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Round My progress button with a small flame badge carrying the streak.
+  Widget _buildMyProgressEntry(
+    SoroLanguage lang,
+    bool reducedMotion,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 6, top: 6),
+      child: Semantics(
+        button: true,
+        label:
+            '${SoroStrings.tr(lang, 'myProgressEntry')}, $_streak ${SoroStrings.tr(lang, 'streakLabel')}',
+        excludeSemantics: true,
+        onTap: widget.onOpenMyProgress,
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Material(
+              color: SoroTokens.paper,
+              shape: const CircleBorder(
+                side: BorderSide(color: SoroTokens.crimson, width: 1.5),
+              ),
+              elevation: 2,
+              shadowColor: const Color.fromRGBO(92, 74, 42, 0.3),
+              child: InkWell(
+                key: const Key('my-progress-entry-button'),
+                customBorder: const CircleBorder(),
+                onTap: widget.onOpenMyProgress,
+                child: const SizedBox(
+                  width: SoroTokens.minTapTarget,
+                  height: SoroTokens.minTapTarget,
+                  child: Icon(
+                    Icons.auto_graph_rounded,
+                    color: SoroTokens.crimson,
+                    size: 24,
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              right: -8,
+              top: -8,
+              child: IgnorePointer(
+                child: Container(
+                  key: const Key('streak-badge'),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: SoroTokens.orange,
+                    borderRadius: BorderRadius.circular(SoroTokens.rPill),
+                    border: Border.all(color: SoroTokens.paper, width: 1.5),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.local_fire_department_rounded,
+                        size: 12,
+                        color: SoroTokens.ink,
+                      ),
+                      Text(
+                        '$_streak',
+                        style: SoroTokens.sans(
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w800,
+                          height: 1.1,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -436,174 +892,10 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  /// One-tap entry to the "My progress" page. Only the button lives here; no
-  /// statistics are shown on the home screen.
-  Widget _buildMyProgressEntry(
-    SoroLanguage lang,
-    bool reducedMotion,
-  ) {
-    return ConstrainedBox(
-      constraints: const BoxConstraints(minHeight: SoroTokens.minTapTarget),
-      child: OutlinedButton.icon(
-        key: const Key('my-progress-entry-button'),
-        onPressed: widget.onOpenMyProgress,
-        style: OutlinedButton.styleFrom(
-          backgroundColor: SoroTokens.paper,
-          foregroundColor: SoroTokens.ink,
-          padding: const EdgeInsets.symmetric(horizontal: SoroTokens.s16),
-          side: const BorderSide(color: SoroTokens.crimson, width: 1.5),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(SoroTokens.rPill),
-          ),
-        ),
-        icon: const Icon(
-          Icons.auto_graph_rounded,
-          size: 18,
-          color: SoroTokens.crimson,
-        ),
-        label: SoroLocalizedText(
-          SoroStrings.tr(lang, 'myProgressEntry'),
-          language: lang,
-          style: SoroTokens.sans(
-            fontSize: 13.5,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildIluGreetingSection(
-    BuildContext context,
-    SoroLanguage lang,
-    bool reducedMotion,
-  ) {
-    final String mascotAsset = _isMicListening
-        ? 'assets/mascot/soro-ilu-listening.svg'
-        : 'assets/mascot/soro-ilu-encouraging.svg';
-
-    return Container(
-      key: const Key('ilu-greeting-section'),
-      padding: const EdgeInsets.symmetric(
-        horizontal: SoroTokens.s20,
-        vertical: SoroTokens.s16,
-      ),
-      decoration: BoxDecoration(
-        color: SoroTokens.paper,
-        borderRadius: BorderRadius.circular(SoroTokens.rLg),
-        border: Border.all(color: SoroTokens.line),
-        boxShadow: SoroTokens.e1,
-      ),
-      child: Column(
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Container(
-                width: 64,
-                height: 64,
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: SoroTokens.blush.withValues(alpha: 0.45),
-                  shape: BoxShape.circle,
-                ),
-                child: Semantics(
-                  label: _isMicListening
-                      ? 'Ìlù the talking drum listening to your question'
-                      : 'Ìlù the talking drum greeting and encouraging you',
-                  image: true,
-                  child: SvgPicture.asset(
-                    mascotAsset,
-                    key: const Key('ilu-mascot-svg'),
-                    fit: BoxFit.contain,
-                  ),
-                ),
-              ),
-              const SizedBox(width: SoroTokens.s16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Wrap(
-                      spacing: SoroTokens.s8,
-                      runSpacing: 6,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 3,
-                          ),
-                          decoration: BoxDecoration(
-                            color: SoroTokens.blush,
-                            borderRadius:
-                                BorderRadius.circular(SoroTokens.rPill),
-                          ),
-                          child: SoroLocalizedText(
-                            SoroStrings.tr(lang, 'greetingBadge'),
-                            language: lang,
-                            style: SoroTokens.sans(
-                              fontSize: 12.5,
-                              fontWeight: FontWeight.w700,
-                              color: SoroTokens.crimsonDeep,
-                            ),
-                          ),
-                        ),
-                        if (lang.needsNativeCheck)
-                          Container(
-                            key: const Key('yoruba-native-check-badge'),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 3,
-                            ),
-                            decoration: BoxDecoration(
-                              color: SoroTokens.sticky,
-                              borderRadius:
-                                  BorderRadius.circular(SoroTokens.rPill),
-                              border: Border.all(color: SoroTokens.control),
-                            ),
-                            child: Text(
-                              SoroStrings.tr(lang, 'nativeCheckFlag'),
-                              style: SoroTokens.sans(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
-                                color: SoroTokens.ink,
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                    const SizedBox(height: 6),
-                    SoroLocalizedText(
-                      SoroStrings.tr(lang, 'greetingHeadline'),
-                      key: const Key('greeting-headline'),
-                      language: lang,
-                      style: SoroTokens.serif(
-                        fontSize: 26,
-                        fontWeight: FontWeight.w500,
-                        color: SoroTokens.ink,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    SoroLocalizedText(
-                      SoroStrings.tr(lang, 'greetingSubtitle'),
-                      language: lang,
-                      style: SoroTokens.sans(
-                        fontSize: 14.5,
-                        color: SoroTokens.ink2,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildCalmChatSection(BuildContext context, SoroLanguage lang) {
+    final ChatMessage? last = widget.messages
+        .cast<ChatMessage?>()
+        .lastWhere((m) => m!.sender == ChatSender.tutor, orElse: () => null);
     return Semantics(
       container: true,
       liveRegion: true,
@@ -612,13 +904,13 @@ class _HomeScreenState extends State<HomeScreen> {
         key: const Key('calm-chat-area'),
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          for (final ChatMessage msg in widget.messages)
+          if (last != null)
             Padding(
               padding: const EdgeInsets.only(bottom: SoroTokens.s12),
               child: _ChatTurnBubble(
-                message: msg,
+                message: last,
                 currentLanguage: lang,
-                onOpenBoard: () => widget.onOpenBoard(msg.text),
+                onOpenBoard: () => widget.onOpenBoard(last.text),
               ),
             ),
         ],
@@ -633,52 +925,9 @@ class _HomeScreenState extends State<HomeScreen> {
   ) {
     return Container(
       key: const Key('ask-anything-composer'),
-      padding: const EdgeInsets.all(SoroTokens.s20),
-      decoration: BoxDecoration(
-        color: SoroTokens.paper,
-        borderRadius: BorderRadius.circular(SoroTokens.rLg),
-        border: Border.all(
-          color: _isMicListening ? SoroTokens.crimson : SoroTokens.control,
-          width: _isMicListening ? 2.0 : 1.5,
-        ),
-        boxShadow: SoroTokens.e2,
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Wrap(
-            alignment: WrapAlignment.spaceBetween,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            spacing: SoroTokens.s8,
-            runSpacing: SoroTokens.s8,
-            children: [
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  ExcludeSemantics(
-                    child: SvgPicture.asset(
-                      'assets/mascot/soro-ilu-icon.svg',
-                      width: 26,
-                      height: 26,
-                    ),
-                  ),
-                  const SizedBox(width: SoroTokens.s8),
-                  Flexible(
-                    child: SoroLocalizedText(
-                      SoroStrings.tr(lang, 'composerHeading'),
-                      language: lang,
-                      style: SoroTokens.serif(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w600,
-                        color: SoroTokens.ink,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: SoroTokens.s12),
           TextField(
             key: const Key('ask-anything-input'),
             controller: _textController,
@@ -700,7 +949,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               hintMaxLines: 3,
               filled: true,
-              fillColor: SoroTokens.cream.withValues(alpha: 0.55),
+              fillColor: SoroTokens.paper,
               contentPadding: const EdgeInsets.all(SoroTokens.s16),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(SoroTokens.rMd),
@@ -1032,49 +1281,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildSuggestedTopicsSection(
-    BuildContext context,
-    SoroLanguage lang,
-  ) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: SoroTokens.s4),
-          child: SoroLocalizedText(
-            SoroStrings.tr(lang, 'suggestedTopicsHeading'),
-            language: lang,
-            style: SoroTokens.sans(
-              fontSize: 13.5,
-              fontWeight: FontWeight.w700,
-              color: SoroTokens.ink2,
-            ),
-          ),
-        ),
-        const SizedBox(height: SoroTokens.s12),
-        Wrap(
-          spacing: SoroTokens.s12,
-          runSpacing: SoroTokens.s12,
-          children: [
-            for (final SuggestedTopic topic in _suggestedTopics)
-              _SuggestedTopicChip(
-                key: Key('topic-chip-${topic.id}'),
-                topic: topic,
-                language: lang,
-                onTap: () {
-                  final String prompt =
-                      SoroStrings.tr(lang, topic.promptKey);
-                  widget.onSubmitQuestion(
-                    prompt,
-                    inputMethodLabel: 'Suggested topic',
-                  );
-                },
-              ),
-          ],
-        ),
-      ],
-    );
-  }
 }
 
 class _LanguageOptionButton extends StatelessWidget {
@@ -1296,87 +1502,6 @@ class _ChatTurnBubble extends StatelessWidget {
             ),
           ],
         ],
-      ),
-    );
-  }
-}
-
-class _SuggestedTopicChip extends StatelessWidget {
-  const _SuggestedTopicChip({
-    super.key,
-    required this.topic,
-    required this.language,
-    required this.onTap,
-  });
-
-  final SuggestedTopic topic;
-  final SoroLanguage language;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final String title = SoroStrings.tr(language, topic.titleKey);
-    final String tag = SoroStrings.tr(language, topic.tagKey);
-
-    return Semantics(
-      button: true,
-      label: '$title ($tag)',
-      child: Material(
-        color: SoroTokens.paper,
-        borderRadius: BorderRadius.circular(SoroTokens.rMd),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(SoroTokens.rMd),
-          onTap: onTap,
-          child: Container(
-            constraints: const BoxConstraints(
-              minHeight: SoroTokens.minTapTarget,
-            ),
-            padding: const EdgeInsets.symmetric(
-              horizontal: SoroTokens.s16,
-              vertical: SoroTokens.s12,
-            ),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(SoroTokens.rMd),
-              border: Border.all(color: SoroTokens.control, width: 1.5),
-              boxShadow: SoroTokens.e1,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 2,
-                  ),
-                  decoration: BoxDecoration(
-                    color: SoroTokens.sand,
-                    borderRadius: BorderRadius.circular(SoroTokens.rPill),
-                  ),
-                  child: SoroLocalizedText(
-                    tag,
-                    language: language,
-                    style: SoroTokens.sans(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: SoroTokens.ink2,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 6),
-                SoroLocalizedText(
-                  title,
-                  language: language,
-                  style: SoroTokens.sans(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: SoroTokens.ink,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
       ),
     );
   }
