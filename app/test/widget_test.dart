@@ -21,11 +21,12 @@ void main() {
 
       // 1. Home screen renders greeting, ask-anything box, and suggested topic chips
       expect(find.byKey(const Key('greeting-headline')), findsOneWidget);
-      expect(find.text('What shall we solve together?'), findsOneWidget);
+      expect(find.text('Hello, Ada'), findsOneWidget);
+      expect(find.byKey(const Key('ask-soro-card')), findsOneWidget);
       expect(find.byKey(const Key('ask-anything-composer')), findsOneWidget);
-      expect(find.byKey(const Key('topic-chip-quadratic')), findsOneWidget);
-      expect(find.byKey(const Key('topic-chip-friction')), findsOneWidget);
-      expect(find.byKey(const Key('topic-chip-pdf')), findsOneWidget);
+      expect(find.byKey(const Key('learn-card-quadratic')), findsOneWidget);
+      expect(find.byKey(const Key('learn-card-friction')), findsOneWidget);
+      expect(find.byKey(const Key('quick-pdf')), findsOneWidget);
 
       // 2. One tap on "My progress" opens the dashboard (no statistics on home)
       expect(find.byKey(const Key('my-progress-entry-button')), findsOneWidget);
@@ -51,7 +52,7 @@ void main() {
       // 4. Language selector switches to Yorùbá and displays 'needs native check' flag
       await tester.tap(find.byKey(const Key('lang-yo-button')));
       await tester.pumpAndSettle();
-      expect(find.text('Kí ni kí á jọ yanju lónìí?'), findsOneWidget);
+      expect(find.text('Báwo, Ada [needs native check]'), findsOneWidget);
       expect(find.byKey(const Key('yoruba-native-check-badge')), findsOneWidget);
 
       await tester.tap(find.byKey(const Key('lang-en-button')));
@@ -96,7 +97,7 @@ void main() {
       // Return to home chat
       await tester.tap(find.byKey(const Key('board-back-button')));
       await tester.pumpAndSettle();
-      expect(find.text('Solve x² − 5x + 6 = 0'), findsOneWidget);
+      expect(find.textContaining('Solve x² − 5x + 6 = 0'), findsWidgets);
     },
   );
 
