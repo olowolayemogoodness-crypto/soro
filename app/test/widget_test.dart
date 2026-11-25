@@ -14,7 +14,7 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
 
-      await tester.pumpWidget(const SoroApp());
+      await tester.pumpWidget(const SoroApp(showSplash: false));
       await tester.pumpAndSettle();
 
       // 1. Home screen renders greeting, ask-anything box, and suggested topic chips
@@ -115,7 +115,7 @@ void main() {
             textScaler: TextScaler.linear(2.0),
             disableAnimations: true,
           ),
-          child: const SoroApp(),
+          child: const SoroApp(showSplash: false),
         ),
       );
       await tester.pumpAndSettle();

@@ -8,6 +8,7 @@ import 'models/chat_models.dart';
 import 'screens/home_screen.dart';
 import 'screens/placeholder_screens.dart';
 import 'theme/soro_theme.dart';
+import 'widgets/soro_splash.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,7 +27,13 @@ enum SoroRoute {
 }
 
 class SoroApp extends StatefulWidget {
-  const SoroApp({super.key});
+  const SoroApp({super.key, this.showSplash = true});
+
+  /// Show the short splash first. It is skipped when the app is opened again
+  /// in the same session.
+  final bool showSplash;
+
+  static bool _splashSeenThisSession = false;
 
   @override
   State<SoroApp> createState() => _SoroAppState();
@@ -36,6 +43,8 @@ class _SoroAppState extends State<SoroApp> {
   SoroLanguage _language = SoroLanguage.en;
   SoroNetworkStatus _networkStatus = SoroNetworkStatus.live;
   SoroRoute _activeRoute = SoroRoute.home;
+  late bool _splashVisible =
+      widget.showSplash && !SoroApp._splashSeenThisSession;
   String _activeBoardQuestion = '';
   late List<ChatMessage> _messages;
 
@@ -142,6 +151,14 @@ class _SoroAppState extends State<SoroApp> {
   }
 
   Widget _buildActiveScreen() {
+    if (_splashVisible) {
+      return SoroSplash(
+        onDone: () {
+          SoroApp._splashSeenThisSession = true;
+          setState(() => _splashVisible = false);
+        },
+      );
+    }
     switch (_activeRoute) {
       case SoroRoute.home:
         return HomeScreen(

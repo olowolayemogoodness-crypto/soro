@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../theme/soro_theme.dart';
+import '../../widgets/ilu_state_view.dart';
 import 'progress_data.dart';
 import 'progress_strings.dart';
 
@@ -93,7 +94,14 @@ class _ProgressScreenState extends State<ProgressScreen> {
                       if (_parent) ...[_consentNote(), const SizedBox(height: 16)],
                       _hero(wide),
                       const SizedBox(height: 16),
-                      if (wide)
+                      if (_data.subjects.isEmpty)
+                        const SoroStateView(
+                          kind: SoroStateKind.empty,
+                          title: 'Your journey starts here',
+                          message:
+                              'Solve a problem with Ìlù and your progress will show up on this page.',
+                        )
+                      else if (wide)
                         Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
                           Expanded(flex: 3, child: _leftColumn()),
                           const SizedBox(width: 16),
