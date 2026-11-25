@@ -65,3 +65,10 @@ def test_token_errors(monkeypatch):
     assert client.post("/session/token", json=BODY).status_code == 503
     monkeypatch.setenv("LIVEKIT_MODE", "bogus")
     assert client.get("/health").status_code == 500
+
+
+def test_placeholder_url_is_rejected(monkeypatch):
+    monkeypatch.setenv("LIVEKIT_MODE", "cloud")
+    monkeypatch.setenv("CLOUD_LIVEKIT_URL", "wss://your_project.livekit.cloud")
+    r = client.post("/session/token", json=BODY)
+    assert r.status_code == 503 and "placeholder" in r.json()["detail"]

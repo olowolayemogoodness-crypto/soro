@@ -46,6 +46,8 @@ def livekit_creds() -> tuple[str, str, str]:
     url = os.getenv(f"{prefix}_LIVEKIT_URL", "")
     key = os.getenv(f"{prefix}_LIVEKIT_API_KEY", "")
     secret = os.getenv(f"{prefix}_LIVEKIT_API_SECRET", "")
+    if any(m in url.lower() for m in ("your_project", "<", "example.")):
+        raise HTTPException(503, f"{prefix}_LIVEKIT_URL is still a placeholder; set the real URL")
     missing = [n for n, v in (("URL", url), ("API_KEY", key), ("API_SECRET", secret)) if not v]
     if missing:
         raise HTTPException(503, f"{prefix}_LIVEKIT_{', '.join(missing)} not configured")
