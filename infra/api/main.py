@@ -12,7 +12,7 @@ from datetime import date, datetime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from livekit import api as lk
@@ -280,3 +280,69 @@ def assemble_progress(
 @app.get("/progress")
 def get_progress() -> dict:
     return load_progress()
+
+
+# --- recording (B6 follow-up): save a session step and an unaided-check result ---
+class CheckResult(BaseModel):
+    result: str = Field(pattern=r"^(passed|needs_practice)$")
+    attempts: int = Field(ge=0, le=50)
+
+
+class RecordRequest(BaseModel):
+    """Anonymous ids only: never put a student name in learner_id."""
+    learner_id: str = Field(default="demo-learner", pattern=NAME_RE.pattern)
+    session_id: str = Field(pattern=NAME_RE.pattern)
+    subject: str = Field(min_length=1, max_length=64)
+    topic: str = Field(min_length=1, max_length=64)
+    lesson: str = Field(min_length=1, max_length=120)
+    time: datetime | None = None  # when the session started; defaults to now
+    step: int | None = Field(default=None, ge=1, le=100)
+    completed: bool = True
+    check: CheckResult | None = None
+
+
+def _check_record_key(header_value: str | None) -> None:
+    """If SORO_RECORD_KEY is set, writes must send it in X-Soro-Key (stops anonymous spam)."""
+    want = os.getenv("SORO_RECORD_KEY", "")
+    if want and header_value != want:
+        raise HTTPException(401, "missing or wrong X-Soro-Key")
+
+
+def save_record(conn, req: RecordRequest) -> dict:
+    """One transaction: learner, session, step and check are upserted, never duplicated."""
+    conn.execute(
+        "INSERT INTO learners (id, display_name) VALUES (%s, 'Learner') ON CONFLICT (id) DO NOTHING",
+        (req.learner_id,),
+    )
+    conn.execute(
+        "INSERT INTO sessions (id, learner_id, started_at, subject, topic, lesson) "
+        "VALUES (%s, %s, COALESCE(%s, now()), %s, %s, %s) ON CONFLICT (id) DO NOTHING",
+        (req.session_id, req.learner_id, req.time, req.subject, req.topic, req.lesson),
+    )
+    owner = conn.execute("SELECT learner_id FROM sessions WHERE id = %s", (req.session_id,)).fetchone()
+    if owner["learner_id"] != req.learner_id:  # a session id belongs to one learner
+        raise HTTPException(409, "session_id belongs to another learner")
+    if req.step is not None:
+        conn.execute(
+            "INSERT INTO steps (session_id, position, completed) VALUES (%s, %s, %s) "
+            "ON CONFLICT (session_id, position) DO UPDATE SET completed = steps.completed OR EXCLUDED.completed",
+            (req.session_id, req.step, req.completed),
+        )
+    if req.check is not None:
+        conn.execute(
+            "INSERT INTO unaided_checks (session_id, result, attempts) VALUES (%s, %s, %s) "
+            "ON CONFLICT (session_id) DO UPDATE SET result = EXCLUDED.result, attempts = EXCLUDED.attempts",
+            (req.session_id, req.check.result, req.check.attempts),
+        )
+    done = conn.execute(
+        "SELECT count(*)::int AS n FROM steps WHERE session_id = %s AND completed", (req.session_id,)
+    ).fetchone()["n"]
+    return {"ok": True, "session_id": req.session_id, "steps_done": done,
+            "unaided_check": req.check.model_dump() if req.check else None}
+
+
+@app.post("/progress/record")
+def record_progress(req: RecordRequest, x_soro_key: str | None = Header(default=None)) -> dict:
+    _check_record_key(x_soro_key)
+    with _connect() as conn:  # commits on success, rolls back on error
+        return save_record(conn, req)
