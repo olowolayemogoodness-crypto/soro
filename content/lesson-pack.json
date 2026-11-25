@@ -403,6 +403,1246 @@
           ]
         }
       ]
+    },
+    {
+      "id": "p3",
+      "statement_yo": "Yànjú quadratic equation x² − 6x + 8 = 0",
+      "statement_en": "Solve x² − 6x + 8 = 0",
+      "equation": "x² − 6x + 8 = 0",
+      "steps": [
+        {
+          "id": "s1",
+          "prompt_yo": "Wo quadratic equation tó wà lórí screen yìí; kí ni iye coefficient a, b, àti constant c tí o rí níbẹ̀?",
+          "prompt_en": "What are the values of coefficient a, b, and constant c?",
+          "acceptable_concepts": [
+            "a=1",
+            "b=-6",
+            "c=8"
+          ],
+          "misconceptions": {
+            "b=6": "Dúró náà, wo àmì tó wà níwájú 6x: ṣé plus 6 ni tàbí minus 6?",
+            "c=-8": "Wo àmì tó wà níwájú 8 ní òpin equation náà: ṣé plus ni tàbí minus?"
+          },
+          "hint_ladder": [
+            "Wo nọ́mbà tó dúró níwájú x², x, àti nọ́mbà tó dá dúró.",
+            "Ìtọ́ka: ax² + bx + c = 0, kí ni nọ́mbà tó wà níwájú x?"
+          ],
+          "canvas_ops": [
+            {
+              "op": "write_step",
+              "params": {
+                "step_id": "s1",
+                "latex_or_text": "a = ?, b = ?, c = ?",
+                "author": "tutor",
+                "reveal_answer": false
+              }
+            }
+          ],
+          "term_ids": [
+            "coefficient",
+            "constant"
+          ]
+        },
+        {
+          "id": "s2",
+          "prompt_yo": "Nọ́mbà méjì wo ni ìsọdipúpọ̀ wọn jẹ́ c, tí àròpọ̀ wọn sì jẹ́ b?",
+          "prompt_en": "Which two numbers multiply to give c and add up to b?",
+          "acceptable_concepts": [
+            "pair=-2,-4"
+          ],
+          "misconceptions": {
+            "pair=2,4": "Wo àmì b lẹ́ẹ̀kan sí i: àròpọ̀ 2 àti 4 jẹ́ 6, ṣé ó bá b mu?"
+          },
+          "hint_ladder": [
+            "Kọ àwọn nọ́mbà méjì tí ìsọdipúpọ̀ wọn jẹ́ 6 sílẹ̀ kí o wo àròpọ̀ olúkúlùkù wọn.",
+            "Àwọn nọ́mbà méjèèjì ní àmì kan náà nítorí c jẹ́ positive."
+          ],
+          "canvas_ops": [
+            {
+              "op": "write_step",
+              "params": {
+                "step_id": "s2",
+                "latex_or_text": "? × ? = c,  ? + ? = b",
+                "author": "tutor",
+                "reveal_answer": false
+              }
+            }
+          ],
+          "term_ids": [
+            "product",
+            "sum"
+          ]
+        },
+        {
+          "id": "s3",
+          "prompt_yo": "Fi àwọn nọ́mbà méjì náà sí àwọn ibi tí ó ṣófo nínú brackets méjèèjì; kí ni o máa kọ sí bracket àkọ́kọ́?",
+          "prompt_en": "Fill the blanks in the two brackets with your numbers; what goes in the first bracket?",
+          "acceptable_concepts": [
+            "factored=(x-2)(x-4)"
+          ],
+          "misconceptions": {
+            "factored=(x+2)(x+4)": "Tí o bá expand (x + 2)(x + 4), ṣé middle term máa fún wa −6x tàbí +6x?"
+          },
+          "hint_ladder": [
+            "Expand brackets rẹ padà kí o wo middle term.",
+            "Ṣé middle term tí o rí bá b mu?"
+          ],
+          "canvas_ops": [
+            {
+              "op": "write_step",
+              "params": {
+                "step_id": "s3",
+                "latex_or_text": "(x - ?)(x - ?) = 0",
+                "author": "tutor",
+                "reveal_answer": false
+              }
+            }
+          ],
+          "term_ids": [
+            "factorise",
+            "brackets",
+            "expand"
+          ]
+        },
+        {
+          "id": "s4",
+          "prompt_yo": "Tí ìsọdipúpọ̀ bá jẹ́ zero, kí ni ó gbọ́dọ̀ jẹ́ òótọ́ nípa ọ̀kan nínú brackets náà?",
+          "prompt_en": "If a product equals zero, what must be true about one of the brackets?",
+          "acceptable_concepts": [
+            "one bracket = 0"
+          ],
+          "misconceptions": {
+            "both brackets must equal 1": "Tí ìsọdipúpọ̀ bá jẹ́ 1, kìí ṣe zero; kí ni nọ́mbà méjì tí ìsọdipúpọ̀ wọn jẹ́ zero?"
+          },
+          "hint_ladder": [
+            "Ronú nípa 0 × 5 àti 7 × 0; kí ni ó wà ní ìbámu láàrin wọn?"
+          ],
+          "canvas_ops": [
+            {
+              "op": "write_step",
+              "params": {
+                "step_id": "s4",
+                "latex_or_text": "x - ? = 0  or  x - ? = 0",
+                "author": "tutor",
+                "reveal_answer": false
+              }
+            }
+          ],
+          "term_ids": [
+            "zero_product"
+          ]
+        },
+        {
+          "id": "s5",
+          "prompt_yo": "Wo parabola náà: níbo ni ó ti kan x-axis, ṣé ó bá àwọn gbòǹgbò rẹ mu?",
+          "prompt_en": "Look at the parabola: where does it cross the x-axis, and does that match your roots?",
+          "acceptable_concepts": [
+            "crossings match roots"
+          ],
+          "misconceptions": {},
+          "hint_ladder": [
+            "Wo ibi tí ìlà náà ti kan x-axis lórí graph."
+          ],
+          "canvas_ops": [
+            {
+              "op": "highlight",
+              "params": {
+                "target": "roots"
+              }
+            }
+          ],
+          "term_ids": [
+            "root",
+            "parabola",
+            "x_axis"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "p4",
+      "statement_yo": "Yànjú quadratic equation x² + 5x + 6 = 0",
+      "statement_en": "Solve x² + 5x + 6 = 0",
+      "equation": "x² + 5x + 6 = 0",
+      "steps": [
+        {
+          "id": "s1",
+          "prompt_yo": "Wo quadratic equation tó wà lórí screen yìí; kí ni iye coefficient a, b, àti constant c tí o rí níbẹ̀?",
+          "prompt_en": "What are the values of coefficient a, b, and constant c?",
+          "acceptable_concepts": [
+            "a=1",
+            "b=5",
+            "c=6"
+          ],
+          "misconceptions": {
+            "b=-5": "Dúró náà, wo àmì tó wà níwájú 5x: ṣé plus 5 ni tàbí minus 5?",
+            "c=-6": "Wo àmì tó wà níwájú 6 ní òpin equation náà: ṣé plus ni tàbí minus?"
+          },
+          "hint_ladder": [
+            "Wo nọ́mbà tó dúró níwájú x², x, àti nọ́mbà tó dá dúró.",
+            "Ìtọ́ka: ax² + bx + c = 0, kí ni nọ́mbà tó wà níwájú x?"
+          ],
+          "canvas_ops": [
+            {
+              "op": "write_step",
+              "params": {
+                "step_id": "s1",
+                "latex_or_text": "a = ?, b = ?, c = ?",
+                "author": "tutor",
+                "reveal_answer": false
+              }
+            }
+          ],
+          "term_ids": [
+            "coefficient",
+            "constant"
+          ]
+        },
+        {
+          "id": "s2",
+          "prompt_yo": "Nọ́mbà méjì wo ni ìsọdipúpọ̀ wọn jẹ́ c, tí àròpọ̀ wọn sì jẹ́ b?",
+          "prompt_en": "Which two numbers multiply to give c and add up to b?",
+          "acceptable_concepts": [
+            "pair=2,3"
+          ],
+          "misconceptions": {
+            "pair=-2,-3": "Wo àmì b lẹ́ẹ̀kan sí i: àròpọ̀ −2 àti −3 jẹ́ −5, ṣé ó bá b mu?"
+          },
+          "hint_ladder": [
+            "Kọ àwọn nọ́mbà méjì tí ìsọdipúpọ̀ wọn jẹ́ 6 sílẹ̀ kí o wo àròpọ̀ olúkúlùkù wọn.",
+            "Àwọn nọ́mbà méjèèjì ní àmì kan náà nítorí c jẹ́ positive."
+          ],
+          "canvas_ops": [
+            {
+              "op": "write_step",
+              "params": {
+                "step_id": "s2",
+                "latex_or_text": "? × ? = c,  ? + ? = b",
+                "author": "tutor",
+                "reveal_answer": false
+              }
+            }
+          ],
+          "term_ids": [
+            "product",
+            "sum"
+          ]
+        },
+        {
+          "id": "s3",
+          "prompt_yo": "Fi àwọn nọ́mbà méjì náà sí àwọn ibi tí ó ṣófo nínú brackets méjèèjì; kí ni o máa kọ sí bracket àkọ́kọ́?",
+          "prompt_en": "Fill the blanks in the two brackets with your numbers; what goes in the first bracket?",
+          "acceptable_concepts": [
+            "factored=(x+2)(x+3)"
+          ],
+          "misconceptions": {
+            "factored=(x-2)(x-3)": "Tí o bá expand (x − 2)(x − 3), ṣé middle term máa fún wa +5x tàbí −5x?"
+          },
+          "hint_ladder": [
+            "Expand brackets rẹ padà kí o wo middle term.",
+            "Ṣé middle term tí o rí bá b mu?"
+          ],
+          "canvas_ops": [
+            {
+              "op": "write_step",
+              "params": {
+                "step_id": "s3",
+                "latex_or_text": "(x - ?)(x - ?) = 0",
+                "author": "tutor",
+                "reveal_answer": false
+              }
+            }
+          ],
+          "term_ids": [
+            "factorise",
+            "brackets",
+            "expand"
+          ]
+        },
+        {
+          "id": "s4",
+          "prompt_yo": "Tí ìsọdipúpọ̀ bá jẹ́ zero, kí ni ó gbọ́dọ̀ jẹ́ òótọ́ nípa ọ̀kan nínú brackets náà?",
+          "prompt_en": "If a product equals zero, what must be true about one of the brackets?",
+          "acceptable_concepts": [
+            "one bracket = 0"
+          ],
+          "misconceptions": {
+            "both brackets must equal 1": "Tí ìsọdipúpọ̀ bá jẹ́ 1, kìí ṣe zero; kí ni nọ́mbà méjì tí ìsọdipúpọ̀ wọn jẹ́ zero?"
+          },
+          "hint_ladder": [
+            "Ronú nípa 0 × 5 àti 7 × 0; kí ni ó wà ní ìbámu láàrin wọn?"
+          ],
+          "canvas_ops": [
+            {
+              "op": "write_step",
+              "params": {
+                "step_id": "s4",
+                "latex_or_text": "x - ? = 0  or  x - ? = 0",
+                "author": "tutor",
+                "reveal_answer": false
+              }
+            }
+          ],
+          "term_ids": [
+            "zero_product"
+          ]
+        },
+        {
+          "id": "s5",
+          "prompt_yo": "Wo parabola náà: níbo ni ó ti kan x-axis, ṣé ó bá àwọn gbòǹgbò rẹ mu?",
+          "prompt_en": "Look at the parabola: where does it cross the x-axis, and does that match your roots?",
+          "acceptable_concepts": [
+            "crossings match roots"
+          ],
+          "misconceptions": {},
+          "hint_ladder": [
+            "Wo ibi tí ìlà náà ti kan x-axis lórí graph."
+          ],
+          "canvas_ops": [
+            {
+              "op": "highlight",
+              "params": {
+                "target": "roots"
+              }
+            }
+          ],
+          "term_ids": [
+            "root",
+            "parabola",
+            "x_axis"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "p5",
+      "statement_yo": "Yànjú quadratic equation x² − 1x − 6 = 0",
+      "statement_en": "Solve x² − 1x − 6 = 0",
+      "equation": "x² − 1x − 6 = 0",
+      "steps": [
+        {
+          "id": "s1",
+          "prompt_yo": "Wo quadratic equation tó wà lórí screen yìí; kí ni iye coefficient a, b, àti constant c tí o rí níbẹ̀?",
+          "prompt_en": "What are the values of coefficient a, b, and constant c?",
+          "acceptable_concepts": [
+            "a=1",
+            "b=-1",
+            "c=-6"
+          ],
+          "misconceptions": {
+            "b=1": "Dúró náà, wo àmì tó wà níwájú 1x: ṣé plus 1 ni tàbí minus 1?",
+            "c=6": "Wo àmì tó wà níwájú 6 ní òpin equation náà: ṣé plus ni tàbí minus?"
+          },
+          "hint_ladder": [
+            "Wo nọ́mbà tó dúró níwájú x², x, àti nọ́mbà tó dá dúró.",
+            "Ìtọ́ka: ax² + bx + c = 0, kí ni nọ́mbà tó wà níwájú x?"
+          ],
+          "canvas_ops": [
+            {
+              "op": "write_step",
+              "params": {
+                "step_id": "s1",
+                "latex_or_text": "a = ?, b = ?, c = ?",
+                "author": "tutor",
+                "reveal_answer": false
+              }
+            }
+          ],
+          "term_ids": [
+            "coefficient",
+            "constant"
+          ]
+        },
+        {
+          "id": "s2",
+          "prompt_yo": "Nọ́mbà méjì wo ni ìsọdipúpọ̀ wọn jẹ́ c, tí àròpọ̀ wọn sì jẹ́ b?",
+          "prompt_en": "Which two numbers multiply to give c and add up to b?",
+          "acceptable_concepts": [
+            "pair=-3,2"
+          ],
+          "misconceptions": {
+            "pair=3,-2": "Wo àmì b lẹ́ẹ̀kan sí i: àròpọ̀ 3 àti −2 jẹ́ 1, ṣé ó bá b mu?"
+          },
+          "hint_ladder": [
+            "Kọ àwọn nọ́mbà méjì tí ìsọdipúpọ̀ wọn jẹ́ 6 sílẹ̀ kí o wo àròpọ̀ olúkúlùkù wọn.",
+            "Àwọn nọ́mbà méjèèjì ní àmì kan náà nítorí c jẹ́ positive."
+          ],
+          "canvas_ops": [
+            {
+              "op": "write_step",
+              "params": {
+                "step_id": "s2",
+                "latex_or_text": "? × ? = c,  ? + ? = b",
+                "author": "tutor",
+                "reveal_answer": false
+              }
+            }
+          ],
+          "term_ids": [
+            "product",
+            "sum"
+          ]
+        },
+        {
+          "id": "s3",
+          "prompt_yo": "Fi àwọn nọ́mbà méjì náà sí àwọn ibi tí ó ṣófo nínú brackets méjèèjì; kí ni o máa kọ sí bracket àkọ́kọ́?",
+          "prompt_en": "Fill the blanks in the two brackets with your numbers; what goes in the first bracket?",
+          "acceptable_concepts": [
+            "factored=(x-3)(x+2)"
+          ],
+          "misconceptions": {
+            "factored=(x+3)(x-2)": "Tí o bá expand (x + 3)(x − 2), ṣé middle term máa fún wa −1x tàbí +1x?"
+          },
+          "hint_ladder": [
+            "Expand brackets rẹ padà kí o wo middle term.",
+            "Ṣé middle term tí o rí bá b mu?"
+          ],
+          "canvas_ops": [
+            {
+              "op": "write_step",
+              "params": {
+                "step_id": "s3",
+                "latex_or_text": "(x - ?)(x - ?) = 0",
+                "author": "tutor",
+                "reveal_answer": false
+              }
+            }
+          ],
+          "term_ids": [
+            "factorise",
+            "brackets",
+            "expand"
+          ]
+        },
+        {
+          "id": "s4",
+          "prompt_yo": "Tí ìsọdipúpọ̀ bá jẹ́ zero, kí ni ó gbọ́dọ̀ jẹ́ òótọ́ nípa ọ̀kan nínú brackets náà?",
+          "prompt_en": "If a product equals zero, what must be true about one of the brackets?",
+          "acceptable_concepts": [
+            "one bracket = 0"
+          ],
+          "misconceptions": {
+            "both brackets must equal 1": "Tí ìsọdipúpọ̀ bá jẹ́ 1, kìí ṣe zero; kí ni nọ́mbà méjì tí ìsọdipúpọ̀ wọn jẹ́ zero?"
+          },
+          "hint_ladder": [
+            "Ronú nípa 0 × 5 àti 7 × 0; kí ni ó wà ní ìbámu láàrin wọn?"
+          ],
+          "canvas_ops": [
+            {
+              "op": "write_step",
+              "params": {
+                "step_id": "s4",
+                "latex_or_text": "x - ? = 0  or  x - ? = 0",
+                "author": "tutor",
+                "reveal_answer": false
+              }
+            }
+          ],
+          "term_ids": [
+            "zero_product"
+          ]
+        },
+        {
+          "id": "s5",
+          "prompt_yo": "Wo parabola náà: níbo ni ó ti kan x-axis, ṣé ó bá àwọn gbòǹgbò rẹ mu?",
+          "prompt_en": "Look at the parabola: where does it cross the x-axis, and does that match your roots?",
+          "acceptable_concepts": [
+            "crossings match roots"
+          ],
+          "misconceptions": {},
+          "hint_ladder": [
+            "Wo ibi tí ìlà náà ti kan x-axis lórí graph."
+          ],
+          "canvas_ops": [
+            {
+              "op": "highlight",
+              "params": {
+                "target": "roots"
+              }
+            }
+          ],
+          "term_ids": [
+            "root",
+            "parabola",
+            "x_axis"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "p6",
+      "statement_yo": "Yànjú quadratic equation x² − 9x + 20 = 0",
+      "statement_en": "Solve x² − 9x + 20 = 0",
+      "equation": "x² − 9x + 20 = 0",
+      "steps": [
+        {
+          "id": "s1",
+          "prompt_yo": "Wo quadratic equation tó wà lórí screen yìí; kí ni iye coefficient a, b, àti constant c tí o rí níbẹ̀?",
+          "prompt_en": "What are the values of coefficient a, b, and constant c?",
+          "acceptable_concepts": [
+            "a=1",
+            "b=-9",
+            "c=20"
+          ],
+          "misconceptions": {
+            "b=9": "Dúró náà, wo àmì tó wà níwájú 9x: ṣé plus 9 ni tàbí minus 9?",
+            "c=-20": "Wo àmì tó wà níwájú 20 ní òpin equation náà: ṣé plus ni tàbí minus?"
+          },
+          "hint_ladder": [
+            "Wo nọ́mbà tó dúró níwájú x², x, àti nọ́mbà tó dá dúró.",
+            "Ìtọ́ka: ax² + bx + c = 0, kí ni nọ́mbà tó wà níwájú x?"
+          ],
+          "canvas_ops": [
+            {
+              "op": "write_step",
+              "params": {
+                "step_id": "s1",
+                "latex_or_text": "a = ?, b = ?, c = ?",
+                "author": "tutor",
+                "reveal_answer": false
+              }
+            }
+          ],
+          "term_ids": [
+            "coefficient",
+            "constant"
+          ]
+        },
+        {
+          "id": "s2",
+          "prompt_yo": "Nọ́mbà méjì wo ni ìsọdipúpọ̀ wọn jẹ́ c, tí àròpọ̀ wọn sì jẹ́ b?",
+          "prompt_en": "Which two numbers multiply to give c and add up to b?",
+          "acceptable_concepts": [
+            "pair=-4,-5"
+          ],
+          "misconceptions": {
+            "pair=4,5": "Wo àmì b lẹ́ẹ̀kan sí i: àròpọ̀ 4 àti 5 jẹ́ 9, ṣé ó bá b mu?"
+          },
+          "hint_ladder": [
+            "Kọ àwọn nọ́mbà méjì tí ìsọdipúpọ̀ wọn jẹ́ 6 sílẹ̀ kí o wo àròpọ̀ olúkúlùkù wọn.",
+            "Àwọn nọ́mbà méjèèjì ní àmì kan náà nítorí c jẹ́ positive."
+          ],
+          "canvas_ops": [
+            {
+              "op": "write_step",
+              "params": {
+                "step_id": "s2",
+                "latex_or_text": "? × ? = c,  ? + ? = b",
+                "author": "tutor",
+                "reveal_answer": false
+              }
+            }
+          ],
+          "term_ids": [
+            "product",
+            "sum"
+          ]
+        },
+        {
+          "id": "s3",
+          "prompt_yo": "Fi àwọn nọ́mbà méjì náà sí àwọn ibi tí ó ṣófo nínú brackets méjèèjì; kí ni o máa kọ sí bracket àkọ́kọ́?",
+          "prompt_en": "Fill the blanks in the two brackets with your numbers; what goes in the first bracket?",
+          "acceptable_concepts": [
+            "factored=(x-4)(x-5)"
+          ],
+          "misconceptions": {
+            "factored=(x+4)(x+5)": "Tí o bá expand (x + 4)(x + 5), ṣé middle term máa fún wa −9x tàbí +9x?"
+          },
+          "hint_ladder": [
+            "Expand brackets rẹ padà kí o wo middle term.",
+            "Ṣé middle term tí o rí bá b mu?"
+          ],
+          "canvas_ops": [
+            {
+              "op": "write_step",
+              "params": {
+                "step_id": "s3",
+                "latex_or_text": "(x - ?)(x - ?) = 0",
+                "author": "tutor",
+                "reveal_answer": false
+              }
+            }
+          ],
+          "term_ids": [
+            "factorise",
+            "brackets",
+            "expand"
+          ]
+        },
+        {
+          "id": "s4",
+          "prompt_yo": "Tí ìsọdipúpọ̀ bá jẹ́ zero, kí ni ó gbọ́dọ̀ jẹ́ òótọ́ nípa ọ̀kan nínú brackets náà?",
+          "prompt_en": "If a product equals zero, what must be true about one of the brackets?",
+          "acceptable_concepts": [
+            "one bracket = 0"
+          ],
+          "misconceptions": {
+            "both brackets must equal 1": "Tí ìsọdipúpọ̀ bá jẹ́ 1, kìí ṣe zero; kí ni nọ́mbà méjì tí ìsọdipúpọ̀ wọn jẹ́ zero?"
+          },
+          "hint_ladder": [
+            "Ronú nípa 0 × 5 àti 7 × 0; kí ni ó wà ní ìbámu láàrin wọn?"
+          ],
+          "canvas_ops": [
+            {
+              "op": "write_step",
+              "params": {
+                "step_id": "s4",
+                "latex_or_text": "x - ? = 0  or  x - ? = 0",
+                "author": "tutor",
+                "reveal_answer": false
+              }
+            }
+          ],
+          "term_ids": [
+            "zero_product"
+          ]
+        },
+        {
+          "id": "s5",
+          "prompt_yo": "Wo parabola náà: níbo ni ó ti kan x-axis, ṣé ó bá àwọn gbòǹgbò rẹ mu?",
+          "prompt_en": "Look at the parabola: where does it cross the x-axis, and does that match your roots?",
+          "acceptable_concepts": [
+            "crossings match roots"
+          ],
+          "misconceptions": {},
+          "hint_ladder": [
+            "Wo ibi tí ìlà náà ti kan x-axis lórí graph."
+          ],
+          "canvas_ops": [
+            {
+              "op": "highlight",
+              "params": {
+                "target": "roots"
+              }
+            }
+          ],
+          "term_ids": [
+            "root",
+            "parabola",
+            "x_axis"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "p7",
+      "statement_yo": "Yànjú quadratic equation x² − 8x + 15 = 0",
+      "statement_en": "Solve x² − 8x + 15 = 0",
+      "equation": "x² − 8x + 15 = 0",
+      "steps": [
+        {
+          "id": "s1",
+          "prompt_yo": "Wo quadratic equation tó wà lórí screen yìí; kí ni iye coefficient a, b, àti constant c tí o rí níbẹ̀?",
+          "prompt_en": "What are the values of coefficient a, b, and constant c?",
+          "acceptable_concepts": [
+            "a=1",
+            "b=-8",
+            "c=15"
+          ],
+          "misconceptions": {
+            "b=8": "Dúró náà, wo àmì tó wà níwájú 8x: ṣé plus 8 ni tàbí minus 8?",
+            "c=-15": "Wo àmì tó wà níwájú 15 ní òpin equation náà: ṣé plus ni tàbí minus?"
+          },
+          "hint_ladder": [
+            "Wo nọ́mbà tó dúró níwájú x², x, àti nọ́mbà tó dá dúró.",
+            "Ìtọ́ka: ax² + bx + c = 0, kí ni nọ́mbà tó wà níwájú x?"
+          ],
+          "canvas_ops": [
+            {
+              "op": "write_step",
+              "params": {
+                "step_id": "s1",
+                "latex_or_text": "a = ?, b = ?, c = ?",
+                "author": "tutor",
+                "reveal_answer": false
+              }
+            }
+          ],
+          "term_ids": [
+            "coefficient",
+            "constant"
+          ]
+        },
+        {
+          "id": "s2",
+          "prompt_yo": "Nọ́mbà méjì wo ni ìsọdipúpọ̀ wọn jẹ́ c, tí àròpọ̀ wọn sì jẹ́ b?",
+          "prompt_en": "Which two numbers multiply to give c and add up to b?",
+          "acceptable_concepts": [
+            "pair=-3,-5"
+          ],
+          "misconceptions": {
+            "pair=3,5": "Wo àmì b lẹ́ẹ̀kan sí i: àròpọ̀ 3 àti 5 jẹ́ 8, ṣé ó bá b mu?"
+          },
+          "hint_ladder": [
+            "Kọ àwọn nọ́mbà méjì tí ìsọdipúpọ̀ wọn jẹ́ 6 sílẹ̀ kí o wo àròpọ̀ olúkúlùkù wọn.",
+            "Àwọn nọ́mbà méjèèjì ní àmì kan náà nítorí c jẹ́ positive."
+          ],
+          "canvas_ops": [
+            {
+              "op": "write_step",
+              "params": {
+                "step_id": "s2",
+                "latex_or_text": "? × ? = c,  ? + ? = b",
+                "author": "tutor",
+                "reveal_answer": false
+              }
+            }
+          ],
+          "term_ids": [
+            "product",
+            "sum"
+          ]
+        },
+        {
+          "id": "s3",
+          "prompt_yo": "Fi àwọn nọ́mbà méjì náà sí àwọn ibi tí ó ṣófo nínú brackets méjèèjì; kí ni o máa kọ sí bracket àkọ́kọ́?",
+          "prompt_en": "Fill the blanks in the two brackets with your numbers; what goes in the first bracket?",
+          "acceptable_concepts": [
+            "factored=(x-3)(x-5)"
+          ],
+          "misconceptions": {
+            "factored=(x+3)(x+5)": "Tí o bá expand (x + 3)(x + 5), ṣé middle term máa fún wa −8x tàbí +8x?"
+          },
+          "hint_ladder": [
+            "Expand brackets rẹ padà kí o wo middle term.",
+            "Ṣé middle term tí o rí bá b mu?"
+          ],
+          "canvas_ops": [
+            {
+              "op": "write_step",
+              "params": {
+                "step_id": "s3",
+                "latex_or_text": "(x - ?)(x - ?) = 0",
+                "author": "tutor",
+                "reveal_answer": false
+              }
+            }
+          ],
+          "term_ids": [
+            "factorise",
+            "brackets",
+            "expand"
+          ]
+        },
+        {
+          "id": "s4",
+          "prompt_yo": "Tí ìsọdipúpọ̀ bá jẹ́ zero, kí ni ó gbọ́dọ̀ jẹ́ òótọ́ nípa ọ̀kan nínú brackets náà?",
+          "prompt_en": "If a product equals zero, what must be true about one of the brackets?",
+          "acceptable_concepts": [
+            "one bracket = 0"
+          ],
+          "misconceptions": {
+            "both brackets must equal 1": "Tí ìsọdipúpọ̀ bá jẹ́ 1, kìí ṣe zero; kí ni nọ́mbà méjì tí ìsọdipúpọ̀ wọn jẹ́ zero?"
+          },
+          "hint_ladder": [
+            "Ronú nípa 0 × 5 àti 7 × 0; kí ni ó wà ní ìbámu láàrin wọn?"
+          ],
+          "canvas_ops": [
+            {
+              "op": "write_step",
+              "params": {
+                "step_id": "s4",
+                "latex_or_text": "x - ? = 0  or  x - ? = 0",
+                "author": "tutor",
+                "reveal_answer": false
+              }
+            }
+          ],
+          "term_ids": [
+            "zero_product"
+          ]
+        },
+        {
+          "id": "s5",
+          "prompt_yo": "Wo parabola náà: níbo ni ó ti kan x-axis, ṣé ó bá àwọn gbòǹgbò rẹ mu?",
+          "prompt_en": "Look at the parabola: where does it cross the x-axis, and does that match your roots?",
+          "acceptable_concepts": [
+            "crossings match roots"
+          ],
+          "misconceptions": {},
+          "hint_ladder": [
+            "Wo ibi tí ìlà náà ti kan x-axis lórí graph."
+          ],
+          "canvas_ops": [
+            {
+              "op": "highlight",
+              "params": {
+                "target": "roots"
+              }
+            }
+          ],
+          "term_ids": [
+            "root",
+            "parabola",
+            "x_axis"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "p8",
+      "statement_yo": "Yànjú quadratic equation x² + 7x + 10 = 0",
+      "statement_en": "Solve x² + 7x + 10 = 0",
+      "equation": "x² + 7x + 10 = 0",
+      "steps": [
+        {
+          "id": "s1",
+          "prompt_yo": "Wo quadratic equation tó wà lórí screen yìí; kí ni iye coefficient a, b, àti constant c tí o rí níbẹ̀?",
+          "prompt_en": "What are the values of coefficient a, b, and constant c?",
+          "acceptable_concepts": [
+            "a=1",
+            "b=7",
+            "c=10"
+          ],
+          "misconceptions": {
+            "b=-7": "Dúró náà, wo àmì tó wà níwájú 7x: ṣé plus 7 ni tàbí minus 7?",
+            "c=-10": "Wo àmì tó wà níwájú 10 ní òpin equation náà: ṣé plus ni tàbí minus?"
+          },
+          "hint_ladder": [
+            "Wo nọ́mbà tó dúró níwájú x², x, àti nọ́mbà tó dá dúró.",
+            "Ìtọ́ka: ax² + bx + c = 0, kí ni nọ́mbà tó wà níwájú x?"
+          ],
+          "canvas_ops": [
+            {
+              "op": "write_step",
+              "params": {
+                "step_id": "s1",
+                "latex_or_text": "a = ?, b = ?, c = ?",
+                "author": "tutor",
+                "reveal_answer": false
+              }
+            }
+          ],
+          "term_ids": [
+            "coefficient",
+            "constant"
+          ]
+        },
+        {
+          "id": "s2",
+          "prompt_yo": "Nọ́mbà méjì wo ni ìsọdipúpọ̀ wọn jẹ́ c, tí àròpọ̀ wọn sì jẹ́ b?",
+          "prompt_en": "Which two numbers multiply to give c and add up to b?",
+          "acceptable_concepts": [
+            "pair=2,5"
+          ],
+          "misconceptions": {
+            "pair=-2,-5": "Wo àmì b lẹ́ẹ̀kan sí i: àròpọ̀ −2 àti −5 jẹ́ −7, ṣé ó bá b mu?"
+          },
+          "hint_ladder": [
+            "Kọ àwọn nọ́mbà méjì tí ìsọdipúpọ̀ wọn jẹ́ 6 sílẹ̀ kí o wo àròpọ̀ olúkúlùkù wọn.",
+            "Àwọn nọ́mbà méjèèjì ní àmì kan náà nítorí c jẹ́ positive."
+          ],
+          "canvas_ops": [
+            {
+              "op": "write_step",
+              "params": {
+                "step_id": "s2",
+                "latex_or_text": "? × ? = c,  ? + ? = b",
+                "author": "tutor",
+                "reveal_answer": false
+              }
+            }
+          ],
+          "term_ids": [
+            "product",
+            "sum"
+          ]
+        },
+        {
+          "id": "s3",
+          "prompt_yo": "Fi àwọn nọ́mbà méjì náà sí àwọn ibi tí ó ṣófo nínú brackets méjèèjì; kí ni o máa kọ sí bracket àkọ́kọ́?",
+          "prompt_en": "Fill the blanks in the two brackets with your numbers; what goes in the first bracket?",
+          "acceptable_concepts": [
+            "factored=(x+2)(x+5)"
+          ],
+          "misconceptions": {
+            "factored=(x-2)(x-5)": "Tí o bá expand (x − 2)(x − 5), ṣé middle term máa fún wa +7x tàbí −7x?"
+          },
+          "hint_ladder": [
+            "Expand brackets rẹ padà kí o wo middle term.",
+            "Ṣé middle term tí o rí bá b mu?"
+          ],
+          "canvas_ops": [
+            {
+              "op": "write_step",
+              "params": {
+                "step_id": "s3",
+                "latex_or_text": "(x - ?)(x - ?) = 0",
+                "author": "tutor",
+                "reveal_answer": false
+              }
+            }
+          ],
+          "term_ids": [
+            "factorise",
+            "brackets",
+            "expand"
+          ]
+        },
+        {
+          "id": "s4",
+          "prompt_yo": "Tí ìsọdipúpọ̀ bá jẹ́ zero, kí ni ó gbọ́dọ̀ jẹ́ òótọ́ nípa ọ̀kan nínú brackets náà?",
+          "prompt_en": "If a product equals zero, what must be true about one of the brackets?",
+          "acceptable_concepts": [
+            "one bracket = 0"
+          ],
+          "misconceptions": {
+            "both brackets must equal 1": "Tí ìsọdipúpọ̀ bá jẹ́ 1, kìí ṣe zero; kí ni nọ́mbà méjì tí ìsọdipúpọ̀ wọn jẹ́ zero?"
+          },
+          "hint_ladder": [
+            "Ronú nípa 0 × 5 àti 7 × 0; kí ni ó wà ní ìbámu láàrin wọn?"
+          ],
+          "canvas_ops": [
+            {
+              "op": "write_step",
+              "params": {
+                "step_id": "s4",
+                "latex_or_text": "x - ? = 0  or  x - ? = 0",
+                "author": "tutor",
+                "reveal_answer": false
+              }
+            }
+          ],
+          "term_ids": [
+            "zero_product"
+          ]
+        },
+        {
+          "id": "s5",
+          "prompt_yo": "Wo parabola náà: níbo ni ó ti kan x-axis, ṣé ó bá àwọn gbòǹgbò rẹ mu?",
+          "prompt_en": "Look at the parabola: where does it cross the x-axis, and does that match your roots?",
+          "acceptable_concepts": [
+            "crossings match roots"
+          ],
+          "misconceptions": {},
+          "hint_ladder": [
+            "Wo ibi tí ìlà náà ti kan x-axis lórí graph."
+          ],
+          "canvas_ops": [
+            {
+              "op": "highlight",
+              "params": {
+                "target": "roots"
+              }
+            }
+          ],
+          "term_ids": [
+            "root",
+            "parabola",
+            "x_axis"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "p9",
+      "statement_yo": "Yànjú quadratic equation x² − 2x − 8 = 0",
+      "statement_en": "Solve x² − 2x − 8 = 0",
+      "equation": "x² − 2x − 8 = 0",
+      "steps": [
+        {
+          "id": "s1",
+          "prompt_yo": "Wo quadratic equation tó wà lórí screen yìí; kí ni iye coefficient a, b, àti constant c tí o rí níbẹ̀?",
+          "prompt_en": "What are the values of coefficient a, b, and constant c?",
+          "acceptable_concepts": [
+            "a=1",
+            "b=-2",
+            "c=-8"
+          ],
+          "misconceptions": {
+            "b=2": "Dúró náà, wo àmì tó wà níwájú 2x: ṣé plus 2 ni tàbí minus 2?",
+            "c=8": "Wo àmì tó wà níwájú 8 ní òpin equation náà: ṣé plus ni tàbí minus?"
+          },
+          "hint_ladder": [
+            "Wo nọ́mbà tó dúró níwájú x², x, àti nọ́mbà tó dá dúró.",
+            "Ìtọ́ka: ax² + bx + c = 0, kí ni nọ́mbà tó wà níwájú x?"
+          ],
+          "canvas_ops": [
+            {
+              "op": "write_step",
+              "params": {
+                "step_id": "s1",
+                "latex_or_text": "a = ?, b = ?, c = ?",
+                "author": "tutor",
+                "reveal_answer": false
+              }
+            }
+          ],
+          "term_ids": [
+            "coefficient",
+            "constant"
+          ]
+        },
+        {
+          "id": "s2",
+          "prompt_yo": "Nọ́mbà méjì wo ni ìsọdipúpọ̀ wọn jẹ́ c, tí àròpọ̀ wọn sì jẹ́ b?",
+          "prompt_en": "Which two numbers multiply to give c and add up to b?",
+          "acceptable_concepts": [
+            "pair=-4,2"
+          ],
+          "misconceptions": {
+            "pair=4,-2": "Wo àmì b lẹ́ẹ̀kan sí i: àròpọ̀ 4 àti −2 jẹ́ 2, ṣé ó bá b mu?"
+          },
+          "hint_ladder": [
+            "Kọ àwọn nọ́mbà méjì tí ìsọdipúpọ̀ wọn jẹ́ 6 sílẹ̀ kí o wo àròpọ̀ olúkúlùkù wọn.",
+            "Àwọn nọ́mbà méjèèjì ní àmì kan náà nítorí c jẹ́ positive."
+          ],
+          "canvas_ops": [
+            {
+              "op": "write_step",
+              "params": {
+                "step_id": "s2",
+                "latex_or_text": "? × ? = c,  ? + ? = b",
+                "author": "tutor",
+                "reveal_answer": false
+              }
+            }
+          ],
+          "term_ids": [
+            "product",
+            "sum"
+          ]
+        },
+        {
+          "id": "s3",
+          "prompt_yo": "Fi àwọn nọ́mbà méjì náà sí àwọn ibi tí ó ṣófo nínú brackets méjèèjì; kí ni o máa kọ sí bracket àkọ́kọ́?",
+          "prompt_en": "Fill the blanks in the two brackets with your numbers; what goes in the first bracket?",
+          "acceptable_concepts": [
+            "factored=(x-4)(x+2)"
+          ],
+          "misconceptions": {
+            "factored=(x+4)(x-2)": "Tí o bá expand (x + 4)(x − 2), ṣé middle term máa fún wa −2x tàbí +2x?"
+          },
+          "hint_ladder": [
+            "Expand brackets rẹ padà kí o wo middle term.",
+            "Ṣé middle term tí o rí bá b mu?"
+          ],
+          "canvas_ops": [
+            {
+              "op": "write_step",
+              "params": {
+                "step_id": "s3",
+                "latex_or_text": "(x - ?)(x - ?) = 0",
+                "author": "tutor",
+                "reveal_answer": false
+              }
+            }
+          ],
+          "term_ids": [
+            "factorise",
+            "brackets",
+            "expand"
+          ]
+        },
+        {
+          "id": "s4",
+          "prompt_yo": "Tí ìsọdipúpọ̀ bá jẹ́ zero, kí ni ó gbọ́dọ̀ jẹ́ òótọ́ nípa ọ̀kan nínú brackets náà?",
+          "prompt_en": "If a product equals zero, what must be true about one of the brackets?",
+          "acceptable_concepts": [
+            "one bracket = 0"
+          ],
+          "misconceptions": {
+            "both brackets must equal 1": "Tí ìsọdipúpọ̀ bá jẹ́ 1, kìí ṣe zero; kí ni nọ́mbà méjì tí ìsọdipúpọ̀ wọn jẹ́ zero?"
+          },
+          "hint_ladder": [
+            "Ronú nípa 0 × 5 àti 7 × 0; kí ni ó wà ní ìbámu láàrin wọn?"
+          ],
+          "canvas_ops": [
+            {
+              "op": "write_step",
+              "params": {
+                "step_id": "s4",
+                "latex_or_text": "x - ? = 0  or  x - ? = 0",
+                "author": "tutor",
+                "reveal_answer": false
+              }
+            }
+          ],
+          "term_ids": [
+            "zero_product"
+          ]
+        },
+        {
+          "id": "s5",
+          "prompt_yo": "Wo parabola náà: níbo ni ó ti kan x-axis, ṣé ó bá àwọn gbòǹgbò rẹ mu?",
+          "prompt_en": "Look at the parabola: where does it cross the x-axis, and does that match your roots?",
+          "acceptable_concepts": [
+            "crossings match roots"
+          ],
+          "misconceptions": {},
+          "hint_ladder": [
+            "Wo ibi tí ìlà náà ti kan x-axis lórí graph."
+          ],
+          "canvas_ops": [
+            {
+              "op": "highlight",
+              "params": {
+                "target": "roots"
+              }
+            }
+          ],
+          "term_ids": [
+            "root",
+            "parabola",
+            "x_axis"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "p10",
+      "statement_yo": "Yànjú quadratic equation x² + 3x − 10 = 0",
+      "statement_en": "Solve x² + 3x − 10 = 0",
+      "equation": "x² + 3x − 10 = 0",
+      "steps": [
+        {
+          "id": "s1",
+          "prompt_yo": "Wo quadratic equation tó wà lórí screen yìí; kí ni iye coefficient a, b, àti constant c tí o rí níbẹ̀?",
+          "prompt_en": "What are the values of coefficient a, b, and constant c?",
+          "acceptable_concepts": [
+            "a=1",
+            "b=3",
+            "c=-10"
+          ],
+          "misconceptions": {
+            "b=-3": "Dúró náà, wo àmì tó wà níwájú 3x: ṣé plus 3 ni tàbí minus 3?",
+            "c=10": "Wo àmì tó wà níwájú 10 ní òpin equation náà: ṣé plus ni tàbí minus?"
+          },
+          "hint_ladder": [
+            "Wo nọ́mbà tó dúró níwájú x², x, àti nọ́mbà tó dá dúró.",
+            "Ìtọ́ka: ax² + bx + c = 0, kí ni nọ́mbà tó wà níwájú x?"
+          ],
+          "canvas_ops": [
+            {
+              "op": "write_step",
+              "params": {
+                "step_id": "s1",
+                "latex_or_text": "a = ?, b = ?, c = ?",
+                "author": "tutor",
+                "reveal_answer": false
+              }
+            }
+          ],
+          "term_ids": [
+            "coefficient",
+            "constant"
+          ]
+        },
+        {
+          "id": "s2",
+          "prompt_yo": "Nọ́mbà méjì wo ni ìsọdipúpọ̀ wọn jẹ́ c, tí àròpọ̀ wọn sì jẹ́ b?",
+          "prompt_en": "Which two numbers multiply to give c and add up to b?",
+          "acceptable_concepts": [
+            "pair=5,-2"
+          ],
+          "misconceptions": {
+            "pair=-5,2": "Wo àmì b lẹ́ẹ̀kan sí i: àròpọ̀ −5 àti 2 jẹ́ −3, ṣé ó bá b mu?"
+          },
+          "hint_ladder": [
+            "Kọ àwọn nọ́mbà méjì tí ìsọdipúpọ̀ wọn jẹ́ 6 sílẹ̀ kí o wo àròpọ̀ olúkúlùkù wọn.",
+            "Àwọn nọ́mbà méjèèjì ní àmì kan náà nítorí c jẹ́ positive."
+          ],
+          "canvas_ops": [
+            {
+              "op": "write_step",
+              "params": {
+                "step_id": "s2",
+                "latex_or_text": "? × ? = c,  ? + ? = b",
+                "author": "tutor",
+                "reveal_answer": false
+              }
+            }
+          ],
+          "term_ids": [
+            "product",
+            "sum"
+          ]
+        },
+        {
+          "id": "s3",
+          "prompt_yo": "Fi àwọn nọ́mbà méjì náà sí àwọn ibi tí ó ṣófo nínú brackets méjèèjì; kí ni o máa kọ sí bracket àkọ́kọ́?",
+          "prompt_en": "Fill the blanks in the two brackets with your numbers; what goes in the first bracket?",
+          "acceptable_concepts": [
+            "factored=(x+5)(x-2)"
+          ],
+          "misconceptions": {
+            "factored=(x-5)(x+2)": "Tí o bá expand (x − 5)(x + 2), ṣé middle term máa fún wa +3x tàbí −3x?"
+          },
+          "hint_ladder": [
+            "Expand brackets rẹ padà kí o wo middle term.",
+            "Ṣé middle term tí o rí bá b mu?"
+          ],
+          "canvas_ops": [
+            {
+              "op": "write_step",
+              "params": {
+                "step_id": "s3",
+                "latex_or_text": "(x - ?)(x - ?) = 0",
+                "author": "tutor",
+                "reveal_answer": false
+              }
+            }
+          ],
+          "term_ids": [
+            "factorise",
+            "brackets",
+            "expand"
+          ]
+        },
+        {
+          "id": "s4",
+          "prompt_yo": "Tí ìsọdipúpọ̀ bá jẹ́ zero, kí ni ó gbọ́dọ̀ jẹ́ òótọ́ nípa ọ̀kan nínú brackets náà?",
+          "prompt_en": "If a product equals zero, what must be true about one of the brackets?",
+          "acceptable_concepts": [
+            "one bracket = 0"
+          ],
+          "misconceptions": {
+            "both brackets must equal 1": "Tí ìsọdipúpọ̀ bá jẹ́ 1, kìí ṣe zero; kí ni nọ́mbà méjì tí ìsọdipúpọ̀ wọn jẹ́ zero?"
+          },
+          "hint_ladder": [
+            "Ronú nípa 0 × 5 àti 7 × 0; kí ni ó wà ní ìbámu láàrin wọn?"
+          ],
+          "canvas_ops": [
+            {
+              "op": "write_step",
+              "params": {
+                "step_id": "s4",
+                "latex_or_text": "x - ? = 0  or  x - ? = 0",
+                "author": "tutor",
+                "reveal_answer": false
+              }
+            }
+          ],
+          "term_ids": [
+            "zero_product"
+          ]
+        },
+        {
+          "id": "s5",
+          "prompt_yo": "Wo parabola náà: níbo ni ó ti kan x-axis, ṣé ó bá àwọn gbòǹgbò rẹ mu?",
+          "prompt_en": "Look at the parabola: where does it cross the x-axis, and does that match your roots?",
+          "acceptable_concepts": [
+            "crossings match roots"
+          ],
+          "misconceptions": {},
+          "hint_ladder": [
+            "Wo ibi tí ìlà náà ti kan x-axis lórí graph."
+          ],
+          "canvas_ops": [
+            {
+              "op": "highlight",
+              "params": {
+                "target": "roots"
+              }
+            }
+          ],
+          "term_ids": [
+            "root",
+            "parabola",
+            "x_axis"
+          ]
+        }
+      ]
     }
   ],
   "transfer_check": {
