@@ -15,6 +15,8 @@ from fastapi.responses import FileResponse
 from livekit import api as lk
 from pydantic import BaseModel, Field
 
+import progress
+
 TOPIC_RE = re.compile(r"^[a-z0-9][a-z0-9-]{0,63}$")
 AUDIO_RE = re.compile(r"^[A-Za-z0-9_-]{1,64}\.mp3$")
 NAME_RE = re.compile(r"^[A-Za-z0-9_.-]{1,64}$")
@@ -122,3 +124,11 @@ def session_token(req: TokenRequest) -> dict:
         # No agent worker exists yet (B2). Flip via env once it is running.
         "agent_ready": os.getenv("SORO_AGENT_READY", "false").lower() == "true",
     }
+
+
+@app.get("/progress")
+def get_progress(today: str | None = None) -> dict:
+    """Seeded demo data for now (B6); persistence in Postgres is not wired yet."""
+    from datetime import date
+    t = date.fromisoformat(today) if today else date.today()
+    return {**progress.summary(progress.seed(t), t), "source": "seeded"}
