@@ -17,6 +17,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from livekit import api as lk
 from pydantic import BaseModel, Field
+from tutor_turn import router as tutor_router
 import psycopg
 from psycopg.rows import dict_row
 
@@ -72,6 +73,8 @@ app.add_middleware(
     allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
+
+app.include_router(tutor_router)
 
 
 def content_dir() -> Path:
