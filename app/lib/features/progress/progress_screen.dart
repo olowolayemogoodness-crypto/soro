@@ -200,6 +200,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
 
   Widget _rightColumn() => Column(children: [
         _strengthsCard(),
+        if (_nextLesson() != null) ...[const SizedBox(height: 16), _nextUpCard(_nextLesson()!)],
         if (_parent) ...[const SizedBox(height: 16), _emailCard()],
       ]);
 
@@ -276,11 +277,48 @@ class _ProgressScreenState extends State<ProgressScreen> {
         Text(_t('strengthsSub'), style: const TextStyle(fontSize: 14, color: _T.ink2)),
         const SizedBox(height: 16),
         for (final s in _data.strengths) ...[
-          _StrengthRow(s: s, notEnough: _t('notEnough'), basedOn: _t('basedOn', {'n': s.attempts})),
+          _StrengthRow(s: s, notEnough: _t('notEnough'), basedOn: s.attempts == 1 ? _t('basedOnOne') : _t('basedOn', {'n': s.attempts})),
           const SizedBox(height: 14),
         ],
         if (_data.isSample)
           Text(_t('sampleNote'), style: const TextStyle(fontSize: 12.5, height: 1.4, color: _T.ink2, fontStyle: FontStyle.italic)),
+      ]),
+    );
+  }
+
+  LessonRecord? _nextLesson() {
+    for (final s in _data.subjects) {
+      for (final topic in s.topics) {
+        for (final l in topic.lessons) {
+          if (l.stepsDone > 0 && l.stepsDone < l.stepsTotal) return l;
+        }
+      }
+    }
+    return null;
+  }
+
+  Widget _nextUpCard(LessonRecord l) {
+    final left = l.stepsTotal - l.stepsDone;
+    return _Card(
+      color: _T.sticky,
+      child: Row(children: [
+        Container(
+          width: 48,
+          height: 48,
+          decoration: const BoxDecoration(color: _T.paper, shape: BoxShape.circle),
+          child: const Icon(Icons.arrow_forward_rounded, color: _T.crimson),
+        ),
+        const SizedBox(width: 14),
+        Expanded(
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(_t('nextUp'), style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: _T.ink2)),
+            const SizedBox(height: 2),
+            Text(l.title, style: const TextStyle(fontFamily: _T.serif, fontSize: 18, fontWeight: FontWeight.w600, height: 1.25)),
+            const SizedBox(height: 2),
+            Text(left == 1 ? _t('stepsLeftOne') : _t('stepsLeft', {'n': left}),
+                style: const TextStyle(fontSize: 13.5, color: _T.ink2)),
+          ]),
+        ),
       ]),
     );
   }
@@ -621,7 +659,7 @@ class _LessonRow extends StatelessWidget {
         ),
         const SizedBox(width: 12),
         ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 150),
+          constraints: const BoxConstraints(maxWidth: 176),
           child: Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
             Text(t('unaided'), style: const TextStyle(fontSize: 11.5, color: _T.ink2)),
             const SizedBox(height: 4),
@@ -673,7 +711,7 @@ class _StrengthRow extends StatelessWidget {
         ),
       ),
       const SizedBox(height: 4),
-      Text(s.hasEvidence ? basedOn : '$notEnough · ${basedOn.toLowerCase()}',
+      Text(s.hasEvidence ? basedOn : '$notEnough · ${basedOn[0].toLowerCase()}${basedOn.substring(1)}',
           style: const TextStyle(fontSize: 12.5, color: _T.ink2)),
     ]);
   }

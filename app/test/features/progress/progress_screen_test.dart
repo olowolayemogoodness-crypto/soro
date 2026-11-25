@@ -35,7 +35,7 @@ void main() {
     expect(find.text('5'), findsWidgets); // streak counter
     expect(find.text('Sample data'), findsOneWidget);
     expect(find.text('Passed on your own'), findsWidgets);
-    expect(find.text('Not enough attempts yet · based on 1 attempts'), findsOneWidget);
+    expect(find.text('Not enough attempts yet · based on 1 attempt'), findsOneWidget);
   });
 
   testWidgets('Parent view switches the wording and shows the consent note', (tester) async {

@@ -52,6 +52,11 @@ const _strings = <ProgressLang, Map<String, String>>{
     'sampleNote': 'Sample data for the demo. Real scores come after the pilot.',
     'notEnough': 'Not enough attempts yet',
     'basedOn': 'Based on {n} attempts',
+    'basedOnOne': 'Based on 1 attempt',
+    'nextUp': 'Next up',
+    'nextUpSub': 'The next lesson to finish. Recommended modules come later.',
+    'stepsLeft': '{n} steps left',
+    'stepsLeftOne': '1 step left',
     'emailTitle': 'Weekly email to parents',
     'emailSample': 'Sample email',
     'emailBody':
@@ -100,6 +105,11 @@ const _strings = <ProgressLang, Map<String, String>>{
     'sampleNote': 'Àpẹẹrẹ dátà fún ìfihàn. Ìdíwọ̀n gidi yóò wá lẹ́yìn ìdánwò.',
     'notEnough': 'Ìgbìyànjú kò tó síbẹ̀',
     'basedOn': 'Ó dá lórí ìgbìyànjú {n}',
+    'basedOnOne': 'Ó dá lórí ìgbìyànjú kan',
+    'nextUp': 'Tókàn',
+    'nextUpSub': 'Ẹ̀kọ́ tó kàn láti parí. Àwọn ẹ̀kọ́ tí a dámọ̀ràn yóò wá lẹ́yìn.',
+    'stepsLeft': 'ìgbésẹ̀ {n} ló kù',
+    'stepsLeftOne': 'ìgbésẹ̀ kan ló kù',
     'emailTitle': 'Ìméèlì ọ̀sẹ̀ sí àwọn òbí',
     'emailSample': 'Àpẹẹrẹ ìméèlì',
     'emailBody':
