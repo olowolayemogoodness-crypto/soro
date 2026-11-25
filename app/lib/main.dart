@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 
+import 'features/graph_friction/graph_friction_screen.dart';
 import 'features/progress/progress_screen.dart';
 import 'features/progress/progress_strings.dart';
 import 'l10n/soro_strings.dart';
@@ -19,7 +20,8 @@ void main() {
 enum SoroRoute {
   home('/'),
   board('/board'),
-  progress('/progress');
+  progress('/progress'),
+  graphFriction(kGraphFrictionRoute);
 
   const SoroRoute(this.path);
   final String path;
@@ -137,6 +139,10 @@ class _SoroAppState extends State<SoroApp> {
       title: 'Sọ̀rọ̀',
       debugShowCheckedModeBanner: false,
       theme: SoroTokens.buildTheme(),
+      routes: <String, WidgetBuilder>{
+        kGraphFrictionRoute: (BuildContext context) =>
+            const GraphFrictionScreen(),
+      },
       home: _buildActiveScreen(),
     );
   }
@@ -177,6 +183,8 @@ class _SoroAppState extends State<SoroApp> {
           ),
           onBack: _handleBackToHome,
         );
+      case SoroRoute.graphFriction:
+        return const GraphFrictionScreen();
     }
   }
 }
