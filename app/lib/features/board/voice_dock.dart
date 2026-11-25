@@ -13,7 +13,8 @@ import 'tutor_script.dart';
 ///   or 'Listening…' when holding the voice orb).
 /// - Two-line live caption strip showing the tutor's current line in English (`lang="en"`)
 ///   and Yorùbá (`lang="yo"`, flagged 'needs native check').
-/// - Voice orb button with tap-and-hold ('Listening…', no real audio) and >= 56px target.
+/// - Voice orb button: tap to hear Soro (recorded Spitch voice, the board writes
+///   the line as it plays), tap again to stop. >= 56px target.
 /// - Tap-to-hear bilingual term cards (`gbòngbò · roots`, `ibùdó · vertex`,
 ///   `ìlà-àárín · axis of symmetry`) with screen-reader `lang` attributes.
 class VoiceDock extends StatefulWidget {
@@ -24,7 +25,8 @@ class VoiceDock extends StatefulWidget {
     required this.turnState,
     required this.captionEn,
     required this.captionYo,
-    required this.onListeningChanged,
+    required this.onSpeak,
+    this.isPlayingVoice = false,
     this.compact = false,
   });
 
@@ -33,7 +35,12 @@ class VoiceDock extends StatefulWidget {
   final TutorTurnState turnState;
   final String captionEn;
   final String captionYo;
-  final ValueChanged<bool> onListeningChanged;
+
+  /// Tapped to hear Soro: plays the recorded voice while the board writes the line.
+  final VoidCallback onSpeak;
+
+  /// True while a recording is playing (the orb then stops it when tapped).
+  final bool isPlayingVoice;
   final bool compact;
 
   @override
@@ -44,7 +51,8 @@ class _VoiceDockState extends State<VoiceDock> {
   String? _activePlayingTermId;
 
   bool get _isListening => widget.turnState == TutorTurnState.listening;
-  bool get _isSpeaking => widget.turnState == TutorTurnState.soroSpeaking;
+  bool get _isSpeaking =>
+      widget.turnState == TutorTurnState.soroSpeaking || widget.isPlayingVoice;
 
   String _turnCueText() {
     switch (widget.turnState) {
@@ -263,21 +271,15 @@ class _VoiceDockState extends State<VoiceDock> {
   }
 
   Widget _buildVoiceOrbButton() {
-    final String hint = _isListening
-        ? BoardStrings.tr(widget.language, 'orbListeningHint')
-        : BoardStrings.tr(widget.language, 'orbHoldHint');
+    final String action = widget.isPlayingVoice ? 'Tap to stop' : 'Tap to hear Soro';
 
     return Semantics(
       button: true,
-      toggled: _isListening,
-      label: 'Voice orb push-to-talk button. $hint',
+      toggled: widget.isPlayingVoice,
+      label: 'Voice orb. $action',
       child: GestureDetector(
         key: const Key('voice-orb-button'),
-        onTapDown: (_) => widget.onListeningChanged(true),
-        onTapUp: (_) => widget.onListeningChanged(false),
-        onTapCancel: () => widget.onListeningChanged(false),
-        onLongPressStart: (_) => widget.onListeningChanged(true),
-        onLongPressEnd: (_) => widget.onListeningChanged(false),
+        onTap: widget.onSpeak,
         child: ConstrainedBox(
           constraints: const BoxConstraints(minWidth: 64, minHeight: 64),
           child: Column(
@@ -290,36 +292,41 @@ class _VoiceDockState extends State<VoiceDock> {
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: _isListening
+                  color: widget.isPlayingVoice
                       ? SoroTokens.crimsonDeep
                       : SoroTokens.crimson,
                   border: Border.all(
-                    color: _isListening ? SoroTokens.sun : SoroTokens.paper,
-                    width: _isListening ? 3.0 : 2.0,
+                    color: widget.isPlayingVoice
+                        ? SoroTokens.sun
+                        : SoroTokens.paper,
+                    width: widget.isPlayingVoice ? 3.0 : 2.0,
                   ),
                   boxShadow: [
                     BoxShadow(
                       color: SoroTokens.crimson.withValues(
-                        alpha: _isListening ? 0.42 : 0.25,
+                        alpha: widget.isPlayingVoice ? 0.42 : 0.25,
                       ),
-                      blurRadius: _isListening ? 16 : 10,
-                      spreadRadius: _isListening ? 3 : 0,
+                      blurRadius: widget.isPlayingVoice ? 16 : 10,
+                      spreadRadius: widget.isPlayingVoice ? 3 : 0,
                     ),
                   ],
                 ),
                 child: ExcludeSemantics(
-                  child: SvgPicture.asset(_mascotAsset(), fit: BoxFit.contain),
+                  child: SvgPicture.asset(
+                    widget.isPlayingVoice
+                        ? 'assets/mascot/soro-ilu-speaking.svg'
+                        : _mascotAsset(),
+                    fit: BoxFit.contain,
+                  ),
                 ),
               ),
               const SizedBox(height: 3),
               Text(
-                _isListening
-                    ? BoardStrings.tr(widget.language, 'turnListening')
-                    : 'Hold to talk',
+                action,
                 style: SoroTokens.sans(
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
-                  color: _isListening
+                  color: widget.isPlayingVoice
                       ? SoroTokens.crimsonDeep
                       : SoroTokens.ink2,
                 ),

@@ -8,8 +8,11 @@ import '../../l10n/soro_strings.dart';
 import '../../theme/soro_theme.dart';
 import 'board_strings.dart';
 import 'brain_tutor_script.dart';
+import 'speech_player.dart';
+import 'spoken_clips.dart';
 import 'tutor_client.dart';
 import 'tutor_script.dart';
+import 'typing_text.dart';
 import 'voice_dock.dart';
 
 /// Default idle duration before the notebook board tucks back into the chat.
@@ -43,7 +46,13 @@ class _NotebookEntry {
     this.isUnaided = false,
     this.isCorrectStudentStep = false,
     this.inputMethod,
+    this.audioUrl,
+    this.writeDuration,
   });
+
+  /// Server-made Spitch clip for this line, and how long the pen should take.
+  final String? audioUrl;
+  final Duration? writeDuration;
 
   final ScriptAuthor author;
   final String text;
@@ -68,6 +77,8 @@ class BoardScreen extends StatefulWidget {
     required this.onBackToChat,
     this.tutorScript,
     this.tuckAwayDelay = kBoardTuckAwayDelay,
+    this.speechPlayer,
+    this.spokenClips,
   });
 
   final SoroLanguage language;
@@ -78,6 +89,10 @@ class BoardScreen extends StatefulWidget {
   final VoidCallback onBackToChat;
   final TutorScript? tutorScript;
   final Duration tuckAwayDelay;
+
+  /// Voice player and clip lookup; tests pass fakes, the app uses the defaults.
+  final SpeechPlayer? speechPlayer;
+  final SpokenClips? spokenClips;
 
   @override
   State<BoardScreen> createState() => _BoardScreenState();
@@ -97,6 +112,17 @@ class _BoardScreenState extends State<BoardScreen> {
   TutorTurnState _turnStateBeforeListening = TutorTurnState.studentTurn;
   String _currentCaptionEn = BoardStrings.tr(SoroLanguage.en, 'step1Prompt');
   String _currentCaptionYo = BoardStrings.tr(SoroLanguage.en, 'step1Yo');
+
+  // Speak button: recorded voice plays while the line is written at its pace.
+  SpeechPlayer? _speech;
+  late final SpokenClips _clips = widget.spokenClips ?? SpokenClips();
+  StreamSubscription<void>? _speechDoneSub;
+  Timer? _speechTimer;
+  bool _voicePlaying = false;
+  int? _typingIndex;
+  Duration _typingDuration = Duration.zero;
+  int _typingRun = 0;
+  String? _speakNote;
 
   bool _isBoardVisible = true;
   bool _thinking = false;
@@ -141,6 +167,7 @@ class _BoardScreenState extends State<BoardScreen> {
       _currentCaptionEn = 'Soro is thinking…';
       _currentCaptionYo = '';
     }
+    _clips.load();
     _subscription = _script.events.listen(_handleScriptEvent);
     _script.start();
     _resetIdleTimer();
@@ -150,6 +177,9 @@ class _BoardScreenState extends State<BoardScreen> {
   void dispose() {
     _idleTimer?.cancel();
     _typingCooldownTimer?.cancel();
+    _speechTimer?.cancel();
+    _speechDoneSub?.cancel();
+    _speech?.dispose();
     _subscription?.cancel();
     if (widget.tutorScript == null) {
       _script.dispose();
@@ -209,6 +239,8 @@ class _BoardScreenState extends State<BoardScreen> {
             isCorrection: line.isCorrection,
             isPraise: line.isPraise,
             isUnaided: line.isUnaided,
+            audioUrl: line.audioUrl,
+            writeDuration: line.writeDuration,
           ),
         );
         if (!line.isAnalogy) {
@@ -295,18 +327,99 @@ class _BoardScreenState extends State<BoardScreen> {
     _resetIdleTimer();
   }
 
-  void _handleListeningChanged(bool isListening) {
-    setState(() {
-      if (isListening) {
-        if (_turnState != TutorTurnState.listening) {
-          _turnStateBeforeListening = _turnState;
-        }
-        _turnState = TutorTurnState.listening;
-      } else {
-        _turnState = _turnStateBeforeListening == TutorTurnState.soroSpeaking
-            ? TutorTurnState.studentTurn
-            : _turnStateBeforeListening;
+  /// The line to read aloud: the newest question or step, not an analogy or tick.
+  int? _lineToSpeak() {
+    for (int i = _entries.length - 1; i >= 0; i--) {
+      final _NotebookEntry e = _entries[i];
+      if (e.author == ScriptAuthor.tutor && !e.isAnalogy && !e.isPraise) {
+        return i;
       }
+    }
+    for (int i = _entries.length - 1; i >= 0; i--) {
+      if (_entries[i].author == ScriptAuthor.tutor) return i;
+    }
+    return null;
+  }
+
+  /// In Yorùbá mode the line shown in Yorùbá is the one that is spoken.
+  bool _writesYoruba(_NotebookEntry e) =>
+      widget.language == SoroLanguage.yo &&
+      e.author == ScriptAuthor.tutor &&
+      (e.textYo ?? '').isNotEmpty;
+
+  String _spokenText(_NotebookEntry e) =>
+      _writesYoruba(e) ? spokenYoruba(e.textYo!) : e.text;
+
+  /// Orb pressed: play the recorded voice and write the line as it plays.
+  /// Pressed again while playing, it stops.
+  Future<void> _handleSpeak() async {
+    if (_voicePlaying || _typingIndex != null) {
+      await _stopSpeaking();
+      return;
+    }
+    final int? index = _lineToSpeak();
+    if (index == null) return;
+    final _NotebookEntry entry = _entries[index];
+    final String spoken = _spokenText(entry);
+    await _clips.load();
+    final SpeechSource? source = _clips.sourceFor(
+      language: widget.language,
+      text: spoken,
+      audioUrl: entry.audioUrl,
+    );
+
+    Duration length = entry.writeDuration ?? writeDurationFor(spoken);
+    bool playing = false;
+    String? note;
+    if (source == null) {
+      note = 'No voice recording for this line yet';
+    } else {
+      try {
+        final SpeechPlayer player = _speech ??=
+            widget.speechPlayer ?? AudioplayersSpeechPlayer();
+        final Duration? clip = await player.play(source);
+        if (clip != null && clip > Duration.zero) length = clip;
+        _speechDoneSub?.cancel();
+        _speechDoneSub = player.onComplete.listen((_) => _finishSpeaking());
+        playing = true;
+      } catch (_) {
+        note = 'Voice could not play; writing the line without it';
+      }
+    }
+    if (!mounted) return;
+    setState(() {
+      if (_turnState != TutorTurnState.soroSpeaking) {
+        _turnStateBeforeListening = _turnState;
+      }
+      _turnState = TutorTurnState.soroSpeaking;
+      _voicePlaying = playing;
+      _typingIndex = index;
+      _typingDuration = length;
+      _typingRun++;
+      _speakNote = note;
+    });
+    // Backstop for platforms that never report the end of a clip.
+    _speechTimer?.cancel();
+    _speechTimer = Timer(length + const Duration(milliseconds: 400), _finishSpeaking);
+    _resetIdleTimer();
+  }
+
+  Future<void> _stopSpeaking() async {
+    try {
+      await _speech?.stop();
+    } catch (_) {}
+    _finishSpeaking();
+  }
+
+  void _finishSpeaking() {
+    _speechTimer?.cancel();
+    if (!mounted || (_typingIndex == null && !_voicePlaying)) return;
+    setState(() {
+      _voicePlaying = false;
+      _typingIndex = null;
+      _turnState = _turnStateBeforeListening == TutorTurnState.soroSpeaking
+          ? TutorTurnState.studentTurn
+          : _turnStateBeforeListening;
     });
     _resetIdleTimer();
   }
@@ -504,13 +617,30 @@ class _BoardScreenState extends State<BoardScreen> {
                         : _buildTuckedAwayChatView(context, lang),
                   ),
                   if (_thinking || _offline) _buildBrainStatus(),
+                  if (_speakNote != null)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: SoroTokens.s16,
+                        vertical: 4,
+                      ),
+                      child: Text(
+                        _speakNote!,
+                        key: const Key('speak-note'),
+                        style: SoroTokens.sans(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: SoroTokens.ink2,
+                        ),
+                      ),
+                    ),
                   VoiceDock(
                     language: lang,
                     networkStatus: widget.networkStatus,
                     turnState: _turnState,
                     captionEn: _currentCaptionEn,
                     captionYo: _currentCaptionYo,
-                    onListeningChanged: _handleListeningChanged,
+                    onSpeak: _handleSpeak,
+                    isPlayingVoice: _voicePlaying || _typingIndex != null,
                     compact: isPhone,
                   ),
                 ],
@@ -1232,24 +1362,46 @@ class _BoardScreenState extends State<BoardScreen> {
         key: Key('notebook-entry-$index'),
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          SoroLocalizedText(
-            entry.text,
-            language: SoroLanguage.en,
-            style: style.copyWith(height: ruleSpacing / size),
-          ),
+          if (_typingIndex == index && !_writesYoruba(entry))
+            TypingText(
+              text: entry.text,
+              duration: _typingDuration,
+              runId: _typingRun,
+              language: SoroLanguage.en,
+              style: style.copyWith(height: ruleSpacing / size),
+            )
+          else
+            SoroLocalizedText(
+              entry.text,
+              language: SoroLanguage.en,
+              style: style.copyWith(height: ruleSpacing / size),
+            ),
           if (isTutor &&
               lang == SoroLanguage.yo &&
               entry.textYo != null &&
               entry.textYo!.isNotEmpty)
-            SoroLocalizedText(
-              entry.textYo!,
-              language: SoroLanguage.yo,
-              style: SoroTokens.sans(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: SoroTokens.ink2,
-              ).copyWith(height: ruleSpacing / 14),
-            ),
+            if (_typingIndex == index)
+              TypingText(
+                text: entry.textYo!,
+                duration: _typingDuration,
+                runId: _typingRun,
+                language: SoroLanguage.yo,
+                style: SoroTokens.sans(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: SoroTokens.ink2,
+                ).copyWith(height: ruleSpacing / 14),
+              )
+            else
+              SoroLocalizedText(
+                entry.textYo!,
+                language: SoroLanguage.yo,
+                style: SoroTokens.sans(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: SoroTokens.ink2,
+                ).copyWith(height: ruleSpacing / 14),
+              ),
         ],
       ),
     );

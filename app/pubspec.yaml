@@ -12,6 +12,7 @@ dependencies:
   cupertino_icons: ^1.0.8
   flutter_svg: ^2.0.17
   http: ^1.2.2
+  audioplayers: ^6.1.0
 
 dev_dependencies:
   flutter_test:
@@ -28,6 +29,7 @@ flutter:
     - assets/mascot/soro-ilu-listening.svg
     - assets/mascot/soro-ilu-speaking.svg
     - assets/mascot/soro-ilu-icon.svg
+    - assets/audio/tutor/
 
   fonts:
     - family: SourceSerif4

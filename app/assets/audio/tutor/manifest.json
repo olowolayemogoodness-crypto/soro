@@ -1,0 +1,22 @@
+{
+ "en|Analogy: roots are where a thrown ball's path meets the ground.": "audio/tutor/en_00.mp3",
+ "yo|gbòngbò dà bí ibi tí bọ́ọ̀lù bá bàlẹ̀ sí": "audio/tutor/yo_00.mp3",
+ "en|Look at the equation. What are the coefficients a, b and c?": "audio/tutor/en_01.mp3",
+ "yo|Wo ìṣedọ́gba náà. Kí ni àwọn nọ́ńbà a, b àti c?": "audio/tutor/yo_01.mp3",
+ "en|Look closely at the signs in x² − 5x + 6 = 0. What sign is in front of 5x?": "audio/tutor/en_02.mp3",
+ "yo|Wo àmì iwájú 5x nínú x² − 5x + 6 = 0 dáadáa. Àmì wo ló wà níbẹ̀?": "audio/tutor/yo_02.mp3",
+ "en|Which two numbers multiply to 6 and add to −5?": "audio/tutor/en_03.mp3",
+ "yo|Àwọn nọ́ńbà méjì wo ni a bá sọ di púpọ̀ tí yóò jẹ́ 6, tí a bá sì ròpọ̀ tí yóò jẹ́ −5?": "audio/tutor/yo_03.mp3",
+ "en|Check the sign of the middle term when you expand": "audio/tutor/en_04.mp3",
+ "yo|Ṣàyẹ̀wò àmì (+/-) ti àárín nígbà tí o bá ṣí i.": "audio/tutor/yo_04.mp3",
+ "en|Ó tọ́ · Correct! Since (x − 2)(x − 3) = 0, write the roots x = ? or x = ? in blue:": "audio/tutor/en_05.mp3",
+ "yo|Ó tọ́! Nígbà tí (x − 2)(x − 3) = 0, kọ àwọn gbòngbò x = ? tàbí x = ? pẹ̀lú yíǹkì buluu:": "audio/tutor/yo_05.mp3",
+ "en|If (x − 2) = 0 or (x − 3) = 0, what values of x make each bracket zero?": "audio/tutor/en_06.mp3",
+ "yo|Tí (x − 2) = 0 tàbí (x − 3) = 0, iye x wo ni yóò mú kí àkámọ́ kọ̀ọ̀kan jẹ́ òdo?": "audio/tutor/yo_06.mp3",
+ "en|Now try x² − 7x + 12 = 0 on your own": "audio/tutor/en_07.mp3",
+ "yo|Báyìí, gbìyànjú x² − 7x + 12 = 0 fúnra rẹ láìsí ìrànlọ́wọ́": "audio/tutor/yo_07.mp3",
+ "en|Unaided check (no hints): try checking your two numbers for x² − 7x + 12 = 0 again.": "audio/tutor/en_08.mp3",
+ "yo|Ìdánwò láìsí ìrànlọ́wọ́: tún ṣàyẹ̀wò àwọn nọ́ńbà méjì rẹ fún x² − 7x + 12 = 0.": "audio/tutor/yo_08.mp3",
+ "en|Ó tọ́ · Correct! You solved x² − 7x + 12 = 0 (x = 3 or x = 4) on your own.": "audio/tutor/en_09.mp3",
+ "yo|Ó tọ́! O yanju x² − 7x + 12 = 0 (x = 3 tàbí x = 4) fúnra rẹ.": "audio/tutor/yo_09.mp3"
+}

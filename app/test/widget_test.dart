@@ -7,6 +7,8 @@ import 'package:app/features/board/tutor_script.dart';
 import 'package:app/l10n/soro_strings.dart';
 import 'package:app/main.dart';
 
+import 'features/speech_fakes.dart';
+
 void main() {
   testWidgets(
     'Soro home shell renders ask-anything composer, switches language to Yoruba, cycles network status, opens board on ask, and opens My progress in one tap',
@@ -102,7 +104,7 @@ void main() {
   );
 
   testWidgets(
-    'BoardScreen runs scripted quadratic co-solve end-to-end, voice dock tap-and-hold, stylus palm rejection, and 10s idle tuck-away with Working card',
+    'BoardScreen runs scripted quadratic co-solve end-to-end, voice dock tap-to-hear, stylus palm rejection, and 10s idle tuck-away with Working card',
     (WidgetTester tester) async {
       tester.view.physicalSize = const Size(1280, 800);
       tester.view.devicePixelRatio = 1.0;
@@ -121,6 +123,8 @@ void main() {
             tutorScript: DemoQuadraticTutorScript(
               stepDelay: const Duration(milliseconds: 50),
             ),
+            speechPlayer: FakeSpeechPlayer(),
+            spokenClips: clipsFor(const <String, String>{}),
           ),
         ),
       );
@@ -138,13 +142,11 @@ void main() {
       expect(find.byKey(const Key('active-blank-template')), findsOneWidget);
       expect(find.text('Your turn: say it or write it'), findsOneWidget);
 
-      // Voice orb tap-and-hold shows 'Listening…'
-      final TestGesture orbGesture = await tester.startGesture(
-        tester.getCenter(find.byKey(const Key('voice-orb-button'))),
-      );
+      // Voice orb: a tap starts Soro speaking ('Tap to stop'), a second tap stops it
+      await tester.tap(find.byKey(const Key('voice-orb-button')));
       await tester.pump(const Duration(milliseconds: 100));
-      expect(find.text('Listening…'), findsWidgets);
-      await orbGesture.up();
+      expect(find.text('Tap to stop'), findsWidgets);
+      await tester.tap(find.byKey(const Key('voice-orb-button')));
       await tester.pump(const Duration(milliseconds: 100));
       expect(find.text('Your turn: say it or write it'), findsOneWidget);
 
