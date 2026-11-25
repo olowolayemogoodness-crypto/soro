@@ -8,6 +8,7 @@ dependencies = [
     "livekit-api>=1.2.3",
     "livekit-plugins-groq>=1.8.13",
     "livekit-plugins-silero>=1.8.13",
+    "livekit-plugins-spitch>=1.8.13",
 ]
 
 [dependency-groups]

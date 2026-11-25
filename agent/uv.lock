@@ -293,6 +293,15 @@ wheels = [
 ]
 
 [[package]]
+name = "distro"
+version = "1.9.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/fc/f8/98eea607f65de6527f8a2e8885fc8015d3e6f5775df186e443e0964a11c3/distro-1.9.0.tar.gz", hash = "sha256:2fa77c6fd8940f116ee1d6b94a2f90b13b5ea8d019b98bc8bafdcabcdd9bdbed", size = 60722, upload-time = "2023-12-24T09:54:32.31Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/12/b3/231ffd4ab1fc9d679809f356cebee130ac7daa00d6d6f3206dd4fd137e9e/distro-1.9.0-py3-none-any.whl", hash = "sha256:7bffd925d65168f85027d8da9af6bddab658135b840670a223589bc0c8ef02b2", size = 20277, upload-time = "2023-12-24T09:54:30.421Z" },
+]
+
+[[package]]
 name = "docstring-parser"
 version = "0.18.0"
 source = { registry = "https://pypi.org/simple" }
@@ -717,6 +726,19 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/da/48/ce34dbd762c13eb9fef2bc949b47cd8671b4433d4c2aae1cdbf3f6f7b49e/livekit_plugins_silero-1.8.13.tar.gz", hash = "sha256:5308cbbe32664bea5b0f6fe4977bae249c05a5028cd85ca4c6589555955e2822", size = 1955659, upload-time = "2026-11-18T21:40:52.598Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/86/33/79876f11a1a6cc211b973076339945861b40c8d68461272f5d692c7c454c/livekit_plugins_silero-1.8.13-py3-none-any.whl", hash = "sha256:94207cffa9469f41e63a2821a65f3c153eb5223e452eae4b65cb59b226c9a6df", size = 3903335, upload-time = "2026-11-18T21:40:49.75Z" },
+]
+
+[[package]]
+name = "livekit-plugins-spitch"
+version = "1.8.13"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "livekit-agents", extra = ["codecs"] },
+    { name = "spitch" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/cc/30/8a26ee132b137cdec78d72b99adeaa71a4518e224782980ac364007eb24a/livekit_plugins_spitch-1.8.13.tar.gz", hash = "sha256:372a0a14c9ab86e1d6bd13dd26b9ff7e34d9e8877c54da079b13cd814d6ecd95", size = 5256, upload-time = "2026-11-18T21:41:12.087Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/74/bd/236b56534b70b5442db9e85faf4e2feb28bf05d2ba5a37441df645f766ca/livekit_plugins_spitch-1.8.13-py3-none-any.whl", hash = "sha256:0adfb0e312e784bc24a52d09f5f3a6e5aa1365336c32f0306eaa62f1d704865a", size = 5868, upload-time = "2026-11-18T21:41:10.876Z" },
 ]
 
 [[package]]
@@ -1393,6 +1415,7 @@ dependencies = [
     { name = "livekit-api" },
     { name = "livekit-plugins-groq" },
     { name = "livekit-plugins-silero" },
+    { name = "livekit-plugins-spitch" },
 ]
 
 [package.dev-dependencies]
@@ -1407,6 +1430,7 @@ requires-dist = [
     { name = "livekit-api", specifier = ">=1.2.3" },
     { name = "livekit-plugins-groq", specifier = ">=1.8.13" },
     { name = "livekit-plugins-silero", specifier = ">=1.8.13" },
+    { name = "livekit-plugins-spitch", specifier = ">=1.8.13" },
 ]
 
 [package.metadata.requires-dev]
@@ -1426,6 +1450,23 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/c5/6f/6292145099f72a153a710245f46ae43e5fb6c77bec1b6086cb76c12dc280/sounddevice-0.5.6-py3-none-win32.whl", hash = "sha256:b36b807eb02abd257198bf84b2af05e4fea199a9d2f0019014169c7136d45e9c", size = 1009627, upload-time = "2026-08-17T07:55:00.401Z" },
     { url = "https://files.pythonhosted.org/packages/8d/3e/cbc593c31a5f0d817b3fe97e64aa8461bd0f55cb07b67ce1b776296ae336/sounddevice-0.5.6-py3-none-win_amd64.whl", hash = "sha256:7f4162f514f007b0bf25a3ccfed3f1705bc2ec311888a90232729eec4f57a4f4", size = 1009630, upload-time = "2026-08-17T07:55:02.088Z" },
     { url = "https://files.pythonhosted.org/packages/60/a4/b0c21c9f215a6fd9606b8f8748c21212dc098e5d5a2d93068c50edcf19b4/sounddevice-0.5.6-py3-none-win_arm64.whl", hash = "sha256:c8ae19173e5f27f8c12d4b5eee2dbfe542cee125d591e663e0fb4dfb75246d45", size = 1009630, upload-time = "2026-08-17T07:55:03.689Z" },
+]
+
+[[package]]
+name = "spitch"
+version = "1.52.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "anyio" },
+    { name = "distro" },
+    { name = "httpx" },
+    { name = "pydantic" },
+    { name = "sniffio" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/26/9c/757450474ddfe17bf02cd579ffad5349b30ac1871e7ef6b3e3afd88bb98c/spitch-1.52.0.tar.gz", hash = "sha256:a7d555a62a88e4815fd15d7481ef5fd6a49a4928418d8cd9e36475b9bdcb1e43", size = 281872, upload-time = "2026-11-24T06:18:55.905Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/3e/82/0895a4be75b3e7e7e1295497f0150587384ba464f0c5c3d86a356a54fa54/spitch-1.52.0-py3-none-any.whl", hash = "sha256:9608df5b4175c893f03096169cc042bd734e335065569dc742d6b62f07421358", size = 91959, upload-time = "2026-11-24T06:01:54.376Z" },
 ]
 
 [[package]]
