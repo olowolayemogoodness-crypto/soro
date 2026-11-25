@@ -107,7 +107,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                       if (_lang == ProgressLang.yo) ...[
                         const SizedBox(height: 20),
                         Text(_t('yoNeedsCheck'),
-                            style: const TextStyle(fontSize: 12, color: _T.ink2, fontStyle: FontStyle.italic)),
+                            style: const TextStyle(fontSize: 13, color: _T.ink2, fontStyle: FontStyle.italic)),
                       ],
                     ],
                   ),
@@ -292,7 +292,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
           const SizedBox(height: 14),
         ],
         if (_data.isSample)
-          Text(_t('sampleNote'), style: const TextStyle(fontSize: 12.5, height: 1.4, color: _T.ink2, fontStyle: FontStyle.italic)),
+          Text(_t('sampleNote'), style: const TextStyle(fontSize: 13, height: 1.4, color: _T.ink2, fontStyle: FontStyle.italic)),
       ]),
     );
   }
@@ -322,7 +322,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
         const SizedBox(width: 14),
         Expanded(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(_t('nextUp'), style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: _T.ink2)),
+            Text(_t('nextUp'), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: _T.ink2)),
             const SizedBox(height: 2),
             Text(l.title, style: const TextStyle(fontFamily: _T.serif, fontSize: 18, fontWeight: FontWeight.w600, height: 1.25)),
             const SizedBox(height: 2),
@@ -390,7 +390,7 @@ class _Chip extends StatelessWidget {
   Widget build(BuildContext context) => Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(999)),
-        child: Text(text, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: _T.ink)),
+        child: Text(text, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: _T.ink)),
       );
 }
 
@@ -516,7 +516,7 @@ class _StreakBadge extends StatelessWidget {
                 Flexible(child: Text(label, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600))),
               ]),
               const SizedBox(height: 4),
-              Text(caption, style: const TextStyle(fontSize: 12.5, height: 1.35, color: _T.ink2)),
+              Text(caption, style: const TextStyle(fontSize: 13, height: 1.35, color: _T.ink2)),
             ]),
           ),
         ]),
@@ -555,7 +555,7 @@ class _DayBar extends StatelessWidget {
       Text(name,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: TextStyle(fontSize: 12.5, fontWeight: isToday ? FontWeight.w700 : FontWeight.w500, color: isToday ? _T.crimsonDeep : _T.ink2)),
+          style: TextStyle(fontSize: 13, fontWeight: isToday ? FontWeight.w700 : FontWeight.w500, color: isToday ? _T.crimsonDeep : _T.ink2)),
     ]);
   }
 }
@@ -665,14 +665,14 @@ class _LessonRow extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(t('steps', {'done': lesson.stepsDone, 'total': lesson.stepsTotal}),
-                style: const TextStyle(fontSize: 12.5, color: _T.ink2)),
+                style: const TextStyle(fontSize: 13, color: _T.ink2)),
           ]),
         ),
         const SizedBox(width: 12),
         ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 176),
           child: Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-            Text(t('unaided'), style: const TextStyle(fontSize: 11.5, color: _T.ink2)),
+            Text(t('unaided'), style: const TextStyle(fontSize: 13, color: _T.ink2)),
             const SizedBox(height: 4),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
@@ -680,12 +680,12 @@ class _LessonRow extends StatelessWidget {
               child: Row(mainAxisSize: MainAxisSize.min, children: [
                 Icon(icon, size: 16, color: iconColor),
                 const SizedBox(width: 5),
-                Flexible(child: Text(label, textAlign: TextAlign.center, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, height: 1.2))),
+                Flexible(child: Text(label, textAlign: TextAlign.center, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, height: 1.2))),
               ]),
             ),
             if (attempts != null) ...[
               const SizedBox(height: 4),
-              Text(attempts, style: const TextStyle(fontSize: 12, color: _T.ink2)),
+              Text(attempts, style: const TextStyle(fontSize: 13, color: _T.ink2)),
             ],
           ]),
         ),
@@ -723,7 +723,7 @@ class _StrengthRow extends StatelessWidget {
       ),
       const SizedBox(height: 4),
       Text(s.hasEvidence ? basedOn : '$notEnough · ${basedOn[0].toLowerCase()}${basedOn.substring(1)}',
-          style: const TextStyle(fontSize: 12.5, color: _T.ink2)),
+          style: const TextStyle(fontSize: 13, color: _T.ink2)),
     ]);
   }
 }
