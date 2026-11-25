@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../../theme/soro_theme.dart';
-import '../../widgets/ilu_state_view.dart';
+import '../../widgets/soro_empty_state.dart';
+import '../../widgets/soro_error_state.dart';
+import '../../widgets/soro_loading_state.dart';
 import 'progress_data.dart';
 import 'progress_strings.dart';
 
@@ -43,7 +45,17 @@ class ProgressScreen extends StatefulWidget {
     this.initialView = ProgressView.student,
     this.onBack,
     this.onLangChanged,
+    this.loading = false,
+    this.failed = false,
+    this.onRetry,
   });
+
+  /// Shows the loading state instead of the page.
+  final bool loading;
+
+  /// Shows the error state, with [onRetry] as its action, instead of the page.
+  final bool failed;
+  final VoidCallback? onRetry;
 
   /// Defaults to seeded sample data until `GET /progress` is wired in.
   final ProgressData? data;
@@ -91,12 +103,24 @@ class _ProgressScreenState extends State<ProgressScreen> {
                     children: [
                       _header(c.maxWidth < 560),
                       const SizedBox(height: 20),
+                      if (widget.loading)
+                        const SoroLoadingState(
+                          title: 'Getting your progress',
+                          message: 'Ìlù is gathering your steps. One moment.',
+                        )
+                      else if (widget.failed)
+                        SoroErrorState(
+                          title: "Your progress didn't load",
+                          message:
+                              'Check your connection, then try again. Your work is safe.',
+                          onRetry: widget.onRetry ?? () {},
+                        )
+                      else ...[
                       if (_parent) ...[_consentNote(), const SizedBox(height: 16)],
                       _hero(wide),
                       const SizedBox(height: 16),
                       if (_data.subjects.isEmpty)
-                        const SoroStateView(
-                          kind: SoroStateKind.empty,
+                        const SoroEmptyState(
                           title: 'Your journey starts here',
                           message:
                               'Solve a problem with Ìlù and your progress will show up on this page.',
@@ -116,6 +140,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                         const SizedBox(height: 20),
                         Text(_t('yoNeedsCheck'),
                             style: const TextStyle(fontSize: 13, color: _T.ink2, fontStyle: FontStyle.italic)),
+                      ],
                       ],
                     ],
                   ),
