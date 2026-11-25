@@ -74,7 +74,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final List<StylusStroke> _strokes = <StylusStroke>[];
   StylusStroke? _activeStroke;
-  PointerDeviceKind _lastPointerKind = PointerDeviceKind.stylus;
 
   static const List<SuggestedTopic> _suggestedTopics = [
     SuggestedTopic(
@@ -167,7 +166,7 @@ class _HomeScreenState extends State<HomeScreen> {
     });
     widget.onSubmitQuestion(
       '$prefix$baseEquation',
-      inputMethodLabel: 'Stylus (${_lastPointerKind.name})',
+      inputMethodLabel: 'Handwriting',
     );
   }
 
@@ -189,6 +188,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       backgroundColor: SoroTokens.cream,
       body: SoroDottedPaperBackground(
+        showWatermark: false,
         child: SafeArea(
           child: FocusTraversalGroup(
             policy: OrderedTraversalPolicy(),
@@ -676,30 +676,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ],
               ),
-              // Yorùbá tone-mark proof badge so ọ̀ ẹ̀ ṣ rendering is always verifiable on screen
-              Semantics(
-                label: 'Yorùbá tone marks proof: ${SoroStrings.yorubaProofString}',
-                child: Container(
-                  key: const Key('yoruba-tone-proof'),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: SoroTokens.s12,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: SoroTokens.sky,
-                    borderRadius: BorderRadius.circular(SoroTokens.rPill),
-                  ),
-                  child: SoroLocalizedText(
-                    'Sọ̀rọ̀ · ọ̀ ẹ̀ ṣ',
-                    language: SoroLanguage.yo,
-                    style: SoroTokens.sans(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      color: SoroTokens.ink,
-                    ),
-                  ),
-                ),
-              ),
             ],
           ),
           const SizedBox(height: SoroTokens.s12),
@@ -930,14 +906,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   color: SoroTokens.studentBlue,
                 ),
               ),
-              Text(
-                'Ink: Student Royal Blue (#1B56D0) · Pointer: ${_lastPointerKind.name}',
-                style: SoroTokens.sans(
-                  fontSize: 12.5,
-                  fontWeight: FontWeight.w600,
-                  color: SoroTokens.ink2,
-                ),
-              ),
             ],
           ),
           const SizedBox(height: SoroTokens.s4),
@@ -964,7 +932,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 key: const Key('stylus-pointer-listener'),
                 onPointerDown: (PointerDownEvent event) {
                   setState(() {
-                    _lastPointerKind = event.kind;
                     _activeStroke = StylusStroke(
                       points: <Offset>[event.localPosition],
                       widths: <double>[_strokeWidthForEvent(event)],
@@ -1099,7 +1066,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       SoroStrings.tr(lang, topic.promptKey);
                   widget.onSubmitQuestion(
                     prompt,
-                    inputMethodLabel: 'Topic chip',
+                    inputMethodLabel: 'Suggested topic',
                   );
                 },
               ),
