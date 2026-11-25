@@ -8,12 +8,14 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../l10n/soro_strings.dart';
 import '../../theme/soro_theme.dart';
 import 'board_strings.dart';
+import 'hear_soro_button.dart';
 import 'brain_tutor_script.dart';
 import 'tutor_client.dart';
 import 'pen_line_view.dart';
 import 'solve_intent.dart';
 import 'tutor_pen_writer.dart';
 import 'tutor_script.dart';
+import 'tutor_speaker.dart';
 import 'voice_dock.dart';
 
 /// Default idle duration before the notebook board tucks back into the chat.
@@ -49,10 +51,15 @@ class _NotebookEntry {
     this.inputMethod,
     this.audioMs,
     this.silent = false,
+    this.audioUrl,
   });
 
   final int? audioMs;
   final bool silent;
+  final String? audioUrl;
+
+  /// Bumped to make the pen write the line again, in sync with its voice.
+  int replay = 0;
   final List<PenMarkKind> marks = <PenMarkKind>[];
   final ScriptAuthor author;
   final String text;
@@ -76,6 +83,7 @@ class BoardScreen extends StatefulWidget {
     required this.onCycleNetworkStatus,
     required this.onBackToChat,
     this.tutorScript,
+    this.speaker,
     this.tuckAwayDelay = kBoardTuckAwayDelay,
   });
 
@@ -86,6 +94,9 @@ class BoardScreen extends StatefulWidget {
   final VoidCallback onCycleNetworkStatus;
   final VoidCallback onBackToChat;
   final TutorScript? tutorScript;
+
+  /// Voice for the Hear Soro buttons; defaults to the device speaker.
+  final TutorSpeaker? speaker;
   final Duration tuckAwayDelay;
 
   @override
@@ -94,6 +105,9 @@ class BoardScreen extends StatefulWidget {
 
 class _BoardScreenState extends State<BoardScreen> {
   late final TutorScript _script;
+  late final TutorSpeaker _speaker = widget.speaker ?? DeviceTutorSpeaker();
+  Object? _speakingTarget;
+  bool _muted = false;
   StreamSubscription<TutorScriptEvent>? _subscription;
 
   final List<_NotebookEntry> _entries = <_NotebookEntry>[];
@@ -166,6 +180,8 @@ class _BoardScreenState extends State<BoardScreen> {
     _idleTimer?.cancel();
     _typingCooldownTimer?.cancel();
     _subscription?.cancel();
+    _speaker.stop();
+    if (widget.speaker == null) _speaker.dispose();
     if (widget.tutorScript == null) {
       _script.dispose();
     }
@@ -237,6 +253,7 @@ class _BoardScreenState extends State<BoardScreen> {
             isUnaided: line.isUnaided,
             audioMs: line.audioMs,
             silent: line.silent,
+            audioUrl: line.audioUrl,
           ),
         );
         if (!line.isAnalogy) {
@@ -307,6 +324,47 @@ class _BoardScreenState extends State<BoardScreen> {
       _resetIdleTimer();
     });
     _resetIdleTimer();
+  }
+
+  /// Press speaks [text] now and the pen rewrites [entry] in sync; press
+  /// again stops. Without an [entry] only the voice plays (dock caption).
+  Future<void> _toggleSpeak(
+    Object target,
+    String text, {
+    String? audioUrl,
+    _NotebookEntry? entry,
+  }) async {
+    if (_speakingTarget == target) {
+      setState(() => _speakingTarget = null);
+      await _speaker.stop();
+      return;
+    }
+    setState(() {
+      _speakingTarget = target;
+      if (entry != null) entry.replay++;
+    });
+    await _speaker.speak(text, audioUrl: audioUrl);
+    if (mounted && _speakingTarget == target) {
+      setState(() => _speakingTarget = null);
+    }
+  }
+
+  void _readAll() {
+    final String text = _entries
+        .where((e) => e.author == ScriptAuthor.tutor && !e.silent)
+        .map((e) => e.text)
+        .join('. ');
+    if (text.isEmpty) return;
+    _toggleSpeak('all', text);
+  }
+
+  void _toggleMute() {
+    setState(() {
+      _muted = !_muted;
+      _speaker.muted = _muted;
+      if (_muted) _speakingTarget = null;
+    });
+    if (_muted) _speaker.stop();
   }
 
   /// Solve mode: the tutor writes the full worked solution with the pen.
@@ -547,6 +605,13 @@ class _BoardScreenState extends State<BoardScreen> {
                     captionEn: _currentCaptionEn,
                     captionYo: _currentCaptionYo,
                     onListeningChanged: _handleListeningChanged,
+                    onHearCaption: () =>
+                        _toggleSpeak('caption', _currentCaptionEn),
+                    onReadAll: _readAll,
+                    onToggleMute: _toggleMute,
+                    speakingCaption: _speakingTarget == 'caption',
+                    speakingAll: _speakingTarget == 'all',
+                    muted: _muted,
                     compact: isPhone,
                   ),
                 ],
@@ -1309,6 +1374,7 @@ class _BoardScreenState extends State<BoardScreen> {
           KeyedSubtree(
             key: entry.isAnalogy ? const Key('board-analogy-line') : null,
             child: PenLineView(
+              key: ValueKey<int>(entry.replay),
               text: entry.text,
               color: SoroTokens.crimson,
               rule: ruleSpacing,
@@ -1317,6 +1383,20 @@ class _BoardScreenState extends State<BoardScreen> {
               spoken: !entry.silent,
             ),
           ),
+          if (!entry.silent && entry.text.trim().length > 1)
+            Align(
+              alignment: Alignment.centerLeft,
+              child: HearSoroButton(
+                key: Key('hear-soro-entry-$index'),
+                active: _speakingTarget == entry,
+                onPressed: () => _toggleSpeak(
+                  entry,
+                  entry.text,
+                  audioUrl: entry.audioUrl,
+                  entry: entry,
+                ),
+              ),
+            ),
           if (lang == SoroLanguage.yo &&
               entry.textYo != null &&
               entry.textYo!.isNotEmpty)
