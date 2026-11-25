@@ -111,7 +111,7 @@ def test_every_factorable_problem_runs_to_transfer_without_leaking(pid):
                 t = Walker(PACK, pid)
                 t.i = prob["steps"].index(s)
                 got = t.submit(key.split("=", 1)[1] if key.startswith("factored=") else key.replace("=", " = ", 1) if key[0] in "bc" else key.split("=")[1].replace(",", " and "))
-                assert got.kind == "misconception" and got.text_yo == txt and one_question(got.text_yo), (pid, s["id"], key)
+                assert got.kind == "misconception" and got.text_yo == txt["correction_yo"] and got.text_en == txt["correction_en"] and one_question(got.text_yo) and one_question(got.text_en), (pid, s["id"], key)
     for s in prob["steps"]:
         turns.append(w.submit(_answer(s)))
     assert turns[-1].kind == "transfer" and one_question(turns[-1].text_yo)

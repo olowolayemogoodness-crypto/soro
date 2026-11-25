@@ -1,0 +1,210 @@
+{
+ "hints": {
+  "math101-quadratics": {
+   "p1": {
+    "s1": [
+     "Look at the numbers in front of x², in front of x, and the number on its own.",
+     "Hint: ax² + bx + c = 0; what is the number in front of x?"
+    ],
+    "s2": [
+     "Write down the pairs of numbers that multiply to c and check the sum of each pair.",
+     "Both numbers have the same sign because c is positive."
+    ],
+    "s3": [
+     "Expand your brackets back out and look at the middle term.",
+     "Does the middle term you get match b?"
+    ],
+    "s4": [
+     "Think about 0 × 5 and 7 × 0; what do they have in common?"
+    ],
+    "s5": [
+     "Look at where the line crosses the x-axis on the graph."
+    ]
+   },
+   "p2": {
+    "s1": [
+     "The equation already looks like that: what is its left side?"
+    ],
+    "s2": [
+     "Take half the coefficient of x, then square it."
+    ],
+    "s3": [
+     "Expand your brackets back out and look at the middle term."
+    ],
+    "s4": [
+     "We need the opposite of squaring; there are two possible answers."
+    ]
+   },
+   "p3": {
+    "s1": [
+     "Look at the numbers in front of x², in front of x, and the number on its own.",
+     "Hint: ax² + bx + c = 0; what is the number in front of x?"
+    ],
+    "s2": [
+     "Write down the pairs of numbers that multiply to c and check the sum of each pair.",
+     "Both numbers have the same sign because c is positive."
+    ],
+    "s3": [
+     "Expand your brackets back out and look at the middle term.",
+     "Does the middle term you get match b?"
+    ],
+    "s4": [
+     "Think about 0 × 5 and 7 × 0; what do they have in common?"
+    ],
+    "s5": [
+     "Look at where the line crosses the x-axis on the graph."
+    ]
+   },
+   "p4": {
+    "s1": [
+     "Look at the numbers in front of x², in front of x, and the number on its own.",
+     "Hint: ax² + bx + c = 0; what is the number in front of x?"
+    ],
+    "s2": [
+     "Write down the pairs of numbers that multiply to c and check the sum of each pair.",
+     "Both numbers have the same sign because c is positive."
+    ],
+    "s3": [
+     "Expand your brackets back out and look at the middle term.",
+     "Does the middle term you get match b?"
+    ],
+    "s4": [
+     "Think about 0 × 5 and 7 × 0; what do they have in common?"
+    ],
+    "s5": [
+     "Look at where the line crosses the x-axis on the graph."
+    ]
+   },
+   "p5": {
+    "s1": [
+     "Look at the numbers in front of x², in front of x, and the number on its own.",
+     "Hint: ax² + bx + c = 0; what is the number in front of x?"
+    ],
+    "s2": [
+     "Write down the pairs of numbers that multiply to c and check the sum of each pair.",
+     "The two numbers have different signs because c is negative."
+    ],
+    "s3": [
+     "Expand your brackets back out and look at the middle term.",
+     "Does the middle term you get match b?"
+    ],
+    "s4": [
+     "Think about 0 × 5 and 7 × 0; what do they have in common?"
+    ],
+    "s5": [
+     "Look at where the line crosses the x-axis on the graph."
+    ]
+   },
+   "p6": {
+    "s1": [
+     "Look at the numbers in front of x², in front of x, and the number on its own.",
+     "Hint: ax² + bx + c = 0; what is the number in front of x?"
+    ],
+    "s2": [
+     "Write down the pairs of numbers that multiply to c and check the sum of each pair.",
+     "Both numbers have the same sign because c is positive."
+    ],
+    "s3": [
+     "Expand your brackets back out and look at the middle term.",
+     "Does the middle term you get match b?"
+    ],
+    "s4": [
+     "Think about 0 × 5 and 7 × 0; what do they have in common?"
+    ],
+    "s5": [
+     "Look at where the line crosses the x-axis on the graph."
+    ]
+   },
+   "p7": {
+    "s1": [
+     "Look at the numbers in front of x², in front of x, and the number on its own.",
+     "Hint: ax² + bx + c = 0; what is the number in front of x?"
+    ],
+    "s2": [
+     "Write down the pairs of numbers that multiply to c and check the sum of each pair.",
+     "Both numbers have the same sign because c is positive."
+    ],
+    "s3": [
+     "Expand your brackets back out and look at the middle term.",
+     "Does the middle term you get match b?"
+    ],
+    "s4": [
+     "Think about 0 × 5 and 7 × 0; what do they have in common?"
+    ],
+    "s5": [
+     "Look at where the line crosses the x-axis on the graph."
+    ]
+   },
+   "p8": {
+    "s1": [
+     "Look at the numbers in front of x², in front of x, and the number on its own.",
+     "Hint: ax² + bx + c = 0; what is the number in front of x?"
+    ],
+    "s2": [
+     "Write down the pairs of numbers that multiply to c and check the sum of each pair.",
+     "Both numbers have the same sign because c is positive."
+    ],
+    "s3": [
+     "Expand your brackets back out and look at the middle term.",
+     "Does the middle term you get match b?"
+    ],
+    "s4": [
+     "Think about 0 × 5 and 7 × 0; what do they have in common?"
+    ],
+    "s5": [
+     "Look at where the line crosses the x-axis on the graph."
+    ]
+   },
+   "p9": {
+    "s1": [
+     "Look at the numbers in front of x², in front of x, and the number on its own.",
+     "Hint: ax² + bx + c = 0; what is the number in front of x?"
+    ],
+    "s2": [
+     "Write down the pairs of numbers that multiply to c and check the sum of each pair.",
+     "The two numbers have different signs because c is negative."
+    ],
+    "s3": [
+     "Expand your brackets back out and look at the middle term.",
+     "Does the middle term you get match b?"
+    ],
+    "s4": [
+     "Think about 0 × 5 and 7 × 0; what do they have in common?"
+    ],
+    "s5": [
+     "Look at where the line crosses the x-axis on the graph."
+    ]
+   },
+   "p10": {
+    "s1": [
+     "Look at the numbers in front of x², in front of x, and the number on its own.",
+     "Hint: ax² + bx + c = 0; what is the number in front of x?"
+    ],
+    "s2": [
+     "Write down the pairs of numbers that multiply to c and check the sum of each pair.",
+     "The two numbers have different signs because c is negative."
+    ],
+    "s3": [
+     "Expand your brackets back out and look at the middle term.",
+     "Does the middle term you get match b?"
+    ],
+    "s4": [
+     "Think about 0 × 5 and 7 × 0; what do they have in common?"
+    ],
+    "s5": [
+     "Look at where the line crosses the x-axis on the graph."
+    ]
+   }
+  },
+  "physics-friction": {
+   "f1": {
+    "s1": [
+     "Watch how the crate moves after you stop pushing."
+    ],
+    "s2": [
+     "Think of a danfo skidding on a wet road: what slows it down?"
+    ]
+   }
+  }
+ }
+}

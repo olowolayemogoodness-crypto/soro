@@ -137,6 +137,7 @@ class TokenRequest(BaseModel):
     room: str = Field(pattern=NAME_RE.pattern)
     participant: str = Field(pattern=NAME_RE.pattern)
     topic_id: str = Field(pattern=TOPIC_RE.pattern)
+    lang: str | None = Field(default=None, pattern=r"^(en|yo)$")  # what the TUTOR says; the student speaks English
 
 
 @app.post("/session/token")
@@ -146,7 +147,7 @@ def session_token(req: TokenRequest) -> dict:
         lk.AccessToken(key, secret)
         .with_identity(req.participant)
         .with_name(req.participant)
-        .with_metadata(json.dumps({"topic_id": req.topic_id}))
+        .with_metadata(json.dumps({"topic_id": req.topic_id, **({"lang": req.lang} if req.lang else {})}))
         .with_grants(
             lk.VideoGrants(
                 room_join=True,

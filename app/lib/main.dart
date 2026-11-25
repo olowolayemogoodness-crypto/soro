@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 
+import 'features/board/board_screen.dart';
 import 'features/graph_friction/graph_friction_screen.dart';
 import 'features/progress/progress_screen.dart';
 import 'features/progress/progress_strings.dart';
 import 'l10n/soro_strings.dart';
 import 'models/chat_models.dart';
 import 'screens/home_screen.dart';
-import 'screens/placeholder_screens.dart';
 import 'theme/soro_theme.dart';
 import 'widgets/soro_splash.dart';
 
@@ -183,7 +183,7 @@ class _SoroAppState extends State<SoroApp> {
           onOpenMyProgress: _handleOpenMyProgress,
         );
       case SoroRoute.board:
-        return BoardPlaceholderScreen(
+        return BoardScreen(
           language: _language,
           networkStatus: _networkStatus,
           activeQuestion: _activeBoardQuestion,

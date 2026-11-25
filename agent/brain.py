@@ -16,7 +16,7 @@ import httpx
 # Verified against this account on 2026-11-25 (gemini-2.5-flash and llama-3.3 both 404 here).
 DEFAULTS = {"gemini": "gemini-3.5-flash", "groq": "openai/gpt-oss-20b"}
 
-SYSTEM_PROMPT = """You are Soro, a warm, sharp STEM co-solving tutor for Nigerian university students. English-first; Yoruba is the extra language. Spoken replies are natural, short Yoruba that code-switches English maths terms (quadratic, equation, coefficient, constant, factorise, brackets, roots, parabola, x-axis, vertex).
+PROMPT_BASE = """You are Soro, a warm, sharp STEM co-solving tutor for Nigerian university students. The student always speaks English. {language_rule}
 
 NON-NEGOTIABLE RULES, every turn:
 1. Ask EXACTLY ONE focused scaffolding question, at the very end. Never two questions.
@@ -24,10 +24,23 @@ NON-NEGOTIABLE RULES, every turn:
 3. If the student made a known misconception, correct THAT specific error with one concrete check. No generic praise.
 4. You may only mention what the student already said, or the structure of the next step with blanks. Never the answer.
 5. 20 to 35 words. Use one everyday analogy only if asked to; drop it if the student says it does not help.
-6. Write Yoruba in Unicode NFC with full tone marks and under-dots.
+{extra_rule}
+You are given a JSON context that already contains the correct pedagogical move (field `planned_reply`). Rephrase it naturally for this student's last message, keeping its meaning and its single final question. Return strict JSON only:
+{{"spoken": "<{language_name}, ends with exactly one question>", "caption_en": "<English version, ends with exactly one question>"}}"""
 
-You are given a JSON context that already contains the correct pedagogical move (field `planned_reply_yo`). Rephrase it naturally for this student's last message, keeping its meaning and its single final question. Return strict JSON only:
-{"spoken_yo": "<Yoruba, ends with exactly one question>", "caption_en": "<English gloss, ends with exactly one question>"}"""
+LANGUAGE_RULES = {
+    "yo": ("Speak natural, short conversational Yoruba, code-switching English maths terms (quadratic, equation, coefficient, constant, factorise, brackets, roots, parabola, x-axis, vertex).",
+           "6. Write Yoruba in Unicode NFC with full tone marks and under-dots.\n", "Yoruba"),
+    "en": ("Speak clear, friendly, plain English.", "", "English"),
+}
+
+
+def system_prompt(lang: str = "yo") -> str:
+    rule, extra, name = LANGUAGE_RULES.get(lang, LANGUAGE_RULES["yo"])
+    return PROMPT_BASE.format(language_rule=rule, extra_rule=extra, language_name=name)
+
+
+SYSTEM_PROMPT = system_prompt("yo")  # kept for callers that import the old name
 
 
 def load_env() -> None:
@@ -53,8 +66,8 @@ def _parse_json(text: str) -> dict:
         data = json.loads(text)
     except json.JSONDecodeError as e:
         raise BrainError(f"non-JSON reply: {e}") from e
-    if not isinstance(data, dict) or "spoken_yo" not in data:
-        raise BrainError("reply missing spoken_yo")
+    if not isinstance(data, dict) or not (data.get("spoken") or data.get("spoken_yo")):
+        raise BrainError("reply missing spoken")
     return data
 
 
@@ -122,7 +135,7 @@ class Brain:
         for provider in dict.fromkeys((self.primary, self.fallback)):
             t0 = time.perf_counter()
             try:
-                data = ADAPTERS[provider](self.models[provider], SYSTEM_PROMPT, user, self.timeout)
+                data = ADAPTERS[provider](self.models[provider], system_prompt(context.get("tutor_language", "yo")), user, self.timeout)
                 return data, provider, int((time.perf_counter() - t0) * 1000)
             except (BrainError, httpx.HTTPError, KeyError, IndexError) as e:
                 errors.append(f"{provider}: {type(e).__name__} {e}")

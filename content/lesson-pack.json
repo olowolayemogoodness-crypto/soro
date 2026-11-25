@@ -143,8 +143,14 @@
             "c=6"
           ],
           "misconceptions": {
-            "b=5": "Dúró náà, wo àmì tó wà níwájú 5x: ṣé plus five ni tàbí minus five?",
-            "c=-6": "Wo àmì tó wà níwájú 6 ní òpin equation náà: ṣé plus ni tàbí minus?"
+            "b=5": {
+              "correction_yo": "Dúró náà, wo àmì tó wà níwájú 5x: ṣé plus five ni tàbí minus five?",
+              "correction_en": "Hold on, look at the sign in front of 5x: is it plus five or minus five?"
+            },
+            "c=-6": {
+              "correction_yo": "Wo àmì tó wà níwájú 6 ní òpin equation náà: ṣé plus ni tàbí minus?",
+              "correction_en": "Look at the sign in front of 6 at the end of the equation: is it plus or minus?"
+            }
           },
           "hint_ladder": [
             "Wo nọ́mbà tó dúró níwájú x², x, àti nọ́mbà tó dá dúró.",
@@ -160,10 +166,6 @@
                 "reveal_answer": false
               }
             }
-          ],
-          "term_ids": [
-            "coefficient",
-            "constant"
           ]
         },
         {
@@ -175,8 +177,14 @@
             "pair=-3,-2"
           ],
           "misconceptions": {
-            "pair=2,3": "Wo àmì b lẹ́ẹ̀kan sí i: àròpọ̀ 2 àti 3 jẹ́ 5, ṣé ó bá b mu?",
-            "pair=1,6": "Ìsọdipúpọ̀ 1 àti 6 jẹ́ 6, ṣùgbọ́n kí ni àròpọ̀ wọn, ṣé ó bá b mu?"
+            "pair=2,3": {
+              "correction_yo": "Wo àmì b lẹ́ẹ̀kan sí i: àròpọ̀ 2 àti 3 jẹ́ 5, ṣé ó bá b mu?",
+              "correction_en": "Look at b again: the sum of 2 and 3 is 5, does that match b?"
+            },
+            "pair=1,6": {
+              "correction_yo": "Ìsọdipúpọ̀ 1 àti 6 jẹ́ 6, ṣùgbọ́n kí ni àròpọ̀ wọn, ṣé ó bá b mu?",
+              "correction_en": "1 and 6 multiply to 6, but what is their sum, and does it match b?"
+            }
           },
           "hint_ladder": [
             "Kọ àwọn nọ́mbà méjì tí ìsọdipúpọ̀ wọn jẹ́ 6 sílẹ̀ kí o wo àròpọ̀ olúkúlùkù wọn.",
@@ -192,10 +200,6 @@
                 "reveal_answer": false
               }
             }
-          ],
-          "term_ids": [
-            "product",
-            "sum"
           ]
         },
         {
@@ -206,8 +210,14 @@
             "factored=(x-2)(x-3)"
           ],
           "misconceptions": {
-            "factored=(x+2)(x+3)": "Tí o bá expand (x + 2)(x + 3), ṣé middle term máa fún wa −5x tàbí +5x?",
-            "factored=(x-1)(x-6)": "Tí o bá expand (x − 1)(x − 6), ṣé middle term máa fún wa −5x?"
+            "factored=(x+2)(x+3)": {
+              "correction_yo": "Tí o bá expand (x + 2)(x + 3), ṣé middle term máa fún wa −5x tàbí +5x?",
+              "correction_en": "If you expand (x + 2)(x + 3), does the middle term give us −5x or +5x?"
+            },
+            "factored=(x-1)(x-6)": {
+              "correction_yo": "Tí o bá expand (x − 1)(x − 6), ṣé middle term máa fún wa −5x?",
+              "correction_en": "If you expand (x − 1)(x − 6), does the middle term give us −5x?"
+            }
           },
           "hint_ladder": [
             "Expand brackets rẹ padà kí o wo middle term.",
@@ -223,11 +233,6 @@
                 "reveal_answer": false
               }
             }
-          ],
-          "term_ids": [
-            "factorise",
-            "brackets",
-            "expand"
           ]
         },
         {
@@ -238,7 +243,10 @@
             "one bracket = 0"
           ],
           "misconceptions": {
-            "both brackets must equal 1": "Tí ìsọdipúpọ̀ bá jẹ́ 1, kìí ṣe zero; kí ni nọ́mbà méjì tí ìsọdipúpọ̀ wọn jẹ́ zero?"
+            "both brackets must equal 1": {
+              "correction_yo": "Tí ìsọdipúpọ̀ bá jẹ́ 1, kìí ṣe zero; kí ni nọ́mbà méjì tí ìsọdipúpọ̀ wọn jẹ́ zero?",
+              "correction_en": "If the product is 1, it is not zero; which two numbers multiply to give zero?"
+            }
           },
           "hint_ladder": [
             "Ronú nípa 0 × 5 àti 7 × 0; kí ni ó wà ní ìbámu láàrin wọn?"
@@ -253,9 +261,6 @@
                 "reveal_answer": false
               }
             }
-          ],
-          "term_ids": [
-            "zero_product"
           ]
         },
         {
@@ -276,11 +281,6 @@
                 "target": "roots"
               }
             }
-          ],
-          "term_ids": [
-            "root",
-            "parabola",
-            "x_axis"
           ]
         }
       ]
@@ -312,9 +312,6 @@
                 "reveal_answer": false
               }
             }
-          ],
-          "term_ids": [
-            "completing_square"
           ]
         },
         {
@@ -325,8 +322,14 @@
             "add 1"
           ],
           "misconceptions": {
-            "add 2": "Ìdajì b ni a nílò, kìí ṣe b fúnra rẹ̀; kí ni ìdajì b?",
-            "add 4": "Ìdajì b ni a máa ṣe square; kí ni ìdajì b kí a tó ṣe square rẹ̀?"
+            "add 2": {
+              "correction_yo": "Ìdajì b ni a nílò, kìí ṣe b fúnra rẹ̀; kí ni ìdajì b?",
+              "correction_en": "We need half of b, not b itself; what is half of b?"
+            },
+            "add 4": {
+              "correction_yo": "Ìdajì b ni a máa ṣe square; kí ni ìdajì b kí a tó ṣe square rẹ̀?",
+              "correction_en": "We square half of b; what is half of b before we square it?"
+            }
           },
           "hint_ladder": [
             "Mú ìdajì coefficient ti x, lẹ́yìn náà ṣe square rẹ̀."
@@ -341,9 +344,6 @@
                 "reveal_answer": false
               }
             }
-          ],
-          "term_ids": [
-            "perfect_square"
           ]
         },
         {
@@ -354,7 +354,10 @@
             "(x+1)^2"
           ],
           "misconceptions": {
-            "(x+2)^2": "Tí o bá expand (x + 2)², ṣé middle term jẹ́ 2x tàbí 4x?"
+            "(x+2)^2": {
+              "correction_yo": "Tí o bá expand (x + 2)², ṣé middle term jẹ́ 2x tàbí 4x?",
+              "correction_en": "If you expand (x + 2)², does the middle term give us 2x or 4x?"
+            }
           },
           "hint_ladder": [
             "Expand brackets rẹ padà kí o wo middle term."
@@ -369,9 +372,6 @@
                 "reveal_answer": false
               }
             }
-          ],
-          "term_ids": [
-            "perfect_square"
           ]
         },
         {
@@ -382,7 +382,10 @@
             "square root, plus or minus"
           ],
           "misconceptions": {
-            "square root, positive only": "Nọ́mbà méjì ni square wọn lè dọ́gba pẹ̀lú nọ́mbà kan náà; àwọn wo ni?"
+            "square root, positive only": {
+              "correction_yo": "Nọ́mbà méjì ni square wọn lè dọ́gba pẹ̀lú nọ́mbà kan náà; àwọn wo ni?",
+              "correction_en": "Two different numbers can have the same square; which two?"
+            }
           },
           "hint_ladder": [
             "Ìṣe ìdà square ni a nílò; nọ́mbà méjì ló ní ìdáhùn."
@@ -397,9 +400,6 @@
                 "reveal_answer": false
               }
             }
-          ],
-          "term_ids": [
-            "root"
           ]
         }
       ]
@@ -420,8 +420,14 @@
             "c=8"
           ],
           "misconceptions": {
-            "b=6": "Dúró náà, wo àmì tó wà níwájú 6x: ṣé plus 6 ni tàbí minus 6?",
-            "c=-8": "Wo àmì tó wà níwájú 8 ní òpin equation náà: ṣé plus ni tàbí minus?"
+            "b=6": {
+              "correction_yo": "Dúró náà, wo àmì tó wà níwájú 6x: ṣé plus 6 ni tàbí minus 6?",
+              "correction_en": "Hold on, look at the sign in front of 6x: is it plus 6 or minus 6?"
+            },
+            "c=-8": {
+              "correction_yo": "Wo àmì tó wà níwájú 8 ní òpin equation náà: ṣé plus ni tàbí minus?",
+              "correction_en": "Look at the sign in front of 8 at the end of the equation: is it plus or minus?"
+            }
           },
           "hint_ladder": [
             "Wo nọ́mbà tó dúró níwájú x², x, àti nọ́mbà tó dá dúró.",
@@ -437,10 +443,6 @@
                 "reveal_answer": false
               }
             }
-          ],
-          "term_ids": [
-            "coefficient",
-            "constant"
           ]
         },
         {
@@ -451,7 +453,10 @@
             "pair=-2,-4"
           ],
           "misconceptions": {
-            "pair=2,4": "Wo àmì b lẹ́ẹ̀kan sí i: àròpọ̀ 2 àti 4 jẹ́ 6, ṣé ó bá b mu?"
+            "pair=2,4": {
+              "correction_yo": "Wo àmì b lẹ́ẹ̀kan sí i: àròpọ̀ 2 àti 4 jẹ́ 6, ṣé ó bá b mu?",
+              "correction_en": "Look at b again: the sum of 2 and 4 is 6, does that match b?"
+            }
           },
           "hint_ladder": [
             "Kọ àwọn nọ́mbà méjì tí ìsọdipúpọ̀ wọn jẹ́ 6 sílẹ̀ kí o wo àròpọ̀ olúkúlùkù wọn.",
@@ -467,10 +472,6 @@
                 "reveal_answer": false
               }
             }
-          ],
-          "term_ids": [
-            "product",
-            "sum"
           ]
         },
         {
@@ -481,7 +482,10 @@
             "factored=(x-2)(x-4)"
           ],
           "misconceptions": {
-            "factored=(x+2)(x+4)": "Tí o bá expand (x + 2)(x + 4), ṣé middle term máa fún wa −6x tàbí +6x?"
+            "factored=(x+2)(x+4)": {
+              "correction_yo": "Tí o bá expand (x + 2)(x + 4), ṣé middle term máa fún wa −6x tàbí +6x?",
+              "correction_en": "If you expand (x + 2)(x + 4), does the middle term give us −6x or +6x?"
+            }
           },
           "hint_ladder": [
             "Expand brackets rẹ padà kí o wo middle term.",
@@ -497,11 +501,6 @@
                 "reveal_answer": false
               }
             }
-          ],
-          "term_ids": [
-            "factorise",
-            "brackets",
-            "expand"
           ]
         },
         {
@@ -512,7 +511,10 @@
             "one bracket = 0"
           ],
           "misconceptions": {
-            "both brackets must equal 1": "Tí ìsọdipúpọ̀ bá jẹ́ 1, kìí ṣe zero; kí ni nọ́mbà méjì tí ìsọdipúpọ̀ wọn jẹ́ zero?"
+            "both brackets must equal 1": {
+              "correction_yo": "Tí ìsọdipúpọ̀ bá jẹ́ 1, kìí ṣe zero; kí ni nọ́mbà méjì tí ìsọdipúpọ̀ wọn jẹ́ zero?",
+              "correction_en": "If you expand (x + 2)(x + 4), does the middle term give us −6x or +6x?"
+            }
           },
           "hint_ladder": [
             "Ronú nípa 0 × 5 àti 7 × 0; kí ni ó wà ní ìbámu láàrin wọn?"
@@ -527,9 +529,6 @@
                 "reveal_answer": false
               }
             }
-          ],
-          "term_ids": [
-            "zero_product"
           ]
         },
         {
@@ -550,11 +549,6 @@
                 "target": "roots"
               }
             }
-          ],
-          "term_ids": [
-            "root",
-            "parabola",
-            "x_axis"
           ]
         }
       ]
@@ -575,8 +569,14 @@
             "c=6"
           ],
           "misconceptions": {
-            "b=-5": "Dúró náà, wo àmì tó wà níwájú 5x: ṣé plus 5 ni tàbí minus 5?",
-            "c=-6": "Wo àmì tó wà níwájú 6 ní òpin equation náà: ṣé plus ni tàbí minus?"
+            "b=-5": {
+              "correction_yo": "Dúró náà, wo àmì tó wà níwájú 5x: ṣé plus 5 ni tàbí minus 5?",
+              "correction_en": "Hold on, look at the sign in front of 5x: is it plus 5 or minus 5?"
+            },
+            "c=-6": {
+              "correction_yo": "Wo àmì tó wà níwájú 6 ní òpin equation náà: ṣé plus ni tàbí minus?",
+              "correction_en": "Look at the sign in front of 6 at the end of the equation: is it plus or minus?"
+            }
           },
           "hint_ladder": [
             "Wo nọ́mbà tó dúró níwájú x², x, àti nọ́mbà tó dá dúró.",
@@ -592,10 +592,6 @@
                 "reveal_answer": false
               }
             }
-          ],
-          "term_ids": [
-            "coefficient",
-            "constant"
           ]
         },
         {
@@ -606,7 +602,10 @@
             "pair=2,3"
           ],
           "misconceptions": {
-            "pair=-2,-3": "Wo àmì b lẹ́ẹ̀kan sí i: àròpọ̀ −2 àti −3 jẹ́ −5, ṣé ó bá b mu?"
+            "pair=-2,-3": {
+              "correction_yo": "Wo àmì b lẹ́ẹ̀kan sí i: àròpọ̀ −2 àti −3 jẹ́ −5, ṣé ó bá b mu?",
+              "correction_en": "Look at b again: the sum of −2 and −3 is −5, does that match b?"
+            }
           },
           "hint_ladder": [
             "Kọ àwọn nọ́mbà méjì tí ìsọdipúpọ̀ wọn jẹ́ 6 sílẹ̀ kí o wo àròpọ̀ olúkúlùkù wọn.",
@@ -622,10 +621,6 @@
                 "reveal_answer": false
               }
             }
-          ],
-          "term_ids": [
-            "product",
-            "sum"
           ]
         },
         {
@@ -636,7 +631,10 @@
             "factored=(x+2)(x+3)"
           ],
           "misconceptions": {
-            "factored=(x-2)(x-3)": "Tí o bá expand (x − 2)(x − 3), ṣé middle term máa fún wa +5x tàbí −5x?"
+            "factored=(x-2)(x-3)": {
+              "correction_yo": "Tí o bá expand (x − 2)(x − 3), ṣé middle term máa fún wa +5x tàbí −5x?",
+              "correction_en": "If you expand (x − 2)(x − 3), does the middle term give us +5x or −5x?"
+            }
           },
           "hint_ladder": [
             "Expand brackets rẹ padà kí o wo middle term.",
@@ -652,11 +650,6 @@
                 "reveal_answer": false
               }
             }
-          ],
-          "term_ids": [
-            "factorise",
-            "brackets",
-            "expand"
           ]
         },
         {
@@ -667,7 +660,10 @@
             "one bracket = 0"
           ],
           "misconceptions": {
-            "both brackets must equal 1": "Tí ìsọdipúpọ̀ bá jẹ́ 1, kìí ṣe zero; kí ni nọ́mbà méjì tí ìsọdipúpọ̀ wọn jẹ́ zero?"
+            "both brackets must equal 1": {
+              "correction_yo": "Tí ìsọdipúpọ̀ bá jẹ́ 1, kìí ṣe zero; kí ni nọ́mbà méjì tí ìsọdipúpọ̀ wọn jẹ́ zero?",
+              "correction_en": "If you expand (x − 2)(x − 3), does the middle term give us +5x or −5x?"
+            }
           },
           "hint_ladder": [
             "Ronú nípa 0 × 5 àti 7 × 0; kí ni ó wà ní ìbámu láàrin wọn?"
@@ -682,9 +678,6 @@
                 "reveal_answer": false
               }
             }
-          ],
-          "term_ids": [
-            "zero_product"
           ]
         },
         {
@@ -705,11 +698,6 @@
                 "target": "roots"
               }
             }
-          ],
-          "term_ids": [
-            "root",
-            "parabola",
-            "x_axis"
           ]
         }
       ]
@@ -730,8 +718,14 @@
             "c=-6"
           ],
           "misconceptions": {
-            "b=1": "Dúró náà, wo àmì tó wà níwájú 1x: ṣé plus 1 ni tàbí minus 1?",
-            "c=6": "Wo àmì tó wà níwájú 6 ní òpin equation náà: ṣé plus ni tàbí minus?"
+            "b=1": {
+              "correction_yo": "Dúró náà, wo àmì tó wà níwájú 1x: ṣé plus 1 ni tàbí minus 1?",
+              "correction_en": "Hold on, look at the sign in front of 1x: is it plus 1 or minus 1?"
+            },
+            "c=6": {
+              "correction_yo": "Wo àmì tó wà níwájú 6 ní òpin equation náà: ṣé plus ni tàbí minus?",
+              "correction_en": "Look at the sign in front of 6 at the end of the equation: is it plus or minus?"
+            }
           },
           "hint_ladder": [
             "Wo nọ́mbà tó dúró níwájú x², x, àti nọ́mbà tó dá dúró.",
@@ -747,10 +741,6 @@
                 "reveal_answer": false
               }
             }
-          ],
-          "term_ids": [
-            "coefficient",
-            "constant"
           ]
         },
         {
@@ -761,11 +751,14 @@
             "pair=-3,2"
           ],
           "misconceptions": {
-            "pair=3,-2": "Wo àmì b lẹ́ẹ̀kan sí i: àròpọ̀ 3 àti −2 jẹ́ 1, ṣé ó bá b mu?"
+            "pair=3,-2": {
+              "correction_yo": "Wo àmì b lẹ́ẹ̀kan sí i: àròpọ̀ 3 àti −2 jẹ́ 1, ṣé ó bá b mu?",
+              "correction_en": "Look at b again: the sum of 3 and −2 is 1, does that match b?"
+            }
           },
           "hint_ladder": [
             "Kọ àwọn nọ́mbà méjì tí ìsọdipúpọ̀ wọn jẹ́ 6 sílẹ̀ kí o wo àròpọ̀ olúkúlùkù wọn.",
-            "Àwọn nọ́mbà méjèèjì ní àmì kan náà nítorí c jẹ́ positive."
+            "Àwọn nọ́mbà méjèèjì ní àmì tó yàtọ̀ síra nítorí c jẹ́ negative."
           ],
           "canvas_ops": [
             {
@@ -777,10 +770,6 @@
                 "reveal_answer": false
               }
             }
-          ],
-          "term_ids": [
-            "product",
-            "sum"
           ]
         },
         {
@@ -791,7 +780,10 @@
             "factored=(x-3)(x+2)"
           ],
           "misconceptions": {
-            "factored=(x+3)(x-2)": "Tí o bá expand (x + 3)(x − 2), ṣé middle term máa fún wa −1x tàbí +1x?"
+            "factored=(x+3)(x-2)": {
+              "correction_yo": "Tí o bá expand (x + 3)(x − 2), ṣé middle term máa fún wa −1x tàbí +1x?",
+              "correction_en": "If you expand (x + 3)(x − 2), does the middle term give us −1x or +1x?"
+            }
           },
           "hint_ladder": [
             "Expand brackets rẹ padà kí o wo middle term.",
@@ -807,11 +799,6 @@
                 "reveal_answer": false
               }
             }
-          ],
-          "term_ids": [
-            "factorise",
-            "brackets",
-            "expand"
           ]
         },
         {
@@ -822,7 +809,10 @@
             "one bracket = 0"
           ],
           "misconceptions": {
-            "both brackets must equal 1": "Tí ìsọdipúpọ̀ bá jẹ́ 1, kìí ṣe zero; kí ni nọ́mbà méjì tí ìsọdipúpọ̀ wọn jẹ́ zero?"
+            "both brackets must equal 1": {
+              "correction_yo": "Tí ìsọdipúpọ̀ bá jẹ́ 1, kìí ṣe zero; kí ni nọ́mbà méjì tí ìsọdipúpọ̀ wọn jẹ́ zero?",
+              "correction_en": "If you expand (x + 3)(x − 2), does the middle term give us −1x or +1x?"
+            }
           },
           "hint_ladder": [
             "Ronú nípa 0 × 5 àti 7 × 0; kí ni ó wà ní ìbámu láàrin wọn?"
@@ -837,9 +827,6 @@
                 "reveal_answer": false
               }
             }
-          ],
-          "term_ids": [
-            "zero_product"
           ]
         },
         {
@@ -860,11 +847,6 @@
                 "target": "roots"
               }
             }
-          ],
-          "term_ids": [
-            "root",
-            "parabola",
-            "x_axis"
           ]
         }
       ]
@@ -885,8 +867,14 @@
             "c=20"
           ],
           "misconceptions": {
-            "b=9": "Dúró náà, wo àmì tó wà níwájú 9x: ṣé plus 9 ni tàbí minus 9?",
-            "c=-20": "Wo àmì tó wà níwájú 20 ní òpin equation náà: ṣé plus ni tàbí minus?"
+            "b=9": {
+              "correction_yo": "Dúró náà, wo àmì tó wà níwájú 9x: ṣé plus 9 ni tàbí minus 9?",
+              "correction_en": "Hold on, look at the sign in front of 9x: is it plus 9 or minus 9?"
+            },
+            "c=-20": {
+              "correction_yo": "Wo àmì tó wà níwájú 20 ní òpin equation náà: ṣé plus ni tàbí minus?",
+              "correction_en": "Look at the sign in front of 20 at the end of the equation: is it plus or minus?"
+            }
           },
           "hint_ladder": [
             "Wo nọ́mbà tó dúró níwájú x², x, àti nọ́mbà tó dá dúró.",
@@ -902,10 +890,6 @@
                 "reveal_answer": false
               }
             }
-          ],
-          "term_ids": [
-            "coefficient",
-            "constant"
           ]
         },
         {
@@ -916,7 +900,10 @@
             "pair=-4,-5"
           ],
           "misconceptions": {
-            "pair=4,5": "Wo àmì b lẹ́ẹ̀kan sí i: àròpọ̀ 4 àti 5 jẹ́ 9, ṣé ó bá b mu?"
+            "pair=4,5": {
+              "correction_yo": "Wo àmì b lẹ́ẹ̀kan sí i: àròpọ̀ 4 àti 5 jẹ́ 9, ṣé ó bá b mu?",
+              "correction_en": "Look at b again: the sum of 4 and 5 is 9, does that match b?"
+            }
           },
           "hint_ladder": [
             "Kọ àwọn nọ́mbà méjì tí ìsọdipúpọ̀ wọn jẹ́ 6 sílẹ̀ kí o wo àròpọ̀ olúkúlùkù wọn.",
@@ -932,10 +919,6 @@
                 "reveal_answer": false
               }
             }
-          ],
-          "term_ids": [
-            "product",
-            "sum"
           ]
         },
         {
@@ -946,7 +929,10 @@
             "factored=(x-4)(x-5)"
           ],
           "misconceptions": {
-            "factored=(x+4)(x+5)": "Tí o bá expand (x + 4)(x + 5), ṣé middle term máa fún wa −9x tàbí +9x?"
+            "factored=(x+4)(x+5)": {
+              "correction_yo": "Tí o bá expand (x + 4)(x + 5), ṣé middle term máa fún wa −9x tàbí +9x?",
+              "correction_en": "If you expand (x + 4)(x + 5), does the middle term give us −9x or +9x?"
+            }
           },
           "hint_ladder": [
             "Expand brackets rẹ padà kí o wo middle term.",
@@ -962,11 +948,6 @@
                 "reveal_answer": false
               }
             }
-          ],
-          "term_ids": [
-            "factorise",
-            "brackets",
-            "expand"
           ]
         },
         {
@@ -977,7 +958,10 @@
             "one bracket = 0"
           ],
           "misconceptions": {
-            "both brackets must equal 1": "Tí ìsọdipúpọ̀ bá jẹ́ 1, kìí ṣe zero; kí ni nọ́mbà méjì tí ìsọdipúpọ̀ wọn jẹ́ zero?"
+            "both brackets must equal 1": {
+              "correction_yo": "Tí ìsọdipúpọ̀ bá jẹ́ 1, kìí ṣe zero; kí ni nọ́mbà méjì tí ìsọdipúpọ̀ wọn jẹ́ zero?",
+              "correction_en": "If you expand (x + 4)(x + 5), does the middle term give us −9x or +9x?"
+            }
           },
           "hint_ladder": [
             "Ronú nípa 0 × 5 àti 7 × 0; kí ni ó wà ní ìbámu láàrin wọn?"
@@ -992,9 +976,6 @@
                 "reveal_answer": false
               }
             }
-          ],
-          "term_ids": [
-            "zero_product"
           ]
         },
         {
@@ -1015,11 +996,6 @@
                 "target": "roots"
               }
             }
-          ],
-          "term_ids": [
-            "root",
-            "parabola",
-            "x_axis"
           ]
         }
       ]
@@ -1040,8 +1016,14 @@
             "c=15"
           ],
           "misconceptions": {
-            "b=8": "Dúró náà, wo àmì tó wà níwájú 8x: ṣé plus 8 ni tàbí minus 8?",
-            "c=-15": "Wo àmì tó wà níwájú 15 ní òpin equation náà: ṣé plus ni tàbí minus?"
+            "b=8": {
+              "correction_yo": "Dúró náà, wo àmì tó wà níwájú 8x: ṣé plus 8 ni tàbí minus 8?",
+              "correction_en": "Hold on, look at the sign in front of 8x: is it plus 8 or minus 8?"
+            },
+            "c=-15": {
+              "correction_yo": "Wo àmì tó wà níwájú 15 ní òpin equation náà: ṣé plus ni tàbí minus?",
+              "correction_en": "Look at the sign in front of 15 at the end of the equation: is it plus or minus?"
+            }
           },
           "hint_ladder": [
             "Wo nọ́mbà tó dúró níwájú x², x, àti nọ́mbà tó dá dúró.",
@@ -1057,10 +1039,6 @@
                 "reveal_answer": false
               }
             }
-          ],
-          "term_ids": [
-            "coefficient",
-            "constant"
           ]
         },
         {
@@ -1071,7 +1049,10 @@
             "pair=-3,-5"
           ],
           "misconceptions": {
-            "pair=3,5": "Wo àmì b lẹ́ẹ̀kan sí i: àròpọ̀ 3 àti 5 jẹ́ 8, ṣé ó bá b mu?"
+            "pair=3,5": {
+              "correction_yo": "Wo àmì b lẹ́ẹ̀kan sí i: àròpọ̀ 3 àti 5 jẹ́ 8, ṣé ó bá b mu?",
+              "correction_en": "Look at b again: the sum of 3 and 5 is 8, does that match b?"
+            }
           },
           "hint_ladder": [
             "Kọ àwọn nọ́mbà méjì tí ìsọdipúpọ̀ wọn jẹ́ 6 sílẹ̀ kí o wo àròpọ̀ olúkúlùkù wọn.",
@@ -1087,10 +1068,6 @@
                 "reveal_answer": false
               }
             }
-          ],
-          "term_ids": [
-            "product",
-            "sum"
           ]
         },
         {
@@ -1101,7 +1078,10 @@
             "factored=(x-3)(x-5)"
           ],
           "misconceptions": {
-            "factored=(x+3)(x+5)": "Tí o bá expand (x + 3)(x + 5), ṣé middle term máa fún wa −8x tàbí +8x?"
+            "factored=(x+3)(x+5)": {
+              "correction_yo": "Tí o bá expand (x + 3)(x + 5), ṣé middle term máa fún wa −8x tàbí +8x?",
+              "correction_en": "If you expand (x + 3)(x + 5), does the middle term give us −8x or +8x?"
+            }
           },
           "hint_ladder": [
             "Expand brackets rẹ padà kí o wo middle term.",
@@ -1117,11 +1097,6 @@
                 "reveal_answer": false
               }
             }
-          ],
-          "term_ids": [
-            "factorise",
-            "brackets",
-            "expand"
           ]
         },
         {
@@ -1132,7 +1107,10 @@
             "one bracket = 0"
           ],
           "misconceptions": {
-            "both brackets must equal 1": "Tí ìsọdipúpọ̀ bá jẹ́ 1, kìí ṣe zero; kí ni nọ́mbà méjì tí ìsọdipúpọ̀ wọn jẹ́ zero?"
+            "both brackets must equal 1": {
+              "correction_yo": "Tí ìsọdipúpọ̀ bá jẹ́ 1, kìí ṣe zero; kí ni nọ́mbà méjì tí ìsọdipúpọ̀ wọn jẹ́ zero?",
+              "correction_en": "If you expand (x + 3)(x + 5), does the middle term give us −8x or +8x?"
+            }
           },
           "hint_ladder": [
             "Ronú nípa 0 × 5 àti 7 × 0; kí ni ó wà ní ìbámu láàrin wọn?"
@@ -1147,9 +1125,6 @@
                 "reveal_answer": false
               }
             }
-          ],
-          "term_ids": [
-            "zero_product"
           ]
         },
         {
@@ -1170,11 +1145,6 @@
                 "target": "roots"
               }
             }
-          ],
-          "term_ids": [
-            "root",
-            "parabola",
-            "x_axis"
           ]
         }
       ]
@@ -1195,8 +1165,14 @@
             "c=10"
           ],
           "misconceptions": {
-            "b=-7": "Dúró náà, wo àmì tó wà níwájú 7x: ṣé plus 7 ni tàbí minus 7?",
-            "c=-10": "Wo àmì tó wà níwájú 10 ní òpin equation náà: ṣé plus ni tàbí minus?"
+            "b=-7": {
+              "correction_yo": "Dúró náà, wo àmì tó wà níwájú 7x: ṣé plus 7 ni tàbí minus 7?",
+              "correction_en": "Hold on, look at the sign in front of 7x: is it plus 7 or minus 7?"
+            },
+            "c=-10": {
+              "correction_yo": "Wo àmì tó wà níwájú 10 ní òpin equation náà: ṣé plus ni tàbí minus?",
+              "correction_en": "Look at the sign in front of 10 at the end of the equation: is it plus or minus?"
+            }
           },
           "hint_ladder": [
             "Wo nọ́mbà tó dúró níwájú x², x, àti nọ́mbà tó dá dúró.",
@@ -1212,10 +1188,6 @@
                 "reveal_answer": false
               }
             }
-          ],
-          "term_ids": [
-            "coefficient",
-            "constant"
           ]
         },
         {
@@ -1226,7 +1198,10 @@
             "pair=2,5"
           ],
           "misconceptions": {
-            "pair=-2,-5": "Wo àmì b lẹ́ẹ̀kan sí i: àròpọ̀ −2 àti −5 jẹ́ −7, ṣé ó bá b mu?"
+            "pair=-2,-5": {
+              "correction_yo": "Wo àmì b lẹ́ẹ̀kan sí i: àròpọ̀ −2 àti −5 jẹ́ −7, ṣé ó bá b mu?",
+              "correction_en": "Look at b again: the sum of −2 and −5 is −7, does that match b?"
+            }
           },
           "hint_ladder": [
             "Kọ àwọn nọ́mbà méjì tí ìsọdipúpọ̀ wọn jẹ́ 6 sílẹ̀ kí o wo àròpọ̀ olúkúlùkù wọn.",
@@ -1242,10 +1217,6 @@
                 "reveal_answer": false
               }
             }
-          ],
-          "term_ids": [
-            "product",
-            "sum"
           ]
         },
         {
@@ -1256,7 +1227,10 @@
             "factored=(x+2)(x+5)"
           ],
           "misconceptions": {
-            "factored=(x-2)(x-5)": "Tí o bá expand (x − 2)(x − 5), ṣé middle term máa fún wa +7x tàbí −7x?"
+            "factored=(x-2)(x-5)": {
+              "correction_yo": "Tí o bá expand (x − 2)(x − 5), ṣé middle term máa fún wa +7x tàbí −7x?",
+              "correction_en": "If you expand (x − 2)(x − 5), does the middle term give us +7x or −7x?"
+            }
           },
           "hint_ladder": [
             "Expand brackets rẹ padà kí o wo middle term.",
@@ -1272,11 +1246,6 @@
                 "reveal_answer": false
               }
             }
-          ],
-          "term_ids": [
-            "factorise",
-            "brackets",
-            "expand"
           ]
         },
         {
@@ -1287,7 +1256,10 @@
             "one bracket = 0"
           ],
           "misconceptions": {
-            "both brackets must equal 1": "Tí ìsọdipúpọ̀ bá jẹ́ 1, kìí ṣe zero; kí ni nọ́mbà méjì tí ìsọdipúpọ̀ wọn jẹ́ zero?"
+            "both brackets must equal 1": {
+              "correction_yo": "Tí ìsọdipúpọ̀ bá jẹ́ 1, kìí ṣe zero; kí ni nọ́mbà méjì tí ìsọdipúpọ̀ wọn jẹ́ zero?",
+              "correction_en": "If you expand (x − 2)(x − 5), does the middle term give us +7x or −7x?"
+            }
           },
           "hint_ladder": [
             "Ronú nípa 0 × 5 àti 7 × 0; kí ni ó wà ní ìbámu láàrin wọn?"
@@ -1302,9 +1274,6 @@
                 "reveal_answer": false
               }
             }
-          ],
-          "term_ids": [
-            "zero_product"
           ]
         },
         {
@@ -1325,11 +1294,6 @@
                 "target": "roots"
               }
             }
-          ],
-          "term_ids": [
-            "root",
-            "parabola",
-            "x_axis"
           ]
         }
       ]
@@ -1350,8 +1314,14 @@
             "c=-8"
           ],
           "misconceptions": {
-            "b=2": "Dúró náà, wo àmì tó wà níwájú 2x: ṣé plus 2 ni tàbí minus 2?",
-            "c=8": "Wo àmì tó wà níwájú 8 ní òpin equation náà: ṣé plus ni tàbí minus?"
+            "b=2": {
+              "correction_yo": "Dúró náà, wo àmì tó wà níwájú 2x: ṣé plus 2 ni tàbí minus 2?",
+              "correction_en": "Hold on, look at the sign in front of 2x: is it plus 2 or minus 2?"
+            },
+            "c=8": {
+              "correction_yo": "Wo àmì tó wà níwájú 8 ní òpin equation náà: ṣé plus ni tàbí minus?",
+              "correction_en": "Look at the sign in front of 8 at the end of the equation: is it plus or minus?"
+            }
           },
           "hint_ladder": [
             "Wo nọ́mbà tó dúró níwájú x², x, àti nọ́mbà tó dá dúró.",
@@ -1367,10 +1337,6 @@
                 "reveal_answer": false
               }
             }
-          ],
-          "term_ids": [
-            "coefficient",
-            "constant"
           ]
         },
         {
@@ -1381,11 +1347,14 @@
             "pair=-4,2"
           ],
           "misconceptions": {
-            "pair=4,-2": "Wo àmì b lẹ́ẹ̀kan sí i: àròpọ̀ 4 àti −2 jẹ́ 2, ṣé ó bá b mu?"
+            "pair=4,-2": {
+              "correction_yo": "Wo àmì b lẹ́ẹ̀kan sí i: àròpọ̀ 4 àti −2 jẹ́ 2, ṣé ó bá b mu?",
+              "correction_en": "Look at b again: the sum of 4 and −2 is 2, does that match b?"
+            }
           },
           "hint_ladder": [
             "Kọ àwọn nọ́mbà méjì tí ìsọdipúpọ̀ wọn jẹ́ 6 sílẹ̀ kí o wo àròpọ̀ olúkúlùkù wọn.",
-            "Àwọn nọ́mbà méjèèjì ní àmì kan náà nítorí c jẹ́ positive."
+            "Àwọn nọ́mbà méjèèjì ní àmì tó yàtọ̀ síra nítorí c jẹ́ negative."
           ],
           "canvas_ops": [
             {
@@ -1397,10 +1366,6 @@
                 "reveal_answer": false
               }
             }
-          ],
-          "term_ids": [
-            "product",
-            "sum"
           ]
         },
         {
@@ -1411,7 +1376,10 @@
             "factored=(x-4)(x+2)"
           ],
           "misconceptions": {
-            "factored=(x+4)(x-2)": "Tí o bá expand (x + 4)(x − 2), ṣé middle term máa fún wa −2x tàbí +2x?"
+            "factored=(x+4)(x-2)": {
+              "correction_yo": "Tí o bá expand (x + 4)(x − 2), ṣé middle term máa fún wa −2x tàbí +2x?",
+              "correction_en": "If you expand (x + 4)(x − 2), does the middle term give us −2x or +2x?"
+            }
           },
           "hint_ladder": [
             "Expand brackets rẹ padà kí o wo middle term.",
@@ -1427,11 +1395,6 @@
                 "reveal_answer": false
               }
             }
-          ],
-          "term_ids": [
-            "factorise",
-            "brackets",
-            "expand"
           ]
         },
         {
@@ -1442,7 +1405,10 @@
             "one bracket = 0"
           ],
           "misconceptions": {
-            "both brackets must equal 1": "Tí ìsọdipúpọ̀ bá jẹ́ 1, kìí ṣe zero; kí ni nọ́mbà méjì tí ìsọdipúpọ̀ wọn jẹ́ zero?"
+            "both brackets must equal 1": {
+              "correction_yo": "Tí ìsọdipúpọ̀ bá jẹ́ 1, kìí ṣe zero; kí ni nọ́mbà méjì tí ìsọdipúpọ̀ wọn jẹ́ zero?",
+              "correction_en": "If you expand (x + 4)(x − 2), does the middle term give us −2x or +2x?"
+            }
           },
           "hint_ladder": [
             "Ronú nípa 0 × 5 àti 7 × 0; kí ni ó wà ní ìbámu láàrin wọn?"
@@ -1457,9 +1423,6 @@
                 "reveal_answer": false
               }
             }
-          ],
-          "term_ids": [
-            "zero_product"
           ]
         },
         {
@@ -1480,11 +1443,6 @@
                 "target": "roots"
               }
             }
-          ],
-          "term_ids": [
-            "root",
-            "parabola",
-            "x_axis"
           ]
         }
       ]
@@ -1505,8 +1463,14 @@
             "c=-10"
           ],
           "misconceptions": {
-            "b=-3": "Dúró náà, wo àmì tó wà níwájú 3x: ṣé plus 3 ni tàbí minus 3?",
-            "c=10": "Wo àmì tó wà níwájú 10 ní òpin equation náà: ṣé plus ni tàbí minus?"
+            "b=-3": {
+              "correction_yo": "Dúró náà, wo àmì tó wà níwájú 3x: ṣé plus 3 ni tàbí minus 3?",
+              "correction_en": "Hold on, look at the sign in front of 3x: is it plus 3 or minus 3?"
+            },
+            "c=10": {
+              "correction_yo": "Wo àmì tó wà níwájú 10 ní òpin equation náà: ṣé plus ni tàbí minus?",
+              "correction_en": "Look at the sign in front of 10 at the end of the equation: is it plus or minus?"
+            }
           },
           "hint_ladder": [
             "Wo nọ́mbà tó dúró níwájú x², x, àti nọ́mbà tó dá dúró.",
@@ -1522,10 +1486,6 @@
                 "reveal_answer": false
               }
             }
-          ],
-          "term_ids": [
-            "coefficient",
-            "constant"
           ]
         },
         {
@@ -1536,11 +1496,14 @@
             "pair=5,-2"
           ],
           "misconceptions": {
-            "pair=-5,2": "Wo àmì b lẹ́ẹ̀kan sí i: àròpọ̀ −5 àti 2 jẹ́ −3, ṣé ó bá b mu?"
+            "pair=-5,2": {
+              "correction_yo": "Wo àmì b lẹ́ẹ̀kan sí i: àròpọ̀ −5 àti 2 jẹ́ −3, ṣé ó bá b mu?",
+              "correction_en": "Look at b again: the sum of −5 and 2 is −3, does that match b?"
+            }
           },
           "hint_ladder": [
             "Kọ àwọn nọ́mbà méjì tí ìsọdipúpọ̀ wọn jẹ́ 6 sílẹ̀ kí o wo àròpọ̀ olúkúlùkù wọn.",
-            "Àwọn nọ́mbà méjèèjì ní àmì kan náà nítorí c jẹ́ positive."
+            "Àwọn nọ́mbà méjèèjì ní àmì tó yàtọ̀ síra nítorí c jẹ́ negative."
           ],
           "canvas_ops": [
             {
@@ -1552,10 +1515,6 @@
                 "reveal_answer": false
               }
             }
-          ],
-          "term_ids": [
-            "product",
-            "sum"
           ]
         },
         {
@@ -1566,7 +1525,10 @@
             "factored=(x+5)(x-2)"
           ],
           "misconceptions": {
-            "factored=(x-5)(x+2)": "Tí o bá expand (x − 5)(x + 2), ṣé middle term máa fún wa +3x tàbí −3x?"
+            "factored=(x-5)(x+2)": {
+              "correction_yo": "Tí o bá expand (x − 5)(x + 2), ṣé middle term máa fún wa +3x tàbí −3x?",
+              "correction_en": "If you expand (x − 5)(x + 2), does the middle term give us +3x or −3x?"
+            }
           },
           "hint_ladder": [
             "Expand brackets rẹ padà kí o wo middle term.",
@@ -1582,11 +1544,6 @@
                 "reveal_answer": false
               }
             }
-          ],
-          "term_ids": [
-            "factorise",
-            "brackets",
-            "expand"
           ]
         },
         {
@@ -1597,7 +1554,10 @@
             "one bracket = 0"
           ],
           "misconceptions": {
-            "both brackets must equal 1": "Tí ìsọdipúpọ̀ bá jẹ́ 1, kìí ṣe zero; kí ni nọ́mbà méjì tí ìsọdipúpọ̀ wọn jẹ́ zero?"
+            "both brackets must equal 1": {
+              "correction_yo": "Tí ìsọdipúpọ̀ bá jẹ́ 1, kìí ṣe zero; kí ni nọ́mbà méjì tí ìsọdipúpọ̀ wọn jẹ́ zero?",
+              "correction_en": "If you expand (x − 5)(x + 2), does the middle term give us +3x or −3x?"
+            }
           },
           "hint_ladder": [
             "Ronú nípa 0 × 5 àti 7 × 0; kí ni ó wà ní ìbámu láàrin wọn?"
@@ -1612,9 +1572,6 @@
                 "reveal_answer": false
               }
             }
-          ],
-          "term_ids": [
-            "zero_product"
           ]
         },
         {
@@ -1635,11 +1592,6 @@
                 "target": "roots"
               }
             }
-          ],
-          "term_ids": [
-            "root",
-            "parabola",
-            "x_axis"
           ]
         }
       ]

@@ -10,8 +10,10 @@ Guarantees, enforced here and not left to the LLM:
 """
 from __future__ import annotations
 
+import json
 import re
 import unicodedata
+from pathlib import Path
 from dataclasses import dataclass, field
 from typing import Callable, Optional
 
@@ -28,6 +30,14 @@ KEYWORDS = {
 }
 KEYWORDS["*.s4"] = KEYWORDS["p1.s4"]  # factorable problems p3.. share the p1 prose steps
 KEYWORDS["*.s5"] = KEYWORDS["p1.s5"]
+
+_CONTENT = Path(__file__).parent.parent / "content"
+
+
+def _load(name: str) -> dict:
+    p = _CONTENT / name
+    return json.loads(p.read_text(encoding="utf-8")) if p.is_file() else {}
+
 
 READY_EN = "Ready to try one on your own, with no help from me?"
 READY_YO = "Ṣé o ṣetán láti gbìyànjú ọ̀kan fúnra rẹ, láìsí ìrànlọ́wọ́ mi?"  # needs native check
@@ -138,6 +148,13 @@ class Walker:
         self.analogy_dropped = False
         self.finished = False
         self.forbidden = answer_patterns(self.problem)
+        topic = pack["topic_id"]
+        # Kept outside the frozen lesson-pack contract: step -> glossary chips, and English hints.
+        self.terms = _load("term-map.json").get(topic, {}).get(problem_id, {})
+        self.en_hints = _load("en-text.json").get("hints", {}).get(topic, {}).get(problem_id, {})
+
+    def _terms(self, step: dict) -> list:
+        return self.terms.get(step["id"], step.get("term_ids", []))
 
     def _leaks(self, text: str) -> bool:
         return any(re.search(p, text) for p in self.forbidden)
@@ -169,7 +186,7 @@ class Walker:
     # -- public API ------------------------------------------------------
     def open(self) -> Turn:
         en, yo = self._guard(*self._prompt())
-        return Turn("open", en, yo, self.step["id"], self._tutor_ops(), self.step.get("term_ids", []))
+        return Turn("open", en, yo, self.step["id"], self._tutor_ops(), self._terms(self.step))
 
     def classify(self, text: str) -> tuple[str, Optional[str]]:
         step = self.step
@@ -199,9 +216,13 @@ class Walker:
             self.analogy_dropped = True  # student says the analogy does not help: drop it
         kind, key = self.classify(text)
         if kind == "misconception":
-            en, yo = self._guard(self.step["misconceptions"][key], self.step["misconceptions"][key])
+            m = self.step["misconceptions"][key]
+            if isinstance(m, dict):  # contract form: correction_yo + correction_en
+                en, yo = self._guard(m["correction_en"], m.get("correction_yo") or m["correction_en"])
+            else:  # simple form: one string
+                en, yo = self._guard(m, m)
             self.attempts += 1
-            return Turn("misconception", en, yo, self.step["id"], [], self.step.get("term_ids", []),
+            return Turn("misconception", en, yo, self.step["id"], [], self._terms(self.step),
                         needs_analogy=self.attempts >= 2)
         if kind == "correct":
             ink = [{"v": 1, "type": "canvas_cmd", "sim": self.pack["sim"], "visual": self.pack["visual"],
@@ -223,8 +244,10 @@ class Walker:
         ladder = self.step.get("hint_ladder") or []
         hint = ladder[min(self.attempts, len(ladder) - 1)] if ladder else ""
         self.attempts += 1
-        en, yo = self._guard(hint or self.step["prompt_en"], hint or self.step["prompt_yo"])
-        return Turn("hint", en, yo, self.step["id"], [], self.step.get("term_ids", []),
+        en_ladder = self.en_hints.get(self.step["id"]) or []
+        en_hint = en_ladder[min(self.attempts - 1, len(en_ladder) - 1)] if en_ladder else ""
+        en, yo = self._guard(en_hint or self.step["prompt_en"], hint or self.step["prompt_yo"])
+        return Turn("hint", en, yo, self.step["id"], [], self._terms(self.step),
                     needs_analogy=self.attempts >= 2 and not self.analogy_dropped)
 
     def analogy(self, term_id: str) -> Optional[Turn]:

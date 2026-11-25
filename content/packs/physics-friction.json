@@ -42,10 +42,7 @@
           "hint_ladder": [
             "Wo bí crate náà ṣe ń lọ lẹ́yìn tí o ti dẹ́kun títì."
           ],
-          "canvas_ops": [],
-          "term_ids": [
-            "force"
-          ]
+          "canvas_ops": []
         },
         {
           "id": "s2",
@@ -58,11 +55,7 @@
           "hint_ladder": [
             "Ronú nípa danfo tó ń yọ̀ lórí ọ̀nà tó tutù, kí ni ó dín ìyára rẹ̀ kù?"
           ],
-          "canvas_ops": [],
-          "term_ids": [
-            "friction",
-            "surface"
-          ]
+          "canvas_ops": []
         }
       ]
     }
