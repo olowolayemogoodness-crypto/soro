@@ -1,0 +1,119 @@
+{
+  "GET /health": {
+    "response": {
+      "ok": true,
+      "tier": 0,
+      "livekit_mode": "nobus"
+    }
+  },
+  "GET /packs/{topic_id}": {
+    "request": {
+      "topic_id": "math101-quadratics"
+    },
+    "response": {
+      "topic_id": "math101-quadratics",
+      "subject": "mathematics",
+      "lang": "yo",
+      "sim": "quadratic-notebook",
+      "visual": "quadratic-graph",
+      "glossary": [
+        {
+          "id": "root",
+          "yo": "gbòǹgbò",
+          "en": "root of an equation",
+          "audio": "root.mp3"
+        }
+      ],
+      "problems": [
+        {
+          "id": "p1",
+          "statement_yo": "Yànjú quadratic equation x² − 5x + 6 = 0",
+          "statement_en": "Solve the quadratic equation x² − 5x + 6 = 0",
+          "equation": "x² − 5x + 6 = 0",
+          "steps": [
+            {
+              "id": "s1",
+              "prompt_yo": "Wo quadratic equation tó wà lórí screen yìí; kí ni iye coefficient a, b, àti constant c tí o rí níbẹ̀?",
+              "prompt_en": "What are the values of coefficient a, b, and constant c?",
+              "acceptable_concepts": ["a=1", "b=-5", "c=6"],
+              "misconceptions": {
+                "b=5": "Dúró náà, wo àmì tó wà níwájú 5x: ṣé plus five ni tàbí minus five?"
+              },
+              "hint_ladder": [
+                "Wo nọ́mbà tó dúró níwájú x², x, àti nọ́mbà tó dá dúró."
+              ],
+              "canvas_ops": [
+                {
+                  "op": "write_step",
+                  "params": {
+                    "line_id": "l1",
+                    "step_id": "s1",
+                    "author": "tutor",
+                    "text": "a = ?,  b = ?,  c = ?",
+                    "blanks": ["b1", "b2", "b3"],
+                    "reveal_answer": false
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "transfer_check": {
+        "id": "quad-tc-01",
+        "variant_of": "p1",
+        "statement_yo": "Yànjú x² − 7x + 12 = 0 láìsí ìrànlọ́wọ́.",
+        "statement_en": "Solve x² − 7x + 12 = 0 without help.",
+        "assist": false
+      }
+    }
+  },
+  "POST /session/token": {
+    "request": {
+      "room": "soro-demo",
+      "participant": "student-1",
+      "topic_id": "math101-quadratics"
+    },
+    "response": {
+      "livekit_url": "wss://soro-demo.livekit.cloud",
+      "token": "<jwt>",
+      "room": "soro-demo",
+      "agent_ready": true
+    }
+  },
+  "GET /progress": {
+    "request": {
+      "participant": "student-1",
+      "days": 30
+    },
+    "response": {
+      "streak": {
+        "current": 3,
+        "longest": 5
+      },
+      "activity": [
+        {
+          "date": "2026-11-24",
+          "subject": "mathematics",
+          "topic_id": "math101-quadratics",
+          "topic": "Quadratics",
+          "steps_completed": 4,
+          "checks": [
+            {
+              "check_id": "quad-tc-01",
+              "result": "pass",
+              "assist": false
+            }
+          ]
+        },
+        {
+          "date": "2026-11-25",
+          "subject": "mathematics",
+          "topic_id": "math101-quadratics",
+          "steps_completed": 2,
+          "checks": []
+        }
+      ]
+    }
+  }
+}

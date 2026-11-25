@@ -1,0 +1,60 @@
+# Sọ̀rọ̀ (Soro) — Public Repository .gitignore
+# Never commit secrets, API keys, virtual environments, or synthesized audio caches.
+
+# Environment & Secrets (PUBLIC REPO — NEVER COMMIT)
+.env
+.env.*
+*/.env
+*/.env.*
+!.env.example
+!*/.env.example
+secrets/
+*.pem
+*.key
+
+# Claude Code local overrides
+.claude/settings.local.json
+CLAUDE.local.md
+
+# Python & uv virtual environments / caches
+.venv/
+venv/
+ENV/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+*.egg-info/
+dist/
+build/
+
+# TTS & STT local audio caches / scratch recordings
+content/audio/cache/
+**/audio/cache/
+raw_tts/
+blind_tts/
+student_stt/
+tmp_audio/
+*.opus
+
+# Emergency offline git bundles & worktree scratch
+*.bundle
+soro-wt/
+
+# Flutter / Dart / Android build artifacts (Module A)
+app/.dart_tool/
+app/build/
+app/.flutter-plugins
+app/.flutter-plugins-dependencies
+app/android/.gradle/
+app/android/local.properties
+
+# OS & Editor files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.idea/
+.vscode/

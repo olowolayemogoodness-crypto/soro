@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/olowolayemogoodness-crypto/soro/main/contracts/lesson-pack.json",
+  "title": "lesson-pack",
+  "description": "FROZEN contract v1. Lesson pack served by GET /packs/{topic_id} and stored under content/. Subject-agnostic: a pack defines its subject, visual plug-in, bilingual glossary, worked problems with misconception-tagged steps and hint ladders, and one unaided transfer check.",
+  "type": "object",
+  "required": ["topic_id", "subject", "lang", "sim", "visual", "glossary", "problems", "transfer_check"],
+  "additionalProperties": false,
+  "properties": {
+    "topic_id": { "type": "string", "minLength": 1, "description": "Pack id, e.g. 'math101-quadratics'." },
+    "subject": { "type": "string", "minLength": 1, "description": "e.g. 'mathematics', 'physics'." },
+    "lang": { "enum": ["en", "yo"], "description": "Primary language of the pack prompts." },
+    "sim": { "type": "string", "minLength": 1, "description": "Default sim/notebook id used in canvas_cmd, e.g. 'quadratic-notebook'." },
+    "visual": { "type": "string", "minLength": 1, "description": "Supporting visual plug-in, e.g. 'quadratic-graph'." },
+    "glossary": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "yo", "en", "audio"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "yo": { "type": "string", "minLength": 1, "description": "Yoruba term, NFC-normalised with tone marks." },
+          "en": { "type": "string", "minLength": 1 },
+          "audio": { "type": "string", "minLength": 1, "description": "Pre-rendered audio filename under the pack's audio/ directory." }
+        }
+      }
+    },
+    "problems": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "statement_yo", "steps"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "statement_yo": { "type": "string", "minLength": 1 },
+          "statement_en": { "type": "string" },
+          "equation": { "type": "string", "description": "Plain-text maths, e.g. 'x^2 - 5x + 6 = 0'." },
+          "steps": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": ["id", "prompt_yo", "misconceptions", "hint_ladder"],
+              "additionalProperties": false,
+              "properties": {
+                "id": { "type": "string", "minLength": 1 },
+                "prompt_yo": { "type": "string", "minLength": 1, "description": "One scaffolding question for this step." },
+                "prompt_en": { "type": "string" },
+                "acceptable_concepts": { "type": "array", "items": { "type": "string" }, "description": "Concepts/answers that count as correct at this step." },
+                "misconceptions": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "oneOf": [
+                      { "type": "string", "description": "Simple form: wrong answer -> targeted corrective prompt." },
+                      {
+                        "type": "object",
+                        "required": ["correction_en"],
+                        "additionalProperties": false,
+                        "properties": {
+                          "triggers": { "type": "array", "items": { "type": "string" }, "description": "Substrings/answers that fire this misconception." },
+                          "correction_yo": { "type": "string" },
+                          "correction_en": { "type": "string", "description": "Targeted corrective prompt; never generic praise." },
+                          "canvas_ops": { "type": "array", "items": { "type": "object" } }
+                        }
+                      }
+                    ]
+                  },
+                  "description": "Map of known wrong answer -> corrective prompt (string) or rich misconception object {triggers, correction_yo, correction_en, canvas_ops}."
+                },
+                "hint_ladder": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": { "type": "string" },
+                  "description": "Ordered hints from subtlest to most explicit; never the final answer."
+                },
+                "canvas_ops": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": ["op"],
+                    "additionalProperties": false,
+                    "properties": {
+                      "op": { "enum": ["set_params", "highlight", "draw", "reset", "narrate_state", "write_step"] },
+                      "params": { "type": "object" }
+                    }
+                  },
+                  "description": "Canvas commands the tutor may emit at this step; write_step text uses ? blanks only."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "transfer_check": {
+      "type": "object",
+      "required": ["id", "variant_of", "statement_yo"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "variant_of": { "type": "string", "minLength": 1, "description": "Id of the guided problem this check transfers from." },
+        "statement_yo": { "type": "string", "minLength": 1 },
+        "statement_en": { "type": "string" },
+        "assist": { "type": "boolean", "description": "Whether help is allowed; the unaided check uses false." }
+      }
+    }
+  }
+}

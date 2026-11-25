@@ -1,0 +1,120 @@
+# OPTIONAL WORKFLOW — DISABLED BY DEFAULT
+#
+# Primary workflow for Sọ̀rọ̀ (Soro) on https://github.com/olowolayemogoodness-crypto/soro:
+#   Goodness runs `/next-task` locally in the Claude Code CLI on his laptop.
+#   That runs directly on his machine with local audio (`lk agent console`),
+#   local Docker/Nobus SSH tunnels, local `.env` keys, and zero GitHub runner spin-up.
+#
+# What this file is:
+#   The official `anthropics/claude-code-action@v1` workflow triggered by `@claude`
+#   mentions in GitHub issues, issue comments, and PR review comments, authenticating
+#   with a `CLAUDE_CODE_OAUTH_TOKEN` secret generated via `claude setup-token`.
+#   Verified against:
+#   - https://code.claude.com/docs/en/github-actions
+#   - https://github.com/anthropics/claude-code-action/blob/main/docs/setup.md
+#   - https://github.com/anthropics/claude-code-action/blob/main/docs/security.md
+#   - https://github.com/anthropics/claude-code-action/blob/main/examples/claude.yml
+#
+# PUBLIC REPOSITORY ACCESS CONTROL (https://github.com/olowolayemogoodness-crypto/soro is PUBLIC):
+#   So strangers on a public repo can NEVER spend Goodness's Claude Pro allowance:
+#   1. Built-in Action write-access check (verified in `docs/security.md` & `action.yml`):
+#      `anthropics/claude-code-action@v1` only runs for users with **write access**
+#      to the repository (owners & collaborators). By default:
+#      - `allowed_non_write_users: ""` (non-collaborators are rejected before Claude starts)
+#      - `allowed_bots: ""` (external GitHub Apps/bots are rejected)
+#      - `allow_fork_prs: "false"` (fork PRs are skipped before checkout)
+#   2. Workflow-level `author_association` gate in `if:` below:
+#      Even before the action step starts, the job `if:` requires the event's
+#      `author_association` to be `OWNER`, `COLLABORATOR`, or `MEMBER`, so outside
+#      users commenting `@claude` on the public repo do not even spin up a runner.
+#
+# CAVEATS (Read before enabling):
+#   1. Runs in GitHub's cloud (`ubuntu-latest`), NOT on Goodness's laptop:
+#      It has no microphone, no speakers, no USB stick, no local `.env`, and cannot
+#      run live `lk agent console` voice latency tests against the phone.
+#   2. Uses Goodness's Claude Pro allowance:
+#      Every `@claude` comment spins up a new Claude Code turn that draws from the
+#      same shared 5-hour rolling and weekly Claude Pro quota as his laptop terminal.
+#   3. OAuth token reliability & API-key fallback:
+#      Some users report `CLAUDE_CODE_OAUTH_TOKEN` (from `claude setup-token`) failing
+#      or expiring in GitHub Actions. If that occurs, either fall back to a pay-as-you-go
+#      Console API key secret (`anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}`)
+#      or disable this Action and use `/next-task` locally on the laptop.
+#
+# HOW TO ENABLE (only if you explicitly want cloud `@claude` mentions):
+#   1. Install the Claude GitHub App on `olowolayemogoodness-crypto/soro`: https://github.com/apps/claude
+#   2. On Goodness's laptop, run `claude setup-token` and save the token in GitHub:
+#      Settings -> Secrets and variables -> Actions -> New repository secret:
+#      Name: `CLAUDE_CODE_OAUTH_TOKEN`
+#   3. Below, uncomment the `issue_comment`, `pull_request_review_comment`, `issues`,
+#      and `pull_request_review` triggers under `on:`, and change `if: false && (`
+#      to `if: (` in the `claude` job.
+
+name: Claude Code (Optional Cloud Action - Disabled by Default)
+
+on:
+  workflow_dispatch:
+  # Uncomment the four event triggers below ONLY if you want @claude cloud runs:
+  # issue_comment:
+  #   types: [created]
+  # pull_request_review_comment:
+  #   types: [created]
+  # issues:
+  #   types: [opened, assigned]
+  # pull_request_review:
+  #   types: [submitted]
+
+jobs:
+  claude:
+    # Disabled by default (`false &&`) to protect Goodness's Claude Pro 5-hour quota.
+    # Also restricted strictly to repo OWNER / COLLABORATOR / MEMBER so strangers on
+    # the public olowolayemogoodness-crypto/soro repository can never trigger a run.
+    if: |
+      false && (
+        (github.event_name == 'issue_comment' &&
+          contains(github.event.comment.body, '@claude') &&
+          contains(fromJSON('["OWNER", "COLLABORATOR", "MEMBER"]'), github.event.comment.author_association)) ||
+        (github.event_name == 'pull_request_review_comment' &&
+          contains(github.event.comment.body, '@claude') &&
+          contains(fromJSON('["OWNER", "COLLABORATOR", "MEMBER"]'), github.event.comment.author_association)) ||
+        (github.event_name == 'pull_request_review' &&
+          contains(github.event.review.body, '@claude') &&
+          contains(fromJSON('["OWNER", "COLLABORATOR", "MEMBER"]'), github.event.review.author_association)) ||
+        (github.event_name == 'issues' &&
+          (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')) &&
+          contains(fromJSON('["OWNER", "COLLABORATOR", "MEMBER"]'), github.event.issue.author_association))
+      )
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      id-token: write
+      actions: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - name: Run Claude Code
+        id: claude
+        uses: anthropics/claude-code-action@v1
+        with:
+          # Primary auth for Claude Pro subscribers (generated locally via `claude setup-token`):
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+
+          # Fallback auth if CLAUDE_CODE_OAUTH_TOKEN fails in GitHub Actions:
+          # comment out `claude_code_oauth_token` above and uncomment `anthropic_api_key` below:
+          # anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+
+          # Keep built-in write-access protections locked down on public repo olowolayemogoodness-crypto/soro:
+          allow_fork_prs: "false"
+          allowed_bots: ""
+          allowed_non_write_users: ""
+          restrict_untrusted_prs: "true"
+
+          # Keep cloud runs bounded and pinned to Sonnet so a single @claude mention cannot drain Pro quota:
+          claude_args: |
+            --model claude-sonnet-4-5
+            --max-turns 10

@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/olowolayemogoodness-crypto/soro/main/contracts/canvas-cmd.json",
+  "title": "canvas-cmd",
+  "description": "FROZEN contract v1. Agent -> client canvas command, sent as a LiveKit data message. Ops: set_params | highlight | draw | reset | narrate_state | write_step. For write_step the ink colour is implied by author: tutor = crimson #C31E49, student = royal blue #1B56D0.",
+  "type": "object",
+  "required": ["v", "type", "sim", "op", "params"],
+  "additionalProperties": false,
+  "properties": {
+    "v": { "const": 1, "description": "Contract version." },
+    "type": { "const": "canvas_cmd" },
+    "sim": { "type": "string", "minLength": 1, "description": "Simulation or notebook id, e.g. 'incline-plane' or 'quadratic-notebook'." },
+    "visual": { "type": "string", "description": "Optional companion visual, e.g. 'quadratic-graph'." },
+    "op": { "enum": ["set_params", "highlight", "draw", "reset", "narrate_state", "write_step"] },
+    "params": { "type": "object" }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "op": { "const": "write_step" } }, "required": ["op"] },
+      "then": {
+        "properties": {
+          "params": {
+            "type": "object",
+            "required": ["line_id", "author", "text", "blanks"],
+            "additionalProperties": false,
+            "properties": {
+              "line_id": { "type": "string", "minLength": 1, "description": "Notebook line the step is written on." },
+              "step_id": { "type": "string", "description": "Optional lesson-pack step id this line belongs to." },
+              "author": { "enum": ["tutor", "student"], "description": "Who wrote the ink; implies ink colour (tutor crimson, student royal blue)." },
+              "text": { "type": "string", "minLength": 1, "description": "Maths notation, e.g. '(x - ?) (x - ?) = 0'. Never the final answer for tutor ink." },
+              "blanks": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true, "description": "Ids of the blanks (▢ / ?) inside text that the student must fill." },
+              "reveal_answer": { "type": "boolean", "description": "Must stay false until the student has answered; tutor never reveals." }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "op": { "const": "set_params" } }, "required": ["op"] },
+      "then": {
+        "properties": {
+          "params": { "type": "object", "description": "Arbitrary sim parameters, e.g. {angle_deg, mass_kg, friction} or {a, b, c}." }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "op": { "const": "highlight" } }, "required": ["op"] },
+      "then": {
+        "properties": {
+          "params": {
+            "type": "object",
+            "required": ["target"],
+            "additionalProperties": false,
+            "properties": {
+              "target": { "type": "string", "minLength": 1, "description": "Element to highlight, e.g. 'weight_vector', 'middle_term', 'roots', 'vertex'." }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "op": { "const": "draw" } }, "required": ["op"] },
+      "then": {
+        "properties": {
+          "params": {
+            "type": "object",
+            "required": ["shape"],
+            "additionalProperties": false,
+            "properties": {
+              "shape": { "enum": ["arrow", "circle", "underline", "line", "text"] },
+              "target": { "type": "string" },
+              "label": { "type": "string" },
+              "color": { "type": "string", "description": "Optional CSS colour; omit to use the author/default ink." }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "op": { "const": "reset" } }, "required": ["op"] },
+      "then": {
+        "properties": {
+          "params": { "type": "object", "additionalProperties": false, "properties": {} }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "op": { "const": "narrate_state" } }, "required": ["op"] },
+      "then": {
+        "properties": {
+          "params": { "type": "object", "description": "Optional context for the narration, e.g. {state: 'awaiting_step_2'}." }
+        }
+      }
+    }
+  ]
+}

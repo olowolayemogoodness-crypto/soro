@@ -1,0 +1,65 @@
+[
+  {
+    "v": 1,
+    "type": "canvas_cmd",
+    "sim": "quadratic-notebook",
+    "visual": "quadratic-graph",
+    "op": "write_step",
+    "params": {
+      "line_id": "l1",
+      "step_id": "s1",
+      "author": "tutor",
+      "text": "a = 1,  b = -5,  c = ?",
+      "blanks": ["b1"],
+      "reveal_answer": false
+    }
+  },
+  {
+    "v": 1,
+    "type": "canvas_cmd",
+    "sim": "quadratic-notebook",
+    "visual": "quadratic-graph",
+    "op": "write_step",
+    "params": {
+      "line_id": "l1",
+      "author": "student",
+      "text": "(x - 2)(x - 3) = 0",
+      "blanks": []
+    }
+  },
+  {
+    "v": 1,
+    "type": "canvas_cmd",
+    "sim": "incline-plane",
+    "op": "set_params",
+    "params": { "angle_deg": 30, "mass_kg": 5, "friction": 0.2 }
+  },
+  {
+    "v": 1,
+    "type": "canvas_cmd",
+    "sim": "incline-plane",
+    "op": "highlight",
+    "params": { "target": "weight_vector" }
+  },
+  {
+    "v": 1,
+    "type": "canvas_cmd",
+    "sim": "incline-plane",
+    "op": "draw",
+    "params": { "shape": "arrow", "target": "crate", "label": "push" }
+  },
+  {
+    "v": 1,
+    "type": "canvas_cmd",
+    "sim": "quadratic-notebook",
+    "op": "narrate_state",
+    "params": { "state": "awaiting_step_2" }
+  },
+  {
+    "v": 1,
+    "type": "canvas_cmd",
+    "sim": "incline-plane",
+    "op": "reset",
+    "params": {}
+  }
+]

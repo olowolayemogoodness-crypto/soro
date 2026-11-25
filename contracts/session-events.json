@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/olowolayemogoodness-crypto/soro/main/contracts/session-events.json",
+  "title": "session-events",
+  "description": "FROZEN contract v1. Agent -> client session events, sent as LiveKit transcription captions and data messages. Event types: caption | term_chip | tier | transfer_check | board_visibility. board_visibility reports the chat-first whiteboard tucking away (~10 s idle) and reopening.",
+  "oneOf": [
+    {
+      "title": "caption",
+      "type": "object",
+      "required": ["v", "type", "role", "text", "lang"],
+      "additionalProperties": false,
+      "properties": {
+        "v": { "const": 1 },
+        "type": { "const": "caption" },
+        "role": { "enum": ["student", "tutor"] },
+        "text": { "type": "string" },
+        "lang": { "enum": ["en", "yo"], "description": "Caption language; Yoruba is NFC-normalised with full tone marks." },
+        "t": { "type": "integer" }
+      }
+    },
+    {
+      "title": "term_chip",
+      "type": "object",
+      "required": ["v", "type", "term_en", "term_yo", "audio_url"],
+      "additionalProperties": false,
+      "properties": {
+        "v": { "const": 1 },
+        "type": { "const": "term_chip" },
+        "term_en": { "type": "string", "minLength": 1 },
+        "term_yo": { "type": "string", "minLength": 1 },
+        "audio_url": { "type": "string", "minLength": 1, "description": "Pre-recorded glossary audio path, e.g. '/packs/<topic_id>/audio/<term>.mp3'." },
+        "tier": { "type": "integer", "minimum": 0, "description": "Optional glossary tier (0 = core demo terms)." },
+        "t": { "type": "integer" }
+      }
+    },
+    {
+      "title": "tier",
+      "type": "object",
+      "required": ["v", "type", "level"],
+      "additionalProperties": false,
+      "properties": {
+        "v": { "const": 1 },
+        "type": { "const": "tier" },
+        "level": { "type": "integer", "minimum": 0, "description": "Scaffolding tier the tutor is currently giving (0 = most support)." },
+        "t": { "type": "integer" }
+      }
+    },
+    {
+      "title": "transfer_check",
+      "type": "object",
+      "required": ["v", "type", "problem_id", "assist"],
+      "additionalProperties": false,
+      "properties": {
+        "v": { "const": 1 },
+        "type": { "const": "transfer_check" },
+        "problem_id": { "type": "string", "minLength": 1 },
+        "assist": { "type": "boolean", "description": "True if the student received help on the unaided check." },
+        "t": { "type": "integer" }
+      }
+    },
+    {
+      "title": "board_visibility",
+      "type": "object",
+      "required": ["v", "type", "state"],
+      "additionalProperties": false,
+      "properties": {
+        "v": { "const": 1 },
+        "type": { "const": "board_visibility" },
+        "state": { "enum": ["open", "tucked"], "description": "'open' = whiteboard visible over chat; 'tucked' = board collapsed back into the chat 'Working' card." },
+        "t": { "type": "integer" }
+      }
+    }
+  ]
+}

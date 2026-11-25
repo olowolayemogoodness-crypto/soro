@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/olowolayemogoodness-crypto/soro/main/contracts/student-action.json",
+  "title": "student-action",
+  "description": "FROZEN contract v1. Client -> agent student action, sent as a LiveKit data message, throttled to <= 5 Hz. Actions: drag | draw | tap | write_blank. write_blank must carry the student's value.",
+  "type": "object",
+  "required": ["v", "type", "actor", "action", "t"],
+  "additionalProperties": false,
+  "properties": {
+    "v": { "const": 1 },
+    "type": { "const": "student_action" },
+    "actor": { "const": "student" },
+    "action": { "enum": ["drag", "draw", "tap", "write_blank"] },
+    "target": { "type": "string", "description": "What was acted on, e.g. 'angle', 'b1', 'term_chip:root'." },
+    "blank_id": { "type": "string", "description": "Blank filled by a write_blank action." },
+    "line_id": { "type": "string", "description": "Notebook line acted on." },
+    "value": { "description": "Action payload: dragged value, tapped value, or the text written into a blank." },
+    "points": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["x", "y"],
+        "additionalProperties": false,
+        "properties": {
+          "x": { "type": "number" },
+          "y": { "type": "number" }
+        }
+      },
+      "description": "Stroke points for draw actions."
+    },
+    "t": { "type": "integer", "description": "Unix epoch seconds when the action happened." }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "action": { "const": "write_blank" } }, "required": ["action"] },
+      "then": { "required": ["value"] }
+    }
+  ]
+}
