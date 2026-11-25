@@ -23,7 +23,6 @@ class SoroTokens {
   static const Color ink2 = Color(0xFF565044);
   static const Color line = Color(0xFFDDD4BA);
   static const Color control = Color(0xFF7A7260);
-  static const Color dot = Color(0xFFCCC2A8);
 
   // Tutor, Student & Semantic Accents
   static const Color crimson = Color(0xFFC31E49);
@@ -51,7 +50,7 @@ class SoroTokens {
   static const double rLg = 28.0;
   static const double rPill = 999.0;
 
-  // 4-pt Spacing Grid & Dot Grid
+  // 4-pt Spacing Grid
   static const double s4 = 4.0;
   static const double s8 = 8.0;
   static const double s12 = 12.0;
@@ -60,7 +59,6 @@ class SoroTokens {
   static const double s24 = 24.0;
   static const double s32 = 32.0;
   static const double s48 = 48.0;
-  static const double dotGridSize = 16.0;
 
   // Minimum touch target for Android tablet stylus & finger use
   static const double minTapTarget = 48.0;

@@ -5,8 +5,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import '../theme/soro_theme.dart';
 
-/// Short branded splash: the under-dotted logo and Ìlù fade in on the cream
-/// dotted paper, then [onDone] fires. Total time stays under 1.5 seconds.
+/// Short branded splash: the under-dotted logo and Ìlù fade in on the plain
+/// white page, then [onDone] fires. Total time stays under 1.5 seconds.
 /// With reduced motion on, a still version is shown (no fade) for a moment.
 class SoroSplash extends StatefulWidget {
   const SoroSplash({super.key, required this.onDone});
@@ -57,7 +57,7 @@ class _SoroSplashState extends State<SoroSplash>
   Widget build(BuildContext context) {
     return Scaffold(
       key: const Key('soro-splash'),
-      backgroundColor: SoroTokens.cream,
+      backgroundColor: SoroTokens.paper,
       body: SoroDottedPaperBackground(
         showWatermark: false,
         child: Center(

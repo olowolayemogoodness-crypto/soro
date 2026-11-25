@@ -258,7 +258,7 @@ class _HomeScreenState extends State<HomeScreen> {
           child: _buildAskSoroCard(context, lang, reducedMotion),
         );
         final Widget learn = _buildContinueLearning(lang);
-        final Widget quick = _buildQuickLinks(lang, wide);
+        final Widget quick = _buildQuickLinks(lang);
         final Widget today = _buildTodaySection(lang);
         return SingleChildScrollView(
           controller: _scrollController,
@@ -282,16 +282,26 @@ class _HomeScreenState extends State<HomeScreen> {
                       children: [
                         Expanded(flex: 6, child: ask),
                         const SizedBox(width: SoroTokens.s20),
-                        Expanded(flex: 5, child: learn),
+                        Expanded(
+                          flex: 5,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              learn,
+                              const SizedBox(height: SoroTokens.s24),
+                              quick,
+                            ],
+                          ),
+                        ),
                       ],
                     )
                   else ...[
                     ask,
                     const SizedBox(height: SoroTokens.s20),
                     learn,
+                    const SizedBox(height: SoroTokens.s24),
+                    quick,
                   ],
-                  const SizedBox(height: SoroTokens.s24),
-                  quick,
                   const SizedBox(height: SoroTokens.s24),
                   today,
                 ],
@@ -431,7 +441,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildQuickLinks(SoroLanguage lang, bool wide) {
+  Widget _buildQuickLinks(SoroLanguage lang) {
     final List<Widget> tiles = [
       SoroQuickTile(
         key: const Key('quick-progress'),
@@ -472,7 +482,7 @@ class _HomeScreenState extends State<HomeScreen> {
         _sectionHeading(lang, 'quickHeading'),
         LayoutBuilder(
           builder: (BuildContext context, BoxConstraints c) {
-            final int cols = wide ? 4 : 2;
+            const int cols = 2;
             const double gap = SoroTokens.s12;
             final double w = (c.maxWidth - gap * (cols - 1)) / cols;
             return Wrap(
@@ -637,7 +647,9 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 1180),
-          child: Wrap(
+          child: SizedBox(
+            width: double.infinity,
+            child: Wrap(
             alignment: WrapAlignment.spaceBetween,
             crossAxisAlignment: WrapCrossAlignment.center,
             spacing: SoroTokens.s12,
@@ -699,6 +711,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
             ],
+          ),
           ),
         ),
       ),
