@@ -41,15 +41,31 @@ class BrainTutorScript implements TutorScript {
   String get _lang => language == SoroLanguage.yo ? 'yo' : 'en';
 
   @override
-  Future<void> start() => _turn(
-    text: question,
-    mode: wantsSolve(question) ? TutorMode.solve : TutorMode.guide,
-    problem: question,
-  );
+  Future<void> start() {
+    _startedSolve = wantsSolve(question);
+    return _turn(
+      text: question,
+      mode: _startedSolve ? TutorMode.solve : TutorMode.guide,
+      problem: question,
+    );
+  }
+
+  bool _startedSolve = false;
 
   /// Asks the brain to write out the full worked solution (Show me how).
   Future<void> requestSolve() =>
       _turn(text: 'Show me how', mode: TutorMode.solve);
+
+  @override
+  Future<void> solveForStudent() async {
+    if (_offline) return fallback.solveForStudent();
+    // A solve-intent question already got the worked solution as its first turn.
+    if (_startedSolve) {
+      _startedSolve = false;
+      return;
+    }
+    await requestSolve();
+  }
 
   @override
   Future<void> submitBlankAnswers({
@@ -147,6 +163,7 @@ class BrainTutorScript implements TutorScript {
                   audioMs: op.audioMs ?? res.audioMs,
                 ),
                 audioUrl: op.audioUrl ?? res.audioUrl,
+                audioMs: op.audioMs ?? res.audioMs,
               ),
             ),
           );

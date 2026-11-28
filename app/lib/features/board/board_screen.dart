@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 import 'dart:ui' show PointerDeviceKind;
 
 import 'package:flutter/material.dart';
@@ -7,9 +8,14 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../l10n/soro_strings.dart';
 import '../../theme/soro_theme.dart';
 import 'board_strings.dart';
+import 'hear_soro_button.dart';
 import 'brain_tutor_script.dart';
 import 'tutor_client.dart';
+import 'pen_line_view.dart';
+import 'solve_intent.dart';
+import 'tutor_pen_writer.dart';
 import 'tutor_script.dart';
+import 'tutor_speaker.dart';
 import 'voice_dock.dart';
 
 /// Default idle duration before the notebook board tucks back into the chat.
@@ -33,7 +39,7 @@ class BoardInkStroke {
 
 /// Entry in the notebook's worked calculation log.
 class _NotebookEntry {
-  const _NotebookEntry({
+  _NotebookEntry({
     required this.author,
     required this.text,
     this.textYo,
@@ -43,8 +49,18 @@ class _NotebookEntry {
     this.isUnaided = false,
     this.isCorrectStudentStep = false,
     this.inputMethod,
+    this.audioMs,
+    this.silent = false,
+    this.audioUrl,
   });
 
+  final int? audioMs;
+  final bool silent;
+  final String? audioUrl;
+
+  /// Bumped to make the pen write the line again, in sync with its voice.
+  int replay = 0;
+  final List<PenMarkKind> marks = <PenMarkKind>[];
   final ScriptAuthor author;
   final String text;
   final String? textYo;
@@ -67,6 +83,7 @@ class BoardScreen extends StatefulWidget {
     required this.onCycleNetworkStatus,
     required this.onBackToChat,
     this.tutorScript,
+    this.speaker,
     this.tuckAwayDelay = kBoardTuckAwayDelay,
   });
 
@@ -77,6 +94,9 @@ class BoardScreen extends StatefulWidget {
   final VoidCallback onCycleNetworkStatus;
   final VoidCallback onBackToChat;
   final TutorScript? tutorScript;
+
+  /// Voice for the Hear Soro buttons; defaults to the device speaker.
+  final TutorSpeaker? speaker;
   final Duration tuckAwayDelay;
 
   @override
@@ -85,6 +105,10 @@ class BoardScreen extends StatefulWidget {
 
 class _BoardScreenState extends State<BoardScreen> {
   late final TutorScript _script;
+  late final TutorSpeaker _speaker =
+      widget.speaker ?? DeviceTutorSpeaker(baseUrl: kSoroApiBase);
+  Object? _speakingTarget;
+  bool _muted = false;
   StreamSubscription<TutorScriptEvent>? _subscription;
 
   final List<_NotebookEntry> _entries = <_NotebookEntry>[];
@@ -121,6 +145,7 @@ class _BoardScreenState extends State<BoardScreen> {
   Color _inkColor = SoroTokens.studentBlue;
   bool _erasedInGesture = false;
   bool _graphOpen = true;
+  bool _solving = false;
   int? _inkPointerId;
   int? _activeStylusPointerId;
   DateTime? _lastStylusEventTime;
@@ -142,7 +167,12 @@ class _BoardScreenState extends State<BoardScreen> {
       _currentCaptionYo = '';
     }
     _subscription = _script.events.listen(_handleScriptEvent);
-    _script.start();
+    final Future<void> started = _script.start();
+    if (isSolveIntent(widget.activeQuestion)) {
+      started.then((_) {
+        if (mounted) _requestSolve();
+      });
+    }
     _resetIdleTimer();
   }
 
@@ -151,6 +181,8 @@ class _BoardScreenState extends State<BoardScreen> {
     _idleTimer?.cancel();
     _typingCooldownTimer?.cancel();
     _subscription?.cancel();
+    _speaker.stop();
+    if (widget.speaker == null) _speaker.dispose();
     if (widget.tutorScript == null) {
       _script.dispose();
     }
@@ -177,6 +209,17 @@ class _BoardScreenState extends State<BoardScreen> {
       if (event.caption != null) {
         _currentCaptionEn = event.caption!;
         _currentCaptionYo = event.captionYo ?? '';
+      }
+      if (event.clearBlanks) {
+        _activeBlankRow = null;
+      }
+      if (event.penMark != null) {
+        for (int i = _entries.length - 1; i >= 0; i--) {
+          if (_entries[i].author == ScriptAuthor.tutor) {
+            _entries[i].marks.add(event.penMark!);
+            break;
+          }
+        }
       }
       if (event.rootsRevealed != null) {
         _rootsRevealed = event.rootsRevealed!;
@@ -209,11 +252,14 @@ class _BoardScreenState extends State<BoardScreen> {
             isCorrection: line.isCorrection,
             isPraise: line.isPraise,
             isUnaided: line.isUnaided,
+            audioMs: line.audioMs,
+            silent: line.silent,
+            audioUrl: line.audioUrl,
           ),
         );
         if (!line.isAnalogy) {
-          _currentCaptionEn = line.text;
-          _currentCaptionYo = line.textYo;
+          _currentCaptionEn = line.caption ?? line.text;
+          _currentCaptionYo = line.captionYo ?? line.textYo;
         }
       }
       if (event.blankRow != null) {
@@ -278,6 +324,55 @@ class _BoardScreenState extends State<BoardScreen> {
       _isTyping = false;
       _resetIdleTimer();
     });
+    _resetIdleTimer();
+  }
+
+  /// Press speaks [text] now and the pen rewrites [entry] in sync; press
+  /// again stops. Without an [entry] only the voice plays (dock caption).
+  Future<void> _toggleSpeak(
+    Object target,
+    String text, {
+    String? audioUrl,
+    _NotebookEntry? entry,
+  }) async {
+    if (_speakingTarget == target) {
+      setState(() => _speakingTarget = null);
+      await _speaker.stop();
+      return;
+    }
+    setState(() {
+      _speakingTarget = target;
+      if (entry != null) entry.replay++;
+    });
+    await _speaker.speak(text, audioUrl: audioUrl);
+    if (mounted && _speakingTarget == target) {
+      setState(() => _speakingTarget = null);
+    }
+  }
+
+  void _readAll() {
+    final String text = _entries
+        .where((e) => e.author == ScriptAuthor.tutor && !e.silent)
+        .map((e) => e.text)
+        .join('. ');
+    if (text.isEmpty) return;
+    _toggleSpeak('all', text);
+  }
+
+  void _toggleMute() {
+    setState(() {
+      _muted = !_muted;
+      _speaker.muted = _muted;
+      if (_muted) _speakingTarget = null;
+    });
+    if (_muted) _speaker.stop();
+  }
+
+  /// Solve mode: the tutor writes the full worked solution with the pen.
+  void _requestSolve() {
+    if (_solving) return;
+    _solving = true;
+    _script.solveForStudent().whenComplete(() => _solving = false);
     _resetIdleTimer();
   }
 
@@ -511,6 +606,13 @@ class _BoardScreenState extends State<BoardScreen> {
                     captionEn: _currentCaptionEn,
                     captionYo: _currentCaptionYo,
                     onListeningChanged: _handleListeningChanged,
+                    onHearCaption: () =>
+                        _toggleSpeak('caption', _currentCaptionEn),
+                    onReadAll: _readAll,
+                    onToggleMute: _toggleMute,
+                    speakingCaption: _speakingTarget == 'caption',
+                    speakingAll: _speakingTarget == 'all',
+                    muted: _muted,
                     compact: isPhone,
                   ),
                 ],
@@ -841,80 +943,117 @@ class _BoardScreenState extends State<BoardScreen> {
       color: const Color(0xFFFFFEFA),
       height: 56,
       padding: EdgeInsets.symmetric(horizontal: isPhone ? 4 : 10),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: [
-            _toolButton(
-              key: const Key('tool-pen'),
-              icon: Icons.edit_rounded,
-              tooltip: 'Pen',
-              selected: _tool == BoardInkTool.pen,
-              onPressed: () {
-                setState(() => _tool = BoardInkTool.pen);
-                _resetIdleTimer();
-              },
+      child: Row(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  _toolButton(
+                    key: const Key('tool-pen'),
+                    icon: Icons.edit_rounded,
+                    tooltip: 'Pen',
+                    selected: _tool == BoardInkTool.pen,
+                    onPressed: () {
+                      setState(() => _tool = BoardInkTool.pen);
+                      _resetIdleTimer();
+                    },
+                  ),
+                  _toolButton(
+                    key: const Key('tool-eraser'),
+                    icon: Icons.cleaning_services_rounded,
+                    tooltip: 'Eraser',
+                    selected: _tool == BoardInkTool.eraser,
+                    onPressed: () {
+                      setState(() => _tool = BoardInkTool.eraser);
+                      _resetIdleTimer();
+                    },
+                  ),
+                  const SizedBox(width: 6),
+                  _colorButton('blue', SoroTokens.studentBlue),
+                  _colorButton('black', SoroTokens.ink),
+                  _colorButton('green', const Color(0xFF1E8E4A)),
+                  const SizedBox(width: 6),
+                  _toolButton(
+                    key: const Key('tool-undo'),
+                    icon: Icons.undo_rounded,
+                    tooltip: 'Undo',
+                    onPressed: _undoStack.isEmpty ? null : _undo,
+                  ),
+                  _toolButton(
+                    key: const Key('tool-redo'),
+                    icon: Icons.redo_rounded,
+                    tooltip: 'Redo',
+                    onPressed: _redoStack.isEmpty ? null : _redo,
+                  ),
+                  _toolButton(
+                    key: const Key('tool-clear'),
+                    icon: Icons.delete_outline_rounded,
+                    tooltip: 'Clear page',
+                    onPressed: _strokes.isEmpty ? null : _clearPage,
+                  ),
+                ],
+              ),
             ),
+          ),
+          const SizedBox(width: 12),
+          if (MediaQuery.sizeOf(context).width < 900)
             _toolButton(
-              key: const Key('tool-eraser'),
-              icon: Icons.cleaning_services_rounded,
-              tooltip: 'Eraser',
-              selected: _tool == BoardInkTool.eraser,
-              onPressed: () {
-                setState(() => _tool = BoardInkTool.eraser);
-                _resetIdleTimer();
-              },
-            ),
-            const SizedBox(width: 6),
-            _colorButton('blue', SoroTokens.studentBlue),
-            _colorButton('black', SoroTokens.ink),
-            _colorButton('green', const Color(0xFF1E8E4A)),
-            const SizedBox(width: 6),
-            _toolButton(
-              key: const Key('tool-undo'),
-              icon: Icons.undo_rounded,
-              tooltip: 'Undo',
-              onPressed: _undoStack.isEmpty ? null : _undo,
-            ),
-            _toolButton(
-              key: const Key('tool-redo'),
-              icon: Icons.redo_rounded,
-              tooltip: 'Redo',
-              onPressed: _redoStack.isEmpty ? null : _redo,
-            ),
-            _toolButton(
-              key: const Key('tool-clear'),
-              icon: Icons.delete_outline_rounded,
-              tooltip: 'Clear page',
-              onPressed: _strokes.isEmpty ? null : _clearPage,
-            ),
-            const SizedBox(width: 16),
+              key: const Key('show-me-how-button'),
+              icon: Icons.lightbulb_outline_rounded,
+              tooltip: BoardStrings.tr(lang, 'showMeHowBtn'),
+              onPressed: _requestSolve,
+            )
+          else
             SizedBox(
               height: 48,
-              child: ElevatedButton.icon(
-                key: const Key('send-work-button'),
-                onPressed: canSend ? () => _handleSubmitCurrentBlanks() : null,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: SoroTokens.studentBlue,
-                  foregroundColor: SoroTokens.paper,
+              child: OutlinedButton(
+                key: const Key('show-me-how-button'),
+                onPressed: _requestSolve,
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: SoroTokens.crimsonDeep,
+                  side: const BorderSide(color: SoroTokens.crimson, width: 1.6),
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(SoroTokens.rPill),
                   ),
                 ),
-                icon: const Icon(Icons.send_rounded, size: 18),
-                label: Text(
-                  BoardStrings.tr(lang, 'sendWorkBtn'),
+                child: Text(
+                  BoardStrings.tr(lang, 'showMeHowBtn'),
                   style: SoroTokens.sans(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
-                    color: SoroTokens.paper,
                   ),
                 ),
               ),
             ),
-          ],
-        ),
+          const SizedBox(width: 10),
+          SizedBox(
+            height: 48,
+            child: ElevatedButton.icon(
+              key: const Key('send-work-button'),
+              onPressed: canSend ? () => _handleSubmitCurrentBlanks() : null,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: SoroTokens.studentBlue,
+                foregroundColor: SoroTokens.paper,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(SoroTokens.rPill),
+                ),
+              ),
+              icon: const Icon(Icons.send_rounded, size: 18),
+              label: Text(
+                BoardStrings.tr(lang, 'sendWorkBtn'),
+                style: SoroTokens.sans(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: SoroTokens.paper,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -927,83 +1066,104 @@ class _BoardScreenState extends State<BoardScreen> {
     required double marginLineX,
     required double ruleSpacing,
   }) {
-    final int shown = isPhone ? 4 : 6;
-    final int start = _entries.length > shown ? _entries.length - shown : 0;
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints box) {
+        final double contentW =
+            box.maxWidth - marginLineX - (isPhone ? 20 : 36);
+        int budget =
+            (box.maxHeight / ruleSpacing).floor() -
+            3 -
+            (_activeBlankRow != null && !_unaidedCompleted ? 2 : 0);
+        int start = _entries.length;
+        while (start > 0) {
+          final _NotebookEntry e = _entries[start - 1];
+          final int rows = math.max(
+            1,
+            (e.text.length * 0.43 * ruleSpacing / math.max(contentW, 100))
+                .ceil(),
+          );
+          if (budget - rows < 0 && start < _entries.length) break;
+          budget -= rows;
+          start--;
+        }
 
-    return Listener(
-      key: const Key('board-ink-page'),
-      behavior: HitTestBehavior.translucent,
-      onPointerDown: (PointerDownEvent e) => _trackStylus(e, isUp: false),
-      onPointerMove: (PointerMoveEvent e) => _trackStylus(e, isUp: false),
-      onPointerUp: (PointerUpEvent e) => _trackStylus(e, isUp: true),
-      onPointerCancel: (PointerCancelEvent e) => _trackStylus(e, isUp: true),
-      child: CustomPaint(
-        key: const Key('ruled-notebook-page'),
-        painter: _RuledNotebookPaperPainter(
-          marginLineX: marginLineX,
-          ruleSpacing: ruleSpacing,
-        ),
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            Listener(
-              key: const Key('board-ink-input'),
-              behavior: HitTestBehavior.opaque,
-              onPointerDown: _onInkDown,
-              onPointerMove: _onInkMove,
-              onPointerUp: _endInk,
-              onPointerCancel: _endInk,
-              child: const SizedBox.expand(),
+        return Listener(
+          key: const Key('board-ink-page'),
+          behavior: HitTestBehavior.translucent,
+          onPointerDown: (PointerDownEvent e) => _trackStylus(e, isUp: false),
+          onPointerMove: (PointerMoveEvent e) => _trackStylus(e, isUp: false),
+          onPointerUp: (PointerUpEvent e) => _trackStylus(e, isUp: true),
+          onPointerCancel: (PointerCancelEvent e) =>
+              _trackStylus(e, isUp: true),
+          child: CustomPaint(
+            key: const Key('ruled-notebook-page'),
+            painter: _RuledNotebookPaperPainter(
+              marginLineX: marginLineX,
+              ruleSpacing: ruleSpacing,
             ),
-            Positioned(
-              left: marginLineX + (isPhone ? 10 : 16),
-              right: isPhone ? 10 : 20,
-              top: 0,
-              bottom: 0,
-              child: ClipRect(
-                child: OverflowBox(
-                  alignment: Alignment.topLeft,
-                  minHeight: 0,
-                  maxHeight: double.infinity,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      _buildNotebookTitleHeader(lang, isPhone, ruleSpacing),
-                      for (int i = start; i < _entries.length; i++)
-                        _buildNotebookEntryRow(
-                          _entries[i],
-                          lang,
-                          i,
-                          ruleSpacing,
-                        ),
-                      if (_activeBlankRow != null && !_unaidedCompleted)
-                        _buildActiveBlankRow(
-                          _activeBlankRow!,
-                          lang,
-                          isPhone,
-                          ruleSpacing,
-                        ),
-                    ],
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Listener(
+                  key: const Key('board-ink-input'),
+                  behavior: HitTestBehavior.opaque,
+                  onPointerDown: _onInkDown,
+                  onPointerMove: _onInkMove,
+                  onPointerUp: _endInk,
+                  onPointerCancel: _endInk,
+                  child: const SizedBox.expand(),
+                ),
+                Positioned(
+                  left: marginLineX + (isPhone ? 10 : 16),
+                  right: isPhone ? 10 : 20,
+                  top: 0,
+                  bottom: 0,
+                  child: ClipRect(
+                    child: OverflowBox(
+                      alignment: Alignment.topLeft,
+                      minHeight: 0,
+                      maxHeight: double.infinity,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          _buildNotebookTitleHeader(lang, isPhone, ruleSpacing),
+                          for (int i = start; i < _entries.length; i++)
+                            _buildNotebookEntryRow(
+                              _entries[i],
+                              lang,
+                              i,
+                              ruleSpacing,
+                            ),
+                          if (_activeBlankRow != null && !_unaidedCompleted)
+                            _buildActiveBlankRow(
+                              _activeBlankRow!,
+                              lang,
+                              isPhone,
+                              ruleSpacing,
+                            ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
-              ),
+                Positioned(
+                  right: isPhone ? 8 : 16,
+                  bottom: isPhone ? 8 : 16,
+                  child: _buildGraphPanel(lang, isPhone),
+                ),
+                IgnorePointer(
+                  child: CustomPaint(
+                    key: const Key('board-ink-layer'),
+                    painter: BoardInkPainter(strokes: _strokes),
+                    child: const SizedBox.expand(),
+                  ),
+                ),
+              ],
             ),
-            Positioned(
-              right: isPhone ? 8 : 16,
-              bottom: isPhone ? 8 : 16,
-              child: _buildGraphPanel(lang, isPhone),
-            ),
-            IgnorePointer(
-              child: CustomPaint(
-                key: const Key('board-ink-layer'),
-                painter: BoardInkPainter(strokes: _strokes),
-                child: const SizedBox.expand(),
-              ),
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
@@ -1197,8 +1357,8 @@ class _BoardScreenState extends State<BoardScreen> {
     );
   }
 
-  /// One line of the worked log, written straight onto the page: the tutor in
-  /// crimson, the student in royal blue.
+  /// One line of the worked log: the tutor's lines are written by the pen in
+  /// crimson, the student's answers stand in royal blue.
   Widget _buildNotebookEntryRow(
     _NotebookEntry entry,
     SoroLanguage lang,
@@ -1206,57 +1366,72 @@ class _BoardScreenState extends State<BoardScreen> {
     double ruleSpacing,
   ) {
     final bool isTutor = entry.author == ScriptAuthor.tutor;
-    final double size = isTutor ? 17 : 20;
-    final TextStyle style = entry.isAnalogy
-        ? SoroTokens.serif(
-            fontSize: size,
-            fontStyle: FontStyle.italic,
-            fontWeight: FontWeight.w500,
-            color: SoroTokens.crimsonDeep,
-          )
-        : isTutor
-        ? SoroTokens.sans(
-            fontSize: size,
-            fontWeight: FontWeight.w700,
-            color: SoroTokens.crimsonDeep,
-          )
-        : SoroTokens.serif(
-            fontSize: size,
-            fontWeight: FontWeight.w600,
-            color: SoroTokens.studentBlue,
-          );
 
-    return IgnorePointer(
-      key: entry.isAnalogy ? const Key('board-analogy-line') : null,
-      child: Column(
+    if (isTutor) {
+      return Column(
         key: Key('notebook-entry-$index'),
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          SoroLocalizedText(
-            entry.text,
-            language: SoroLanguage.en,
-            style: style.copyWith(height: ruleSpacing / size),
+          KeyedSubtree(
+            key: entry.isAnalogy ? const Key('board-analogy-line') : null,
+            child: PenLineView(
+              key: ValueKey<int>(entry.replay),
+              text: entry.text,
+              color: SoroTokens.crimson,
+              rule: ruleSpacing,
+              marks: List<PenMarkKind>.of(entry.marks),
+              audioMs: entry.audioMs,
+              spoken: !entry.silent,
+            ),
           ),
-          if (isTutor &&
-              lang == SoroLanguage.yo &&
+          if (!entry.silent && entry.text.trim().length > 1)
+            Align(
+              alignment: Alignment.centerLeft,
+              child: HearSoroButton(
+                key: Key('hear-soro-entry-$index'),
+                active: _speakingTarget == entry,
+                onPressed: () => _toggleSpeak(
+                  entry,
+                  entry.text,
+                  audioUrl: entry.audioUrl,
+                  entry: entry,
+                ),
+              ),
+            ),
+          if (lang == SoroLanguage.yo &&
               entry.textYo != null &&
               entry.textYo!.isNotEmpty)
-            SoroLocalizedText(
-              entry.textYo!,
-              language: SoroLanguage.yo,
-              style: SoroTokens.sans(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: SoroTokens.ink2,
-              ).copyWith(height: ruleSpacing / 14),
+            IgnorePointer(
+              child: SoroLocalizedText(
+                entry.textYo!,
+                language: SoroLanguage.yo,
+                style: SoroTokens.sans(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: SoroTokens.ink2,
+                ).copyWith(height: ruleSpacing / 14),
+              ),
             ),
         ],
+      );
+    }
+
+    return IgnorePointer(
+      child: SoroLocalizedText(
+        entry.text,
+        key: Key('notebook-entry-$index'),
+        language: SoroLanguage.en,
+        style: SoroTokens.serif(
+          fontSize: 20,
+          fontWeight: FontWeight.w600,
+          color: SoroTokens.studentBlue,
+        ).copyWith(height: ruleSpacing / 20),
       ),
     );
   }
 
-  /// The tutor's step template as a crimson line with the blanks as inline
-  /// boxes the student can type into (or write beside).
+  /// The tutor's step template written by the pen, with each blank drawn as a
+  /// hand-drawn box the student can type into (or write beside).
   Widget _buildActiveBlankRow(
     TutorBlankRowPayload row,
     SoroLanguage lang,
@@ -1264,81 +1439,48 @@ class _BoardScreenState extends State<BoardScreen> {
     double ruleSpacing,
   ) {
     final bool isFactorStep = row.stepId == QuadraticStepIds.factors;
-    final List<String> parts = row.templateText.split('▢');
-    final TextStyle lineStyle = SoroTokens.serif(
-      fontSize: isPhone ? 19 : 22,
-      fontWeight: FontWeight.w600,
-      color: SoroTokens.crimsonDeep,
-    );
-
-    final List<Widget> inline = <Widget>[];
-    for (int i = 0; i < parts.length; i++) {
-      if (parts[i].isNotEmpty) {
-        inline.add(IgnorePointer(child: Text(parts[i], style: lineStyle)));
-      }
-      if (i < parts.length - 1 && i < row.blanks.length) {
-        final BlankSpec blank = row.blanks[i];
-        inline.add(
-          SizedBox(
-            width: isPhone ? 54 : 64,
-            height: ruleSpacing - 4,
-            child: TextField(
-              key: Key('blank-input-${blank.id}'),
-              controller: _blankControllers[blank.id],
-              focusNode: _blankFocusNodes[blank.id],
-              onChanged: (_) => _notifyStudentTyping(),
-              onSubmitted: (_) => _handleSubmitCurrentBlanks(),
-              textAlign: TextAlign.center,
-              style: SoroTokens.serif(
-                fontSize: 19,
-                fontWeight: FontWeight.w600,
-                color: SoroTokens.studentBlue,
-              ),
-              decoration: InputDecoration(
-                isDense: true,
-                hintText: blank.label,
-                hintStyle: SoroTokens.sans(
-                  fontSize: 13,
-                  color: SoroTokens.studentBlue.withValues(alpha: 0.55),
-                ),
-                filled: true,
-                fillColor: SoroTokens.skyDeep.withValues(alpha: 0.7),
-                contentPadding: const EdgeInsets.symmetric(vertical: 4),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(6),
-                  borderSide: const BorderSide(
-                    color: SoroTokens.studentBlue,
-                    width: 1.4,
-                  ),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(6),
-                  borderSide: const BorderSide(
-                    color: SoroTokens.studentBlue,
-                    width: 2.2,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-      }
-    }
 
     return Container(
       key: Key('active-blank-row-${row.stepId}'),
-      padding: const EdgeInsets.only(top: 2),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Semantics(
+          KeyedSubtree(
             key: const Key('active-blank-template'),
-            label: row.templateText,
-            child: Wrap(
-              spacing: 6,
-              runSpacing: 2,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: inline,
+            child: PenLineView(
+              key: ValueKey<String>('blank-line-${row.stepId}'),
+              text: row.templateText,
+              color: SoroTokens.crimson,
+              rule: ruleSpacing,
+              spoken: false,
+              blankBuilder: (int i, Rect rect) {
+                if (i >= row.blanks.length) return const SizedBox.shrink();
+                final BlankSpec blank = row.blanks[i];
+                return Semantics(
+                  label: blank.label,
+                  child: TextField(
+                    key: Key('blank-input-${blank.id}'),
+                    controller: _blankControllers[blank.id],
+                    focusNode: _blankFocusNodes[blank.id],
+                    onChanged: (_) => _notifyStudentTyping(),
+                    onSubmitted: (_) => _handleSubmitCurrentBlanks(),
+                    textAlign: TextAlign.center,
+                    cursorColor: SoroTokens.studentBlue,
+                    style: SoroTokens.serif(
+                      fontSize: 19,
+                      fontWeight: FontWeight.w600,
+                      color: SoroTokens.studentBlue,
+                    ),
+                    decoration: const InputDecoration(
+                      isDense: true,
+                      border: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                  ),
+                );
+              },
             ),
           ),
           if (isFactorStep)

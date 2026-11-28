@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../l10n/soro_strings.dart';
 import '../../theme/soro_theme.dart';
 import 'board_strings.dart';
+import 'hear_soro_button.dart';
 import 'tutor_script.dart';
 
 /// Persistent bottom Voice Dock (Task A3 · Issue #11) inside the Notebook Board session.
@@ -26,7 +27,20 @@ class VoiceDock extends StatefulWidget {
     required this.captionYo,
     required this.onListeningChanged,
     this.compact = false,
+    this.onHearCaption,
+    this.onReadAll,
+    this.onToggleMute,
+    this.speakingCaption = false,
+    this.speakingAll = false,
+    this.muted = false,
   });
+
+  final VoidCallback? onHearCaption;
+  final VoidCallback? onReadAll;
+  final VoidCallback? onToggleMute;
+  final bool speakingCaption;
+  final bool speakingAll;
+  final bool muted;
 
   final SoroLanguage language;
   final SoroNetworkStatus networkStatus;
@@ -197,30 +211,77 @@ class _VoiceDockState extends State<VoiceDock> {
                           borderRadius: BorderRadius.circular(SoroTokens.rSm),
                           border: Border.all(color: SoroTokens.line),
                         ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            SoroLocalizedText(
-                              'EN: ${widget.captionEn}',
-                              key: const Key('caption-line-en'),
-                              language: SoroLanguage.en,
-                              style: SoroTokens.sans(
-                                fontSize: widget.compact ? 13 : 14,
-                                fontWeight: FontWeight.w600,
-                                color: SoroTokens.ink,
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  SoroLocalizedText(
+                                    'EN: ${widget.captionEn}',
+                                    key: const Key('caption-line-en'),
+                                    language: SoroLanguage.en,
+                                    style: SoroTokens.sans(
+                                      fontSize: widget.compact ? 13 : 14,
+                                      fontWeight: FontWeight.w600,
+                                      color: SoroTokens.ink,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  SoroLocalizedText(
+                                    'YO: ${widget.captionYo}',
+                                    key: const Key('caption-line-yo'),
+                                    language: SoroLanguage.yo,
+                                    style: SoroTokens.sans(
+                                      fontSize: widget.compact ? 12.5 : 13.5,
+                                      fontWeight: FontWeight.w500,
+                                      color: SoroTokens.crimsonDeep,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                            const SizedBox(height: 2),
-                            SoroLocalizedText(
-                              'YO: ${widget.captionYo}',
-                              key: const Key('caption-line-yo'),
-                              language: SoroLanguage.yo,
-                              style: SoroTokens.sans(
-                                fontSize: widget.compact ? 12.5 : 13.5,
-                                fontWeight: FontWeight.w500,
-                                color: SoroTokens.crimsonDeep,
+                            if (widget.onHearCaption != null) ...[
+                              const SizedBox(width: 4),
+                              Flexible(
+                                child: Wrap(
+                                  crossAxisAlignment: WrapCrossAlignment.center,
+                                  children: [
+                                    HearSoroButton(
+                                      key: const Key('hear-soro-dock'),
+                                      active: widget.speakingCaption,
+                                      onPressed: widget.onHearCaption!,
+                                    ),
+                                    if (widget.onReadAll != null)
+                                      HearSoroButton(
+                                        key: const Key('read-it-to-me'),
+                                        label: 'Read it to me',
+                                        active: widget.speakingAll,
+                                        onPressed: widget.onReadAll!,
+                                      ),
+                                    if (widget.onToggleMute != null)
+                                      IconButton(
+                                        key: const Key('mute-toggle'),
+                                        tooltip: widget.muted
+                                            ? 'Unmute Soro'
+                                            : 'Mute Soro',
+                                        constraints: const BoxConstraints(
+                                          minWidth: 48,
+                                          minHeight: 48,
+                                        ),
+                                        onPressed: widget.onToggleMute,
+                                        icon: Icon(
+                                          widget.muted
+                                              ? Icons.volume_off_rounded
+                                              : Icons.volume_mute_rounded,
+                                          color: SoroTokens.ink2,
+                                        ),
+                                      ),
+                                  ],
+                                ),
                               ),
-                            ),
+                            ],
                           ],
                         ),
                       ),
