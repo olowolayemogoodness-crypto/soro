@@ -1,0 +1,52 @@
+[
+  {
+    "v": 1,
+    "type": "board_visibility",
+    "state": "open",
+    "t": 1764059000
+  },
+  {
+    "v": 1,
+    "type": "caption",
+    "role": "student",
+    "text": "Mo fe sọ pe o mọ official ways ti fi woo sí iroyin.to",
+    "lang": "yo",
+    "t": 1764059010
+  },
+  {
+    "v": 1,
+    "type": "caption",
+    "role": "tutor",
+    "text": "Look at the quadratic equation on your screen. What are the values of a, b, and c?",
+    "lang": "en",
+    "t": 1764059020
+  },
+  {
+    "v": 1,
+    "type": "term_chip",
+    "term_en": "root of an equation",
+    "term_yo": "gbòǹgbò",
+    "audio_url": "/packs/math101-quadratics/audio/root.mp3",
+    "tier": 0,
+    "t": 1764059030
+  },
+  {
+    "v": 1,
+    "type": "tier",
+    "level": 0,
+    "t": 1764059040
+  },
+  {
+    "v": 1,
+    "type": "transfer_check",
+    "problem_id": "quad-tc-01",
+    "assist": false,
+    "t": 1764059900
+  },
+  {
+    "v": 1,
+    "type": "board_visibility",
+    "state": "tucked",
+    "t": 1764060000
+  }
+]

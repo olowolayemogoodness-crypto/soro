@@ -1,0 +1,42 @@
+[
+  {
+    "v": 1,
+    "type": "student_action",
+    "actor": "student",
+    "action": "drag",
+    "target": "angle",
+    "value": 30,
+    "t": 1764060000
+  },
+  {
+    "v": 1,
+    "type": "student_action",
+    "actor": "student",
+    "action": "write_blank",
+    "target": "b1",
+    "blank_id": "b1",
+    "line_id": "l1",
+    "value": "6",
+    "t": 1764060001
+  },
+  {
+    "v": 1,
+    "type": "student_action",
+    "actor": "student",
+    "action": "draw",
+    "points": [
+      { "x": 120.5, "y": 80.0 },
+      { "x": 131.0, "y": 95.5 },
+      { "x": 140.0, "y": 110.0 }
+    ],
+    "t": 1764060002
+  },
+  {
+    "v": 1,
+    "type": "student_action",
+    "actor": "student",
+    "action": "tap",
+    "target": "term_chip:root",
+    "t": 1764060003
+  }
+]

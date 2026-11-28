@@ -1,0 +1,89 @@
+{
+  "topic_id": "math101-quadratics",
+  "subject": "mathematics",
+  "lang": "yo",
+  "sim": "quadratic-notebook",
+  "visual": "quadratic-graph",
+  "glossary": [
+    {
+      "id": "root",
+      "yo": "gbòǹgbò",
+      "en": "root of an equation",
+      "audio": "root.mp3"
+    },
+    {
+      "id": "resolve",
+      "yo": "pín sí àwọn ìpalu",
+      "en": "resolve into components",
+      "audio": "resolve.mp3"
+    }
+  ],
+  "problems": [
+    {
+      "id": "p1",
+      "statement_yo": "Yànjú quadratic equation x² − 5x + 6 = 0",
+      "statement_en": "Solve the quadratic equation x² − 5x + 6 = 0",
+      "equation": "x² − 5x + 6 = 0",
+      "steps": [
+        {
+          "id": "s1",
+          "prompt_yo": "Wo quadratic equation tó wà lórí screen yìí; kí ni iye coefficient a, b, àti constant c tí o rí níbẹ̀?",
+          "prompt_en": "What are the values of coefficient a, b, and constant c that you see?",
+          "acceptable_concepts": ["a=1", "b=-5", "c=6"],
+          "misconceptions": {
+            "b=5": "Dúró náà, wo àmì tó wà níwájú 5x: ṣé plus five ni tàbí minus five?"
+          },
+          "hint_ladder": [
+            "Wo nọ́mbà tó dúró níwájú x², x, àti nọ́mbà tó dá dúró."
+          ],
+          "canvas_ops": [
+            {
+              "op": "write_step",
+              "params": {
+                "line_id": "l1",
+                "step_id": "s1",
+                "author": "tutor",
+                "text": "a = ?,  b = ?,  c = ?",
+                "blanks": ["b1", "b2", "b3"],
+                "reveal_answer": false
+              }
+            }
+          ]
+        },
+        {
+          "id": "s2",
+          "prompt_yo": "Tó bá ti mọ a, b, àti c, wo cách tí a ó ṣe factorise expression yìí; kí ni ìtòsí rẹ?",
+          "prompt_en": "Now that you know a, b, and c, how would you factorise this? What pair of numbers multiplies to c and adds to b?",
+          "acceptable_concepts": ["pair multiplies to 6", "pair adds to -5"],
+          "misconceptions": {
+            "(x+2)(x+3)": "Expand (x + 2)(x + 3): does the middle term give −5x or +5x?"
+          },
+          "hint_ladder": [
+            "Two numbers that multiply to give c = 6.",
+            "Now check their sum against b = −5 — watch the signs."
+          ],
+          "canvas_ops": [
+            {
+              "op": "write_step",
+              "params": {
+                "line_id": "l2",
+                "step_id": "s2",
+                "author": "tutor",
+                "text": "(x - ▢)(x - ▢) = 0",
+                "blanks": ["b4", "b5"],
+                "reveal_answer": false
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "transfer_check": {
+    "id": "quad-tc-01",
+    "variant_of": "p1",
+    "statement_yo": "Yànjú x² − 7x + 12 = 0 láìsí ìrànlọ́wọ́.",
+    "statement_en": "Solve x² − 7x + 12 = 0 without help.",
+    "assist": false
+  }
+}
